@@ -42,18 +42,22 @@ Authorization: Bearer {token}
     "street_number": "88号"
   },
   "star_rating": 4,
+  "main_image_url": "https://example.com/hotel1.jpg",
   "room_prices": [
     {
       "room_type": "大床房",
-      "price": 299.00
+      "price": 299.00,
+      "room_image_url": "https://example.com/room1.jpg"
     },
     {
       "room_type": "双床房",
-      "price": 329.00
+      "price": 329.00,
+      "room_image_url": "https://example.com/room2.jpg"
     },
     {
       "room_type": "套房",
-      "price": 599.00
+      "price": 599.00,
+      "room_image_url": "https://example.com/room3.jpg"
     }
   ],
   "opening_date": "2020-01-01",
@@ -76,9 +80,11 @@ Authorization: Bearer {token}
 | address_component.street | string | 是 | 街道 |
 | address_component.street_number | string | 是 | 门牌号 |
 | star_rating | int | 是 | 酒店星级（1-5星） |
+| main_image_url | string | 否 | 酒店主图片URL |
 | room_prices | array | 是 | 房型价格列表 |
 | room_prices[].room_type | string | 是 | 房型名称 |
 | room_prices[].price | number | 是 | 房型价格（保留2位小数） |
+| room_prices[].room_image_url | string | 否 | 房型图片URL |
 | opening_date | string | 是 | 开业时间（格式：YYYY-MM-DD） |
 | nearby_info | string | 否 | 周边信息（景点、交通等） |
 | promotion_scenario | string | 否 | 优惠场景 |
@@ -181,14 +187,17 @@ Authorization: Bearer {token}
     "street_number": "88号"
   },
   "star_rating": 4,
+  "main_image_url": "https://example.com/hotel1.jpg",
   "room_prices": [
     {
       "room_type": "大床房",
-      "price": 299.00
+      "price": 299.00,
+      "room_image_url": "https://example.com/room1.jpg"
     },
     {
       "room_type": "双床房",
-      "price": 329.00
+      "price": 329.00,
+      "room_image_url": "https://example.com/room2.jpg"
     }
   ],
   "opening_date": "2020-01-01"
@@ -203,9 +212,11 @@ Authorization: Bearer {token}
 | formatted_address | string | 否 | 完整地址 |
 | address_component | object | 否 | 地址组件 |
 | star_rating | int | 否 | 酒店星级（1-5星） |
+| main_image_url | string | 否 | 酒店主图片URL |
 | room_prices | array | 否 | 房型价格列表 |
 | room_prices[].room_type | string | 否 | 房型名称 |
 | room_prices[].price | number | 否 | 房型价格（保留2位小数） |
+| room_prices[].room_image_url | string | 否 | 房型图片URL |
 | opening_date | string | 否 | 开业时间（格式：YYYY-MM-DD） |
 | nearby_info | string | 否 | 周边信息 |
 | promotion_scenario | string | 否 | 优惠场景 |
@@ -307,14 +318,17 @@ Authorization: Bearer {token}
         "hotel_name_en": "Yisu Hotel",
         "formatted_address": "北京市朝阳区建国路88号",
         "star_rating": 4,
+        "main_image_url": "https://example.com/hotel1.jpg",
         "room_prices": [
           {
             "room_type": "大床房",
-            "price": 299.00
+            "price": 299.00,
+            "room_image_url": "https://example.com/room1.jpg"
           },
           {
             "room_type": "双床房",
-            "price": 329.00
+            "price": 329.00,
+            "room_image_url": "https://example.com/room2.jpg"
           }
         ],
         "status": "approved",
@@ -339,9 +353,11 @@ Authorization: Bearer {token}
 | list[].hotel_name_en | string | 酒店英文名称 |
 | list[].formatted_address | string | 完整地址 |
 | list[].star_rating | int | 酒店星级 |
+| list[].main_image_url | string | 酒店主图片URL |
 | list[].room_prices | array | 房型价格列表 |
 | list[].room_prices[].room_type | string | 房型名称 |
 | list[].room_prices[].price | number | 房型价格 |
+| list[].room_prices[].room_image_url | string | 房型图片URL |
 | list[].status | string | 状态 |
 | list[].created_by | string | 创建人ID |
 | list[].created_at | string | 创建时间 |
@@ -396,18 +412,22 @@ Authorization: Bearer {token}
       "street_number": "88号"
     },
     "star_rating": 4,
+    "main_image_url": "https://example.com/hotel1.jpg",
     "room_prices": [
       {
         "room_type": "大床房",
-        "price": 299.00
+        "price": 299.00,
+        "room_image_url": "https://example.com/room1.jpg"
       },
       {
         "room_type": "双床房",
-        "price": 329.00
+        "price": 329.00,
+        "room_image_url": "https://example.com/room2.jpg"
       },
       {
         "room_type": "套房",
-        "price": 599.00
+        "price": 599.00,
+        "room_image_url": "https://example.com/room3.jpg"
       }
     ],
     "opening_date": "2020-01-01",
@@ -430,9 +450,11 @@ Authorization: Bearer {token}
 | formatted_address | string | 完整地址 |
 | address_component | object | 地址组件 |
 | star_rating | int | 酒店星级 |
+| main_image_url | string | 酒店主图片URL |
 | room_prices | array | 房型价格列表 |
 | room_prices[].room_type | string | 房型名称 |
 | room_prices[].price | number | 房型价格 |
+| room_prices[].room_image_url | string | 房型图片URL |
 | opening_date | string | 开业时间 |
 | nearby_info | string | 周边信息 |
 | promotion_scenario | string | 优惠场景 |
@@ -486,22 +508,27 @@ Authorization: Bearer {token}
     "street_number": "100号"
   },
   "star_rating": 5,
+  "main_image_url": "https://example.com/hotel1_updated.jpg",
   "room_prices": [
     {
       "room_type": "大床房",
-      "price": 399.00
+      "price": 399.00,
+      "room_image_url": "https://example.com/room1_updated.jpg"
     },
     {
       "room_type": "双床房",
-      "price": 429.00
+      "price": 429.00,
+      "room_image_url": "https://example.com/room2_updated.jpg"
     },
     {
       "room_type": "套房",
-      "price": 699.00
+      "price": 699.00,
+      "room_image_url": "https://example.com/room3_updated.jpg"
     },
     {
       "room_type": "家庭房",
-      "price": 599.00
+      "price": 599.00,
+      "room_image_url": "https://example.com/room4_updated.jpg"
     }
   ],
   "opening_date": "2020-01-01",
@@ -518,9 +545,11 @@ Authorization: Bearer {token}
 | formatted_address | string | 否 | 完整地址 |
 | address_component | object | 否 | 地址组件 |
 | star_rating | int | 否 | 酒店星级（1-5星） |
+| main_image_url | string | 否 | 酒店主图片URL |
 | room_prices | array | 否 | 房型价格列表 |
 | room_prices[].room_type | string | 否 | 房型名称 |
 | room_prices[].price | number | 否 | 房型价格（保留2位小数） |
+| room_prices[].room_image_url | string | 否 | 房型图片URL |
 | opening_date | string | 否 | 开业时间（格式：YYYY-MM-DD） |
 | nearby_info | string | 否 | 周边信息 |
 | promotion_scenario | string | 否 | 优惠场景 |
