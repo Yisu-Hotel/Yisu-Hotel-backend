@@ -5,6 +5,7 @@
 - [基础信息](#基础信息)
 - [API 端点](#api-端点)
 - [用户认证](#用户认证)
+- [用户资料管理](#用户资料管理)
 
 ## 1.基础信息
 
@@ -100,14 +101,14 @@ curl -X GET http://localhost:{PORT}/api/test
 **请求体:**
 ```json
 {
-  "account": "13800138000"
+  "phone": "13800138000"
 }
 ```
 
 **字段说明:**
 | 字段名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| account | string | 是 | 账号，支持手机号或邮箱 |
+| phone | string | 是 | 手机号 |
 
 **响应示例（账号可用）:**
 ```json
@@ -139,13 +140,13 @@ curl -X GET http://localhost:{PORT}/api/test
 **错误码:**
 | 错误码 | 说明 |
 |--------|------|
-| 3001 | 账号格式不正确 |
+| 3001 | 手机号格式不正确 |
 
 **curl 示例:**
 ```bash
 curl -X POST "http://localhost:{PORT}/auth/check-account" \
   -H "Content-Type: application/json" \
-  -d '{"account": "13800138000"}'
+  -d '{"phone": "13800138000"}'
 ```
 
 ---
@@ -161,7 +162,7 @@ curl -X POST "http://localhost:{PORT}/auth/check-account" \
 **请求体:**
 ```json
 {
-  "account": "13800138000",
+  "phone": "13800138000",
   "type": "register"
 }
 ```
@@ -169,7 +170,7 @@ curl -X POST "http://localhost:{PORT}/auth/check-account" \
 **字段说明:**
 | 字段名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| account | string | 是 | 账号，支持手机号或邮箱 |
+| phone | string | 是 | 手机号 |
 | type | string | 是 | 验证码类型：register（注册）、login（登录）、reset（重置密码） |
 
 **响应示例:**
@@ -191,14 +192,14 @@ curl -X POST "http://localhost:{PORT}/auth/check-account" \
 **错误码:**
 | 错误码 | 说明 |
 |--------|------|
-| 3001 | 账号格式不正确 |
+| 3001 | 手机号格式不正确 |
 | 3002 | 验证码发送频率限制（60秒内只能发送一次） |
 
 **curl 示例:**
 ```bash
 curl -X POST "http://localhost:{PORT}/auth/send-code" \
   -H "Content-Type: application/json" \
-  -d '{"account": "13800138000", "type": "register"}'
+  -d '{"phone": "13800138000", "type": "register"}'
 ```
 
 ---
@@ -214,7 +215,7 @@ curl -X POST "http://localhost:{PORT}/auth/send-code" \
 **请求体:**
 ```json
 {
-  "account": "13800138000",
+  "phone": "13800138000",
   "password": "123456",
   "code": "123456",
   "role": "merchant",
@@ -225,7 +226,7 @@ curl -X POST "http://localhost:{PORT}/auth/send-code" \
 **字段说明:**
 | 字段名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| account | string | 是 | 账号，支持手机号或邮箱 |
+| phone | string | 是 | 手机号 |
 | password | string | 是 | 密码，6-20位字符 |
 | code | string | 是 | 验证码，6 位数字 |
 | role | string | 是 | 角色：merchant（商户）、admin（管理员），默认 merchant |
@@ -259,17 +260,17 @@ curl -X POST "http://localhost:{PORT}/auth/send-code" \
 **错误码:**
 | 错误码 | 说明 |
 |--------|------|
-| 3001 | 账号格式不正确 |
+| 3001 | 手机号格式不正确 |
 | 3003 | 验证码错误或已过期 |
 | 3004 | 未同意用户协议 |
-| 3005 | 账号已被注册 |
+| 3005 | 手机号已被注册 |
 | 3006 | 密码格式不正确 |
 
 **curl 示例:**
 ```bash
 curl -X POST "http://localhost:{PORT}/auth/register" \
   -H "Content-Type: application/json" \
-  -d '{"account": "13800138000", "password": "123456", "code": "123456", "role": "merchant", "agreed": true}'
+  -d '{"phone": "13800138000", "password": "123456", "code": "123456", "role": "merchant", "agreed": true}'
 ```
 
 ---
@@ -285,7 +286,7 @@ curl -X POST "http://localhost:{PORT}/auth/register" \
 **请求体:**
 ```json
 {
-  "account": "13800138000",
+  "phone": "13800138000",
   "password": "123456"
 }
 ```
@@ -293,7 +294,7 @@ curl -X POST "http://localhost:{PORT}/auth/register" \
 **字段说明:**
 | 字段名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| account | string | 是 | 账号，支持手机号或邮箱 |
+| phone | string | 是 | 手机号 |
 | password | string | 是 | 密码 |
 
 **响应示例:**
@@ -321,7 +322,7 @@ curl -X POST "http://localhost:{PORT}/auth/register" \
 | token | string | JWT 认证令牌 |
 | user | object | 用户信息 |
 | user.id | string | 用户 ID（UUID） |
-| user.account | string | 账号 |
+| phone | string | 手机号 |
 | user.role | string | 角色：merchant（商户）、admin（管理员） |
 | user.profile | object | 用户资料 |
 | user.profile.nickname | string | 昵称 |
@@ -329,15 +330,15 @@ curl -X POST "http://localhost:{PORT}/auth/register" \
 **错误码:**
 | 错误码 | 说明 |
 |--------|------|
-| 3007 | 账号不存在 |
+| 3007 | 手机号不存在 |
 | 3008 | 密码错误 |
-| 3009 | 账号已被禁用 |
+| 3009 | 手机号已被禁用 |
 
 **curl 示例:**
 ```bash
 curl -X POST "http://localhost:{PORT}/auth/login" \
   -H "Content-Type: application/json" \
-  -d '{"account": "13800138000", "password": "123456"}'
+  -d '{"phone": "13800138000", "password": "123456"}'
 ```
 
 ---
@@ -353,14 +354,14 @@ curl -X POST "http://localhost:{PORT}/auth/login" \
 **请求体:**
 ```json
 {
-  "account": "13800138000"
+  "phone": "13800138000"
 }
 ```
 
 **字段说明:**
 | 字段名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| account | string | 是 | 账号，支持手机号或邮箱 |
+| phone | string | 是 | 手机号 |
 
 **响应示例:**
 ```json
@@ -381,15 +382,15 @@ curl -X POST "http://localhost:{PORT}/auth/login" \
 **错误码:**
 | 错误码 | 说明 |
 |--------|------|
-| 3001 | 账号格式不正确 |
-| 3007 | 账号不存在 |
+| 3001 | 手机号格式不正确 |
+| 3007 | 手机号不存在 |
 | 3002 | 验证码发送频率限制（60秒内只能发送一次） |
 
 **curl 示例:**
 ```bash
 curl -X POST "http://localhost:{PORT}/auth/forgot-password" \
   -H "Content-Type: application/json" \
-  -d '{"account": "13800138000"}'
+  -d '{"phone": "13800138000"}'
 ```
 
 ---
@@ -414,7 +415,7 @@ curl -X POST "http://localhost:{PORT}/auth/forgot-password" \
 **字段说明:**
 | 字段名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| account | string | 是 | 账号，支持手机号或邮箱 |
+| phone | string | 是 | 手机号 |
 | code | string | 是 | 验证码，6 位数字 |
 | new_password | string | 是 | 新密码，6-20位字符 |
 
@@ -432,14 +433,127 @@ curl -X POST "http://localhost:{PORT}/auth/forgot-password" \
 **错误码:**
 | 错误码 | 说明 |
 |--------|------|
-| 3001 | 账号格式不正确 |
+| 3001 | 手机号格式不正确 |
 | 3003 | 验证码错误或已过期 |
 | 3006 | 密码格式不正确 |
-| 3007 | 账号不存在 |
+| 3007 | 手机号不存在 |
 
 **curl 示例:**
 ```bash
 curl -X POST "http://localhost:{PORT}/auth/reset-password" \
   -H "Content-Type: application/json" \
-  -d '{"account": "13800138000", "code": "123456", "new_password": "123456"}'
+  -d '{"phone": "13800138000", "code": "123456", "new_password": "123456"}'
+```
+
+---
+
+## 4. 用户资料管理
+
+### 4.1 获取用户资料
+
+**接口地址:** `GET /user/profile`
+
+**描述:** 获取当前登录用户的资料信息
+
+**请求参数:** 无
+
+**请求头:**
+```
+Authorization: Bearer {token}
+```
+
+**响应示例:**
+```json
+{
+  "code": 0,
+  "msg": "查询成功",
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "account": "13800138000",
+    "role": "merchant",
+    "nickname": "张三",
+    "created_at": "2026-01-01T10:00:00.000Z",
+    "updated_at": "2026-02-05T10:00:00.000Z"
+  }
+}
+```
+
+**响应字段说明:**
+| 字段名 | 类型 | 说明 |
+|--------|------|------|
+| id | string | 用户ID（UUID） |
+| phone | string | 手机号 |
+| role | string | 角色：merchant（商户）、admin（管理员） |
+| nickname | string | 昵称 |
+| created_at | string | 创建时间 |
+| updated_at | string | 更新时间 |
+
+**错误码:**
+| 错误码 | 说明 |
+|--------|------|
+| 4008 | Token 无效或已过期 |
+
+**curl 示例:**
+```bash
+curl -X GET "http://localhost:{PORT}/user/profile" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+### 4.2 更新用户资料
+
+**接口地址:** `PUT /user/profile`
+
+**描述:** 更新当前登录用户的资料信息
+
+**请求参数:** 无
+
+**请求头:**
+```
+Authorization: Bearer {token}
+```
+
+**请求体:**
+```json
+{
+  "nickname": "李四"
+}
+```
+
+**字段说明:**
+| 字段名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| nickname | string | 否 | 用户昵称，长度2-50字符 |
+
+**响应示例:**
+```json
+{
+  "code": 0,
+  "msg": "更新成功",
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "updated_at": "2026-02-05T15:00:00.000Z"
+  }
+}
+```
+
+**响应字段说明:**
+| 字段名 | 类型 | 说明 |
+|--------|------|------|
+| id | string | 用户ID（UUID） |
+| updated_at | string | 更新时间 |
+
+**错误码:**
+| 错误码 | 说明 |
+|--------|------|
+| 4008 | Token 无效或已过期 |
+| 4017 | 昵称格式不正确 |
+
+**curl 示例:**
+```bash
+curl -X PUT "http://localhost:{PORT}/user/profile" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {token}" \
+  -d '{"nickname": "李四"}'
 ```

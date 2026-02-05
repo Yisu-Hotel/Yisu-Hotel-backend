@@ -7,7 +7,7 @@
 - [第三方登录/注册](#第三方登录注册)
 - [用户信息](#用户信息)
 - [收藏管理](#收藏管理)
-- [酒店预订](#酒店预订)
+- [预订管理](#预订管理)
 - [优惠管理](#优惠管理)
 
 ## 1. 基础信息
@@ -170,48 +170,7 @@ curl -X POST "http://localhost:{PORT}/mobile/auth/check-phone" \
       "phone": "13800138000",
       "role": "mobile",
       "is_new_user": true
-    },
-    "promotions": [
-      {
-        "id": "promo_001",
-        "title": "新人立减 10 元",
-        "description": "首次预订可享新人立减 10 元",
-        "discount": 10,
-        "valid_until": "2026-03-31T23:59:59Z"
-      }
-    ],
-    "quick_access": [
-      {
-        "id": "profile",
-        "title": "完善个人信息",
-        "icon": "user",
-        "path": "/mobile/profile/edit"
-      },
-      {
-        "id": "favorites",
-        "title": "查看我的收藏",
-        "icon": "heart",
-        "path": "/mobile/favorites/list"
-      },
-      {
-        "id": "booking",
-        "title": "开始预订酒店",
-        "icon": "hotel",
-        "path": "/mobile/hotels/search"
-      }
-    ],
-    "buttons": [
-      {
-        "id": "home",
-        "title": "进入首页",
-        "path": "/mobile/hotels/search"
-      },
-      {
-        "id": "profile",
-        "title": "进入个人中心",
-        "path": "/mobile/profile"
-      }
-    ]
+    }
   }
 }
 ```
@@ -225,21 +184,6 @@ curl -X POST "http://localhost:{PORT}/mobile/auth/check-phone" \
 | user.phone | string | 手机号 |
 | user.role | string | 角色：mobile（手机端用户） |
 | user.is_new_user | boolean | 是否新用户，true 表示首次注册 |
-| promotions | array | 优惠信息列表 |
-| promotions[].id | string | 优惠ID |
-| promotions[].title | string | 优惠标题 |
-| promotions[].description | string | 优惠描述 |
-| promotions[].discount | number | 优惠金额 |
-| promotions[].valid_until | string | 优惠有效期 |
-| quick_access | array | 快捷入口列表 |
-| quick_access[].id | string | 入口ID |
-| quick_access[].title | string | 入口标题 |
-| quick_access[].icon | string | 入口图标 |
-| quick_access[].path | string | 跳转路径 |
-| buttons | array | 跳转按钮列表 |
-| buttons[].id | string | 按钮ID |
-| buttons[].title | string | 按钮标题 |
-| buttons[].path | string | 跳转路径 |
 
 **错误码:**
 | 错误码 | 说明 |
@@ -298,48 +242,7 @@ curl -X POST "http://localhost:{PORT}/mobile/auth/register" \
       "profile": {
         "nickname": "张三"
       }
-    },
-    "promotions": [
-      {
-        "id": "promo_001",
-        "title": "新人立减 10 元",
-        "description": "首次预订可享新人立减 10 元",
-        "discount": 10,
-        "valid_until": "2026-03-31T23:59:59Z"
-      }
-    ],
-    "quick_access": [
-      {
-        "id": "profile",
-        "title": "完善个人信息",
-        "icon": "user",
-        "path": "/mobile/profile/edit"
-      },
-      {
-        "id": "favorites",
-        "title": "查看我的收藏",
-        "icon": "heart",
-        "path": "/mobile/favorites/list"
-      },
-      {
-        "id": "booking",
-        "title": "开始预订酒店",
-        "icon": "hotel",
-        "path": "/mobile/hotels/search"
-      }
-    ],
-    "buttons": [
-      {
-        "id": "home",
-        "title": "进入首页",
-        "path": "/mobile/hotels/search"
-      },
-      {
-        "id": "profile",
-        "title": "进入个人中心",
-        "path": "/mobile/profile"
-      }
-    ]
+    }
   }
 }
 ```
@@ -379,21 +282,6 @@ curl -X POST "http://localhost:{PORT}/mobile/auth/register" \
 | user.is_new_user | boolean | 是否新用户，true 表示首次注册 |
 | user.profile | object | 用户资料 |
 | user.profile.nickname | string | 昵称 |
-| promotions | array | 优惠信息列表（仅首次注册返回） |
-| promotions[].id | string | 优惠ID |
-| promotions[].title | string | 优惠标题 |
-| promotions[].description | string | 优惠描述 |
-| promotions[].discount | number | 优惠金额 |
-| promotions[].valid_until | string | 优惠有效期 |
-| quick_access | array | 快捷入口列表（仅首次注册返回） |
-| quick_access[].id | string | 入口ID |
-| quick_access[].title | string | 入口标题 |
-| quick_access[].icon | string | 入口图标 |
-| quick_access[].path | string | 跳转路径 |
-| buttons | array | 跳转按钮列表（仅首次注册返回） |
-| buttons[].id | string | 按钮ID |
-| buttons[].title | string | 按钮标题 |
-| buttons[].path | string | 跳转路径 |
 
 **错误码:**
 | 错误码 | 说明 |
@@ -448,48 +336,7 @@ curl -X POST "http://localhost:{PORT}/mobile/auth/wechat-login" \
       "profile": {
         "nickname": "李四"
       }
-    },
-    "promotions": [
-      {
-        "id": "promo_001",
-        "title": "新人立减 10 元",
-        "description": "首次预订可享新人立减 10 元",
-        "discount": 10,
-        "valid_until": "2026-03-31T23:59:59Z"
-      }
-    ],
-    "quick_access": [
-      {
-        "id": "profile",
-        "title": "完善个人信息",
-        "icon": "user",
-        "path": "/mobile/profile/edit"
-      },
-      {
-        "id": "favorites",
-        "title": "查看我的收藏",
-        "icon": "heart",
-        "path": "/mobile/favorites/list"
-      },
-      {
-        "id": "booking",
-        "title": "开始预订酒店",
-        "icon": "hotel",
-        "path": "/mobile/hotels/search"
-      }
-    ],
-    "buttons": [
-      {
-        "id": "home",
-        "title": "进入首页",
-        "path": "/mobile/hotels/search"
-      },
-      {
-        "id": "profile",
-        "title": "进入个人中心",
-        "path": "/mobile/profile"
-      }
-    ]
+    }
   }
 }
 ```
@@ -529,21 +376,6 @@ curl -X POST "http://localhost:{PORT}/mobile/auth/wechat-login" \
 | user.is_new_user | boolean | 是否新用户，true 表示首次注册 |
 | user.profile | object | 用户资料 |
 | user.profile.nickname | string | 昵称 |
-| promotions | array | 优惠信息列表（仅首次注册返回） |
-| promotions[].id | string | 优惠ID |
-| promotions[].title | string | 优惠标题 |
-| promotions[].description | string | 优惠描述 |
-| promotions[].discount | number | 优惠金额 |
-| promotions[].valid_until | string | 优惠有效期 |
-| quick_access | array | 快捷入口列表（仅首次注册返回） |
-| quick_access[].id | string | 入口ID |
-| quick_access[].title | string | 入口标题 |
-| quick_access[].icon | string | 入口图标 |
-| quick_access[].path | string | 跳转路径 |
-| buttons | array | 跳转按钮列表（仅首次注册返回） |
-| buttons[].id | string | 按钮ID |
-| buttons[].title | string | 按钮标题 |
-| buttons[].path | string | 跳转路径 |
 
 **错误码:**
 | 错误码 | 说明 |
@@ -584,9 +416,11 @@ curl -X POST "http://localhost:{PORT}/mobile/auth/alipay-login" \
     "profile": {
       "nickname": "张三",
       "gender": "男",
-      "birthday": "1990-01-01"
+      "birthday": "1990-01-01",
+      "avatar": "https://example.com/avatar.jpg"
     },
-    "created_at": "2024-01-01T00:00:00Z"
+    "created_at": "2024-01-01T00:00:00Z",
+    "last_login_at": "2026-02-05T10:00:00.000Z"
   }
 }
 ```
@@ -601,7 +435,9 @@ curl -X POST "http://localhost:{PORT}/mobile/auth/alipay-login" \
 | profile.nickname | string | 昵称 |
 | profile.gender | string | 性别 |
 | profile.birthday | string | 生日 |
+| profile.avatar | string | 头像URL（选填信息） |
 | created_at | string | 创建时间 |
+| last_login_at | string | 最后登录时间 |
 
 **错误码:**
 | 错误码 | 说明 |
@@ -634,7 +470,8 @@ curl -X GET "http://localhost:{PORT}/mobile/user/info" \
 {
   "nickname": "张三",
   "gender": "男",
-  "birthday": "1990-01-01"
+  "birthday": "1990-01-01",
+  "avatar": "https://example.com/avatar.jpg"
 }
 ```
 
@@ -644,6 +481,7 @@ curl -X GET "http://localhost:{PORT}/mobile/user/info" \
 | nickname | string | 否 | 昵称 |
 | gender | string | 否 | 性别（男/女） |
 | birthday | string | 否 | 生日（YYYY-MM-DD） |
+| avatar | string | 否 | 头像URL |
 
 **响应示例:**
 ```json
@@ -657,7 +495,8 @@ curl -X GET "http://localhost:{PORT}/mobile/user/info" \
     "profile": {
       "nickname": "张三",
       "gender": "男",
-      "birthday": "1990-01-01"
+      "birthday": "1990-01-01",
+      "avatar": "https://example.com/avatar.jpg"
     }
   }
 }
@@ -673,6 +512,7 @@ curl -X GET "http://localhost:{PORT}/mobile/user/info" \
 | profile.nickname | string | 昵称 |
 | profile.gender | string | 性别 |
 | profile.birthday | string | 生日 |
+| profile.avatar | string | 头像URL |
 
 **错误码:**
 | 错误码 | 说明 |
@@ -717,7 +557,7 @@ curl -X PUT "http://localhost:{PORT}/mobile/user/update" \
         "hotel_address": "北京市朝阳区建国路88号",
         "hotel_star": 3,
         "min_price": 299,
-        "image_url": "https://example.com/hotel1.jpg",
+        "main_image_url": "https://example.com/hotel_main.jpg",
         "collected_at": "2024-01-01T00:00:00Z"
       }
     ],
@@ -736,7 +576,7 @@ curl -X PUT "http://localhost:{PORT}/mobile/user/update" \
 | favorites[].hotel_address | string | 酒店地址 |
 | favorites[].hotel_star | number | 酒店星级 |
 | favorites[].min_price | number | 最低价格 |
-| favorites[].image_url | string | 酒店图片URL |
+| favorites[].main_image_url | string | 酒店主图片URL |
 | favorites[].collected_at | string | 收藏时间 |
 | total | number | 总收藏数 |
 
@@ -751,23 +591,24 @@ curl -X GET "http://localhost:{PORT}/mobile/favorites/list" \
   -H "Authorization: Bearer {token}"
 ```
 
-## 6. 酒店预订
+## 5.2 获取酒店详情
 
-### 6.1 搜索酒店
+参考 PC-api-document2.md 中的 4.2 获取酒店详情 接口
 
-**接口地址:** `GET /mobile/hotels/search`
+## 6. 预订管理
 
-**描述:** 搜索酒店（首页酒店查询）
+### 6.1 获取预订酒店列表
+
+**接口地址:** `GET /mobile/bookings/list`
+
+**描述:** 获取用户预订的酒店列表
 
 **请求参数:**
-| 字段名 | 类型 | 必填 | 说明 |
+| 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| city | string | 否 | 城市 |
-| check_in | string | 否 | 入住日期（YYYY-MM-DD） |
-| check_out | string | 否 | 离店日期（YYYY-MM-DD） |
-| min_price | number | 否 | 最低价格 |
-| max_price | number | 否 | 最高价格 |
-| star | number | 否 | 酒店星级 |
+| page | int | 否 | 页码，默认 1 |
+| page_size | int | 否 | 每页数量，默认 10 |
+| status | string | 否 | 状态筛选：pending（待支付）、paid（已支付）、completed（已完成）、cancelled（已取消） |
 
 **请求头:**
 | 字段名 | 类型 | 必填 | 说明 |
@@ -778,23 +619,28 @@ curl -X GET "http://localhost:{PORT}/mobile/favorites/list" \
 ```json
 {
   "code": 0,
-  "msg": "搜索成功",
+  "msg": "获取成功",
   "data": {
-    "hotels": [
+    "bookings": [
       {
-        "id": "hotel_001",
-        "name": "如家酒店",
-        "address": "北京市朝阳区建国路88号",
-        "star": 3,
-        "min_price": 299,
-        "image_url": "https://example.com/hotel1.jpg",
-        "distance": "2.5km",
-        "rating": 4.5
+        "id": "booking_001",
+        "hotel_id": "hotel_001",
+        "hotel_name": "如家酒店",
+        "hotel_address": "北京市朝阳区建国路88号",
+        "hotel_star": 3,
+        "room_type": "大床房",
+        "check_in_date": "2026-02-10",
+        "check_out_date": "2026-02-11",
+        "total_price": 299.00,
+        "status": "completed",
+        "status_text": "已完成",
+        "main_image_url": "https://example.com/hotel_main.jpg",
+        "booked_at": "2026-02-05T10:00:00Z"
       }
     ],
     "total": 1,
     "page": 1,
-    "page_size": 20
+    "page_size": 10
   }
 }
 ```
@@ -802,16 +648,21 @@ curl -X GET "http://localhost:{PORT}/mobile/favorites/list" \
 **响应字段说明:**
 | 字段名 | 类型 | 说明 |
 |--------|------|------|
-| hotels | array | 酒店列表 |
-| hotels[].id | string | 酒店ID |
-| hotels[].name | string | 酒店名称 |
-| hotels[].address | string | 酒店地址 |
-| hotels[].star | number | 酒店星级 |
-| hotels[].min_price | number | 最低价格 |
-| hotels[].image_url | string | 酒店图片URL |
-| hotels[].distance | string | 距离 |
-| hotels[].rating | number | 评分 |
-| total | number | 总酒店数 |
+| bookings | array | 预订列表 |
+| bookings[].id | string | 预订ID |
+| bookings[].hotel_id | string | 酒店ID |
+| bookings[].hotel_name | string | 酒店名称 |
+| bookings[].hotel_address | string | 酒店地址 |
+| bookings[].hotel_star | number | 酒店星级 |
+| bookings[].room_type | string | 房型 |
+| bookings[].check_in_date | string | 入住日期 |
+| bookings[].check_out_date | string | 离店日期 |
+| bookings[].total_price | number | 总价格 |
+| bookings[].status | string | 状态：pending（待支付）、paid（已支付）、completed（已完成）、cancelled（已取消） |
+| bookings[].status_text | string | 状态文本 |
+| bookings[].main_image_url | string | 酒店主图片URL |
+| bookings[].booked_at | string | 预订时间 |
+| total | number | 总预订数 |
 | page | number | 当前页码 |
 | page_size | number | 每页大小 |
 
@@ -822,7 +673,85 @@ curl -X GET "http://localhost:{PORT}/mobile/favorites/list" \
 
 **curl 示例:**
 ```bash
-curl -X GET "http://localhost:{PORT}/mobile/hotels/search?city=北京&check_in=2024-01-01&check_out=2024-01-02" \
+curl -X GET "http://localhost:{PORT}/mobile/bookings/list?page=1&page_size=10&status=completed" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+### 6.2 获取预订详情
+
+**接口地址:** `GET /mobile/bookings/detail/:id`
+
+**描述:** 获取预订详情信息
+
+**请求参数:**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| id | string | 是 | 预订ID（路径参数） |
+
+**请求头:**
+| 字段名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| Authorization | string | 是 | Bearer {token} |
+
+**响应示例:**
+```json
+{
+  "code": 0,
+  "msg": "获取成功",
+  "data": {
+    "id": "booking_001",
+    "hotel_id": "hotel_001",
+    "hotel_name": "如家酒店",
+    "hotel_address": "北京市朝阳区建国路88号",
+    "hotel_star": 3,
+    "room_type": "大床房",
+    "check_in_date": "2026-02-10",
+    "check_out_date": "2026-02-11",
+    "total_price": 299.00,
+    "status": "completed",
+    "status_text": "已完成",
+    "main_image_url": "https://example.com/hotel_main.jpg",
+    "contact_name": "张三",
+    "contact_phone": "13800138000",
+    "special_requests": "需要无烟房",
+    "booked_at": "2026-02-05T10:00:00Z",
+    "paid_at": "2026-02-05T10:30:00Z"
+  }
+}
+```
+
+**响应字段说明:**
+| 字段名 | 类型 | 说明 |
+|--------|------|------|
+| id | string | 预订ID |
+| hotel_id | string | 酒店ID |
+| hotel_name | string | 酒店名称 |
+| hotel_address | string | 酒店地址 |
+| hotel_star | number | 酒店星级 |
+| room_type | string | 房型 |
+| check_in_date | string | 入住日期 |
+| check_out_date | string | 离店日期 |
+| total_price | number | 总价格 |
+| status | string | 状态：pending（待支付）、paid（已支付）、completed（已完成）、cancelled（已取消） |
+| status_text | string | 状态文本 |
+| main_image_url | string | 酒店主图片URL |
+| contact_name | string | 联系人姓名 |
+| contact_phone | string | 联系人电话 |
+| special_requests | string | 特殊要求 |
+| booked_at | string | 预订时间 |
+| paid_at | string | 支付时间 |
+
+**错误码:**
+| 错误码 | 说明 |
+|--------|------|
+| 401 | 未授权，请先登录 |
+| 402 | 预订不存在 |
+
+**curl 示例:**
+```bash
+curl -X GET "http://localhost:{PORT}/mobile/bookings/detail/booking_001" \
   -H "Authorization: Bearer {token}"
 ```
 
@@ -880,5 +809,103 @@ curl -X GET "http://localhost:{PORT}/mobile/hotels/search?city=北京&check_in=2
 **curl 示例:**
 ```bash
 curl -X GET "http://localhost:{PORT}/mobile/promotions/new-user" \
+  -H "Authorization: Bearer {token}"
+```
+
+---
+
+### 7.2 获取用户所有优惠券
+
+**接口地址:** `GET /mobile/promotions/list`
+
+**描述:** 获取用户所有的优惠券列表
+
+**请求参数:**
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| page | int | 否 | 页码，默认 1 |
+| page_size | int | 否 | 每页数量，默认 10 |
+| status | string | 否 | 状态筛选：available（可用）、used（已使用）、expired（已过期） |
+
+**请求头:**
+| 字段名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| Authorization | string | 是 | Bearer {token} |
+
+**响应示例:**
+```json
+{
+  "code": 0,
+  "msg": "获取成功",
+  "data": {
+    "promotions": [
+      {
+        "id": "promo_001",
+        "title": "新人立减 10 元",
+        "description": "首次预订可享新人立减 10 元",
+        "discount": 10,
+        "valid_until": "2026-03-31T23:59:59Z",
+        "status": "available",
+        "status_text": "可用",
+        "obtained_at": "2026-01-01T00:00:00Z",
+        "used_at": null
+      },
+      {
+        "id": "promo_002",
+        "title": "节日特惠 8 折",
+        "description": "春节期间预订酒店享受 8 折优惠",
+        "discount": 20,
+        "valid_until": "2026-02-28T23:59:59Z",
+        "status": "used",
+        "status_text": "已使用",
+        "obtained_at": "2026-01-15T00:00:00Z",
+        "used_at": "2026-02-10T14:30:00Z",
+        "used_hotel_name": "如家酒店"
+      },
+      {
+        "id": "promo_003",
+        "title": "周末特惠 50 元",
+        "description": "周末预订酒店立减 50 元",
+        "discount": 50,
+        "valid_until": "2026-01-31T23:59:59Z",
+        "status": "expired",
+        "status_text": "已过期",
+        "obtained_at": "2026-01-01T00:00:00Z",
+        "used_at": null
+      }
+    ],
+    "total": 3,
+    "page": 1,
+    "page_size": 10
+  }
+}
+```
+
+**响应字段说明:**
+| 字段名 | 类型 | 说明 |
+|--------|------|------|
+| promotions | array | 优惠券列表 |
+| promotions[].id | string | 优惠券ID |
+| promotions[].title | string | 优惠券标题 |
+| promotions[].description | string | 优惠券描述 |
+| promotions[].discount | number | 优惠金额 |
+| promotions[].valid_until | string | 优惠券有效期 |
+| promotions[].status | string | 状态：available（可用）、used（已使用）、expired（已过期） |
+| promotions[].status_text | string | 状态文本 |
+| promotions[].obtained_at | string | 获得时间 |
+| promotions[].used_at | string | 使用时间（已使用时返回） |
+| promotions[].used_hotel_name | string | 使用的酒店名称（已使用时返回） |
+| total | number | 总优惠券数 |
+| page | number | 当前页码 |
+| page_size | number | 每页大小 |
+
+**错误码:**
+| 错误码 | 说明 |
+|--------|------|
+| 401 | 未授权，请先登录 |
+
+**curl 示例:**
+```bash
+curl -X GET "http://localhost:{PORT}/mobile/promotions/list?page=1&page_size=10&status=available" \
   -H "Authorization: Bearer {token}"
 ```

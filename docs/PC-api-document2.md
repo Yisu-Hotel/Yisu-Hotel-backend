@@ -32,37 +32,143 @@ Authorization: Bearer {token}
 {
   "hotel_name_cn": "易宿酒店",
   "hotel_name_en": "Yisu Hotel",
-  "formatted_address": "北京市朝阳区建国路88号",
-  "address_component": {
+  "star_rating": 4,
+  "description": "易宿酒店位于北京市朝阳区核心地段，交通便利，周边配套设施齐全。酒店拥有舒适的客房和完善的服务设施，是商务出行和休闲旅游的理想选择。",
+  "phone": "010-12345678",
+  "opening_date": "2020-01-01",
+  "nearby_info": "距离地铁站500米，周边有商场、餐厅",
+  "facilities": [
+    {"id": "wifi", "name": "免费WiFi"},
+    {"id": "parking", "name": "免费停车场"},
+    {"id": "air_conditioner", "name": "空调"},
+    {"id": "tv", "name": "电视"},
+    {"id": "breakfast", "name": "早餐"},
+    {"id": "gym", "name": "健身房"}
+  ],
+  "services": [
+    {"id": "reception", "name": "24小时前台"},
+    {"id": "luggage", "name": "行李寄存"},
+    {"id": "laundry", "name": "洗衣服务"},
+    {"id": "taxi", "name": "叫车服务"},
+    {"id": "concierge", "name": "concierge服务"}
+  ],
+  "policies": {
+    "cancellation": "入住前24小时可免费取消",
+    "payment": "支持现金、信用卡、移动支付",
+    "children": "12岁以下儿童可免费入住",
+    "pets": "不允许携带宠物"
+  },
+  "room_prices": {
+    "大床房": {
+      "bed_type": "king",
+      "area": 35,
+      "description": "豪华大床房，配备舒适的大床，适合情侣或独自出行。房间宽敞明亮，装修现代，设施齐全。",
+      "facilities": [
+        {"id": "free_wifi", "name": "免费WiFi"},
+        {"id": "air_conditioner", "name": "空调"},
+        {"id": "tv", "name": "平板电视"},
+        {"id": "minibar", "name": "迷你吧"},
+        {"id": "bathtub", "name": "浴缸"},
+        {"id": "workdesk", "name": "办公桌"}
+      ],
+      "room_image_url": "https://example.com/room1.jpg",
+      "policies": {
+        "cancellation": "入住前48小时可免费取消",
+        "payment": "支持现金、信用卡、移动支付",
+        "children": "12岁以下儿童可免费入住",
+        "pets": "不允许携带宠物"
+      },
+      "tags": ["受欢迎", "豪华", "性价比高"],
+      "services": [
+        {"id": "airport_transfer", "name": "机场接送服务"},
+        {"id": "laundry", "name": "洗衣服务"},
+        {"id": "room_service", "name": "24小时客房服务"}
+      ],
+      "prices": {
+        "2026-02-01": 299.00,
+        "2026-02-02": 299.00,
+        "2026-02-03": 399.00
+      }
+    },
+    "双床房": {
+      "bed_type": "twin",
+      "area": 40,
+      "description": "舒适双床房，配备两张单人床，适合朋友或商务出行。房间布局合理，采光良好。",
+      "facilities": [
+        {"id": "free_wifi", "name": "免费WiFi"},
+        {"id": "air_conditioner", "name": "空调"},
+        {"id": "tv", "name": "平板电视"},
+        {"id": "minibar", "name": "迷你吧"},
+        {"id": "workdesk", "name": "办公桌"}
+      ],
+      "room_image_url": "https://example.com/room2.jpg",
+      "policies": {
+        "cancellation": "入住前48小时可免费取消",
+        "payment": "支持现金、信用卡、移动支付",
+        "children": "12岁以下儿童可免费入住",
+        "pets": "不允许携带宠物"
+      },
+      "tags": ["舒适", "商务"],
+      "services": [
+        {"id": "laundry", "name": "洗衣服务"},
+        {"id": "room_service", "name": "24小时客房服务"}
+      ],
+      "prices": {
+        "2026-02-01": 329.00,
+        "2026-02-02": 329.00,
+        "2026-02-03": 429.00
+      }
+    },
+    "套房": {
+      "bed_type": "king",
+      "area": 60,
+      "description": "豪华套房，配备独立客厅和卧室，适合家庭或商务接待。空间宽敞，设施豪华。",
+      "facilities": [
+        {"id": "free_wifi", "name": "免费WiFi"},
+        {"id": "air_conditioner", "name": "空调"},
+        {"id": "tv", "name": "平板电视"},
+        {"id": "minibar", "name": "迷你吧"},
+        {"id": "bathtub", "name": "浴缸"},
+        {"id": "workdesk", "name": "办公桌"},
+        {"id": "sofa", "name": "沙发"}
+      ],
+      "room_image_url": "https://example.com/room3.jpg",
+      "policies": {
+        "cancellation": "入住前48小时可免费取消",
+        "payment": "支持现金、信用卡、移动支付",
+        "children": "12岁以下儿童可免费入住",
+        "pets": "不允许携带宠物"
+      },
+      "tags": ["豪华", "家庭", "商务"],
+      "services": [
+        {"id": "airport_transfer", "name": "机场接送服务"},
+        {"id": "laundry", "name": "洗衣服务"},
+        {"id": "room_service", "name": "24小时客房服务"},
+        {"id": "butler", "name": "管家服务"}
+      ],
+      "prices": {
+        "2026-02-01": 599.00,
+        "2026-02-02": 599.00,
+        "2026-02-03": 699.00
+      }
+    }
+  },
+  "main_image_url": [
+    "https://example.com/hotel1.jpg",
+    "https://example.com/hotel2.jpg",
+    "https://example.com/hotel3.jpg"
+  ],
+  "tags": ["亲子友好", "免费停车场", "含早餐"],
+  "location_info": {
+    "formatted_address": "北京市朝阳区阜通东大街6号",
     "country": "中国",
     "province": "北京市",
     "city": "北京市",
     "district": "朝阳区",
-    "street": "建国路",
-    "street_number": "88号"
-  },
-  "star_rating": 4,
-  "main_image_url": "https://example.com/hotel1.jpg",
-  "room_prices": [
-    {
-      "room_type": "大床房",
-      "price": 299.00,
-      "room_image_url": "https://example.com/room1.jpg"
-    },
-    {
-      "room_type": "双床房",
-      "price": 329.00,
-      "room_image_url": "https://example.com/room2.jpg"
-    },
-    {
-      "room_type": "套房",
-      "price": 599.00,
-      "room_image_url": "https://example.com/room3.jpg"
-    }
-  ],
-  "opening_date": "2020-01-01",
-  "nearby_info": "距离地铁站500米，周边有商场、餐厅",
-  "promotion_scenario": "节日优惠"
+    "street": "阜通东大街",
+    "number": "6号",
+    "location": "116.482086,39.990496"
+  }
 }
 ```
 
@@ -71,23 +177,53 @@ Authorization: Bearer {token}
 |--------|------|------|------|
 | hotel_name_cn | string | 是 | 酒店中文名称 |
 | hotel_name_en | string | 是 | 酒店英文名称 |
-| formatted_address | string | 是 | 完整地址（地图选点后自动填充） |
-| address_component | object | 是 | 地址组件（地图选点后自动填充） |
-| address_component.country | string | 是 | 国家 |
-| address_component.province | string | 是 | 省份 |
-| address_component.city | string | 是 | 城市 |
-| address_component.district | string | 是 | 区县 |
-| address_component.street | string | 是 | 街道 |
-| address_component.street_number | string | 是 | 门牌号 |
 | star_rating | int | 是 | 酒店星级（1-5星） |
-| main_image_url | string | 否 | 酒店主图片URL |
-| room_prices | array | 是 | 房型价格列表 |
-| room_prices[].room_type | string | 是 | 房型名称 |
-| room_prices[].price | number | 是 | 房型价格（保留2位小数） |
-| room_prices[].room_image_url | string | 否 | 房型图片URL |
+| description | string | 是 | 酒店描述 |
+| phone | string | 是 | 酒店联系电话 |
 | opening_date | string | 是 | 开业时间（格式：YYYY-MM-DD） |
 | nearby_info | string | 否 | 周边信息（景点、交通等） |
-| promotion_scenario | string | 否 | 优惠场景 |
+| facilities | array | 否 | 设施列表 |
+| facilities[].id | string | 是 | 设施ID |
+| facilities[].name | string | 是 | 设施名称 |
+| services | array | 否 | 服务列表 |
+| services[].id | string | 是 | 服务ID |
+| services[].name | string | 是 | 服务名称 |
+| policies | object | 否 | 政策信息 |
+| policies.cancellation | string | 是 | 取消政策 |
+| policies.payment | string | 是 | 支付政策 |
+| policies.children | string | 是 | 儿童政策 |
+| policies.pets | string | 是 | 宠物政策 |
+| room_prices | object | 是 | 房型价格列表 |
+| room_prices.{房型名称} | object | 是 | 房型信息 |
+| room_prices.{房型名称}.bed_type | string | 是 | 床型：king（大床）、twin（双床）、queen（中床） |
+| room_prices.{房型名称}.area | number | 是 | 房间面积（平方米） |
+| room_prices.{房型名称}.description | string | 是 | 房间描述 |
+| room_prices.{房型名称}.facilities | array | 否 | 房间设施列表 |
+| room_prices.{房型名称}.facilities[].id | string | 否 | 设施ID |
+| room_prices.{房型名称}.facilities[].name | string | 否 | 设施名称 |
+| room_prices.{房型名称}.room_image_url | string | 否 | 房型图片URL |
+| room_prices.{房型名称}.policies | object | 否 | 房间政策信息 |
+| room_prices.{房型名称}.policies.cancellation | string | 否 | 取消政策 |
+| room_prices.{房型名称}.policies.payment | string | 否 | 支付政策 |
+| room_prices.{房型名称}.policies.children | string | 否 | 儿童政策 |
+| room_prices.{房型名称}.policies.pets | string | 否 | 宠物政策 |
+| room_prices.{房型名称}.tags | array | 否 | 房间标签 |
+| room_prices.{房型名称}.services | array | 否 | 房间服务列表 |
+| room_prices.{房型名称}.services[].id | string | 否 | 服务ID |
+| room_prices.{房型名称}.services[].name | string | 否 | 服务名称 |
+| room_prices.{房型名称}.prices | object | 是 | 每日价格（日期-价格映射） |
+| room_prices.{房型名称}.prices.{日期} | number | 是 | 指定日期的价格（保留2位小数） |
+| main_image_url | array | 否 | 酒店主图片URL列表 |
+| tags | array | 否 | 酒店标签（如：亲子友好、免费停车场、含早餐） |
+| location_info | object | 是 | 位置信息 |
+| location_info.formatted_address | string | 是 | 格式化地址 |
+| location_info.country | string | 是 | 国家 |
+| location_info.province | string | 是 | 省份 |
+| location_info.city | string | 是 | 城市 |
+| location_info.district | string | 是 | 区 |
+| location_info.street | string | 是 | 街道 |
+| location_info.number | string | 是 | 门牌号 |
+| location_info.location | string | 是 | 经纬度坐标 |
 
 **响应示例:**
 ```json
@@ -127,33 +263,143 @@ curl -X POST "http://localhost:{PORT}/hotel/create" \
   -d '{
     "hotel_name_cn": "易宿酒店",
     "hotel_name_en": "Yisu Hotel",
-    "formatted_address": "北京市朝阳区建国路88号",
-    "address_component": {
+    "star_rating": 4,
+    "description": "易宿酒店位于北京市朝阳区核心地段，交通便利，周边配套设施齐全。酒店拥有舒适的客房和完善的服务设施，是商务出行和休闲旅游的理想选择。",
+    "phone": "010-12345678",
+    "opening_date": "2020-01-01",
+    "nearby_info": "距离地铁站500米，周边有商场、餐厅",
+    "facilities": [
+      {"id": "wifi", "name": "免费WiFi"},
+      {"id": "parking", "name": "免费停车场"},
+      {"id": "air_conditioner", "name": "空调"},
+      {"id": "tv", "name": "电视"},
+      {"id": "breakfast", "name": "早餐"},
+      {"id": "gym", "name": "健身房"}
+    ],
+    "services": [
+      {"id": "reception", "name": "24小时前台"},
+      {"id": "luggage", "name": "行李寄存"},
+      {"id": "laundry", "name": "洗衣服务"},
+      {"id": "taxi", "name": "叫车服务"},
+      {"id": "concierge", "name": "concierge服务"}
+    ],
+    "policies": {
+      "cancellation": "入住前24小时可免费取消",
+      "payment": "支持现金、信用卡、移动支付",
+      "children": "12岁以下儿童可免费入住",
+      "pets": "不允许携带宠物"
+    },
+    "room_prices": {
+      "大床房": {
+        "bed_type": "king",
+        "area": 35,
+        "description": "豪华大床房，配备舒适的大床，适合情侣或独自出行。房间宽敞明亮，装修现代，设施齐全。",
+        "facilities": [
+          {"id": "free_wifi", "name": "免费WiFi"},
+          {"id": "air_conditioner", "name": "空调"},
+          {"id": "tv", "name": "平板电视"},
+          {"id": "minibar", "name": "迷你吧"},
+          {"id": "bathtub", "name": "浴缸"},
+          {"id": "workdesk", "name": "办公桌"}
+        ],
+        "room_image_url": "https://example.com/room1.jpg",
+        "policies": {
+          "cancellation": "入住前48小时可免费取消",
+          "payment": "支持现金、信用卡、移动支付",
+          "children": "12岁以下儿童可免费入住",
+          "pets": "不允许携带宠物"
+        },
+        "tags": ["受欢迎", "豪华", "性价比高"],
+        "services": [
+          {"id": "airport_transfer", "name": "机场接送服务"},
+          {"id": "laundry", "name": "洗衣服务"},
+          {"id": "room_service", "name": "24小时客房服务"}
+        ],
+        "prices": {
+          "2026-02-01": 299.00,
+          "2026-02-02": 299.00,
+          "2026-02-03": 399.00
+        }
+      },
+      "双床房": {
+        "bed_type": "twin",
+        "area": 40,
+        "description": "舒适双床房，配备两张单人床，适合朋友或商务出行。房间布局合理，采光良好。",
+        "facilities": [
+          {"id": "free_wifi", "name": "免费WiFi"},
+          {"id": "air_conditioner", "name": "空调"},
+          {"id": "tv", "name": "平板电视"},
+          {"id": "minibar", "name": "迷你吧"},
+          {"id": "workdesk", "name": "办公桌"}
+        ],
+        "room_image_url": "https://example.com/room2.jpg",
+        "policies": {
+          "cancellation": "入住前48小时可免费取消",
+          "payment": "支持现金、信用卡、移动支付",
+          "children": "12岁以下儿童可免费入住",
+          "pets": "不允许携带宠物"
+        },
+        "tags": ["舒适", "商务"],
+        "services": [
+          {"id": "laundry", "name": "洗衣服务"},
+          {"id": "room_service", "name": "24小时客房服务"}
+        ],
+        "prices": {
+          "2026-02-01": 329.00,
+          "2026-02-02": 329.00,
+          "2026-02-03": 429.00
+        }
+      },
+      "套房": {
+        "bed_type": "king",
+        "area": 60,
+        "description": "豪华套房，配备独立客厅和卧室，适合家庭或商务接待。空间宽敞，设施豪华。",
+        "facilities": [
+          {"id": "free_wifi", "name": "免费WiFi"},
+          {"id": "air_conditioner", "name": "空调"},
+          {"id": "tv", "name": "平板电视"},
+          {"id": "minibar", "name": "迷你吧"},
+          {"id": "bathtub", "name": "浴缸"},
+          {"id": "workdesk", "name": "办公桌"},
+          {"id": "sofa", "name": "沙发"}
+        ],
+        "room_image_url": "https://example.com/room3.jpg",
+        "policies": {
+          "cancellation": "入住前48小时可免费取消",
+          "payment": "支持现金、信用卡、移动支付",
+          "children": "12岁以下儿童可免费入住",
+          "pets": "不允许携带宠物"
+        },
+        "tags": ["豪华", "家庭", "商务"],
+        "services": [
+          {"id": "airport_transfer", "name": "机场接送服务"},
+          {"id": "laundry", "name": "洗衣服务"},
+          {"id": "room_service", "name": "24小时客房服务"},
+          {"id": "butler", "name": "管家服务"}
+        ],
+        "prices": {
+          "2026-02-01": 599.00,
+          "2026-02-02": 599.00,
+          "2026-02-03": 699.00
+        }
+      }
+    },
+    "main_image_url": [
+      "https://example.com/hotel1.jpg",
+      "https://example.com/hotel2.jpg",
+      "https://example.com/hotel3.jpg"
+    ],
+    "tags": ["亲子友好", "免费停车场", "含早餐"],
+    "location_info": {
+      "formatted_address": "北京市朝阳区阜通东大街6号",
       "country": "中国",
       "province": "北京市",
       "city": "北京市",
       "district": "朝阳区",
-      "street": "建国路",
-      "street_number": "88号"
-    },
-    "star_rating": 4,
-    "room_prices": [
-      {
-        "room_type": "大床房",
-        "price": 299.00
-      },
-      {
-        "room_type": "双床房",
-        "price": 329.00
-      },
-      {
-        "room_type": "套房",
-        "price": 599.00
-      }
-    ],
-    "opening_date": "2020-01-01",
-    "nearby_info": "距离地铁站500米，周边有商场、餐厅",
-    "promotion_scenario": "节日优惠"
+      "street": "阜通东大街",
+      "number": "6号",
+      "location": "116.482086,39.990496"
+    }
   }'
 ```
 
@@ -177,30 +423,110 @@ Authorization: Bearer {token}
 {
   "hotel_name_cn": "易宿酒店",
   "hotel_name_en": "Yisu Hotel",
-  "formatted_address": "北京市朝阳区建国路88号",
-  "address_component": {
+  "star_rating": 4,
+  "description": "易宿酒店位于北京市朝阳区核心地段，交通便利，周边配套设施齐全。酒店拥有舒适的客房和完善的服务设施，是商务出行和休闲旅游的理想选择。",
+  "phone": "010-12345678",
+  "opening_date": "2020-01-01",
+  "nearby_info": "距离地铁站500米，周边有商场、餐厅",
+  "facilities": [
+    {"id": "wifi", "name": "免费WiFi"},
+    {"id": "parking", "name": "免费停车场"},
+    {"id": "air_conditioner", "name": "空调"},
+    {"id": "tv", "name": "电视"},
+    {"id": "breakfast", "name": "早餐"},
+    {"id": "gym", "name": "健身房"}
+  ],
+  "services": [
+    {"id": "reception", "name": "24小时前台"},
+    {"id": "luggage", "name": "行李寄存"},
+    {"id": "laundry", "name": "洗衣服务"},
+    {"id": "taxi", "name": "叫车服务"},
+    {"id": "concierge", "name": "concierge服务"}
+  ],
+  "policies": {
+    "cancellation": "入住前24小时可免费取消",
+    "payment": "支持现金、信用卡、移动支付",
+    "children": "12岁以下儿童可免费入住",
+    "pets": "不允许携带宠物"
+  },
+  "room_prices": {
+    "大床房": {
+      "bed_type": "king",
+      "area": 35,
+      "description": "豪华大床房，配备舒适的大床，适合情侣或独自出行。房间宽敞明亮，装修现代，设施齐全。",
+      "facilities": [
+        {"id": "free_wifi", "name": "免费WiFi"},
+        {"id": "air_conditioner", "name": "空调"},
+        {"id": "tv", "name": "平板电视"},
+        {"id": "minibar", "name": "迷你吧"},
+        {"id": "bathtub", "name": "浴缸"},
+        {"id": "workdesk", "name": "办公桌"}
+      ],
+      "room_image_url": "https://example.com/room1.jpg",
+      "policies": {
+        "cancellation": "入住前48小时可免费取消",
+        "payment": "支持现金、信用卡、移动支付",
+        "children": "12岁以下儿童可免费入住",
+        "pets": "不允许携带宠物"
+      },
+      "tags": ["受欢迎", "豪华", "性价比高"],
+      "services": [
+        {"id": "airport_transfer", "name": "机场接送服务"},
+        {"id": "laundry", "name": "洗衣服务"},
+        {"id": "room_service", "name": "24小时客房服务"}
+      ],
+      "prices": {
+        "2026-02-01": 299.00,
+        "2026-02-02": 299.00,
+        "2026-02-03": 399.00
+      }
+    },
+    "双床房": {
+      "bed_type": "twin",
+      "area": 40,
+      "description": "舒适双床房，配备两张单人床，适合朋友或商务出行。房间布局合理，采光良好。",
+      "facilities": [
+        {"id": "free_wifi", "name": "免费WiFi"},
+        {"id": "air_conditioner", "name": "空调"},
+        {"id": "tv", "name": "平板电视"},
+        {"id": "minibar", "name": "迷你吧"},
+        {"id": "workdesk", "name": "办公桌"}
+      ],
+      "room_image_url": "https://example.com/room2.jpg",
+      "policies": {
+        "cancellation": "入住前48小时可免费取消",
+        "payment": "支持现金、信用卡、移动支付",
+        "children": "12岁以下儿童可免费入住",
+        "pets": "不允许携带宠物"
+      },
+      "tags": ["舒适", "商务"],
+      "services": [
+        {"id": "laundry", "name": "洗衣服务"},
+        {"id": "room_service", "name": "24小时客房服务"}
+      ],
+      "prices": {
+        "2026-02-01": 329.00,
+        "2026-02-02": 329.00,
+        "2026-02-03": 429.00
+      }
+    }
+  },
+  "main_image_url": [
+    "https://example.com/hotel1.jpg",
+    "https://example.com/hotel2.jpg",
+    "https://example.com/hotel3.jpg"
+  ],
+  "tags": ["亲子友好", "免费停车场", "含早餐"],
+  "location_info": {
+    "formatted_address": "北京市朝阳区阜通东大街6号",
     "country": "中国",
     "province": "北京市",
     "city": "北京市",
     "district": "朝阳区",
-    "street": "建国路",
-    "street_number": "88号"
-  },
-  "star_rating": 4,
-  "main_image_url": "https://example.com/hotel1.jpg",
-  "room_prices": [
-    {
-      "room_type": "大床房",
-      "price": 299.00,
-      "room_image_url": "https://example.com/room1.jpg"
-    },
-    {
-      "room_type": "双床房",
-      "price": 329.00,
-      "room_image_url": "https://example.com/room2.jpg"
-    }
-  ],
-  "opening_date": "2020-01-01"
+    "street": "阜通东大街",
+    "number": "6号",
+    "location": "116.482086,39.990496"
+  }
 }
 ```
 
@@ -209,17 +535,53 @@ Authorization: Bearer {token}
 |--------|------|------|------|
 | hotel_name_cn | string | 否 | 酒店中文名称 |
 | hotel_name_en | string | 否 | 酒店英文名称 |
-| formatted_address | string | 否 | 完整地址 |
-| address_component | object | 否 | 地址组件 |
 | star_rating | int | 否 | 酒店星级（1-5星） |
-| main_image_url | string | 否 | 酒店主图片URL |
-| room_prices | array | 否 | 房型价格列表 |
-| room_prices[].room_type | string | 否 | 房型名称 |
-| room_prices[].price | number | 否 | 房型价格（保留2位小数） |
-| room_prices[].room_image_url | string | 否 | 房型图片URL |
+| description | string | 否 | 酒店描述 |
+| phone | string | 否 | 酒店联系电话 |
 | opening_date | string | 否 | 开业时间（格式：YYYY-MM-DD） |
-| nearby_info | string | 否 | 周边信息 |
-| promotion_scenario | string | 否 | 优惠场景 |
+| nearby_info | string | 否 | 周边信息（景点、交通等） |
+| facilities | array | 否 | 设施列表 |
+| facilities[].id | string | 否 | 设施ID |
+| facilities[].name | string | 否 | 设施名称 |
+| services | array | 否 | 服务列表 |
+| services[].id | string | 否 | 服务ID |
+| services[].name | string | 否 | 服务名称 |
+| policies | object | 否 | 政策信息 |
+| policies.cancellation | string | 否 | 取消政策 |
+| policies.payment | string | 否 | 支付政策 |
+| policies.children | string | 否 | 儿童政策 |
+| policies.pets | string | 否 | 宠物政策 |
+| room_prices | object | 否 | 房型价格列表 |
+| room_prices.{房型名称} | object | 否 | 房型信息 |
+| room_prices.{房型名称}.bed_type | string | 否 | 床型：king（大床）、twin（双床）、queen（中床） |
+| room_prices.{房型名称}.area | number | 否 | 房间面积（平方米） |
+| room_prices.{房型名称}.description | string | 否 | 房间描述 |
+| room_prices.{房型名称}.facilities | array | 否 | 房间设施列表 |
+| room_prices.{房型名称}.facilities[].id | string | 否 | 设施ID |
+| room_prices.{房型名称}.facilities[].name | string | 否 | 设施名称 |
+| room_prices.{房型名称}.room_image_url | string | 否 | 房型图片URL |
+| room_prices.{房型名称}.policies | object | 否 | 房间政策信息 |
+| room_prices.{房型名称}.policies.cancellation | string | 否 | 取消政策 |
+| room_prices.{房型名称}.policies.payment | string | 否 | 支付政策 |
+| room_prices.{房型名称}.policies.children | string | 否 | 儿童政策 |
+| room_prices.{房型名称}.policies.pets | string | 否 | 宠物政策 |
+| room_prices.{房型名称}.tags | array | 否 | 房间标签 |
+| room_prices.{房型名称}.services | array | 否 | 房间服务列表 |
+| room_prices.{房型名称}.services[].id | string | 否 | 服务ID |
+| room_prices.{房型名称}.services[].name | string | 否 | 服务名称 |
+| room_prices.{房型名称}.prices | object | 否 | 每日价格（日期-价格映射） |
+| room_prices.{房型名称}.prices.{日期} | number | 否 | 指定日期的价格（保留2位小数） |
+| main_image_url | array | 否 | 酒店主图片URL列表 |
+| tags | array | 否 | 酒店标签（如：亲子友好、免费停车场、含早餐） |
+| location_info | object | 否 | 位置信息 |
+| location_info.formatted_address | string | 否 | 格式化地址 |
+| location_info.country | string | 否 | 国家 |
+| location_info.province | string | 否 | 省份 |
+| location_info.city | string | 否 | 城市 |
+| location_info.district | string | 否 | 区 |
+| location_info.street | string | 否 | 街道 |
+| location_info.number | string | 否 | 门牌号 |
+| location_info.location | string | 否 | 经纬度坐标 |
 
 **响应示例:**
 ```json
@@ -257,27 +619,60 @@ curl -X POST "http://localhost:{PORT}/hotel/draft" \
   -d '{
     "hotel_name_cn": "易宿酒店",
     "hotel_name_en": "Yisu Hotel",
-    "formatted_address": "北京市朝阳区建国路88号",
-    "address_component": {
+    "star_rating": 4,
+    "description": "易宿酒店位于北京市朝阳区核心地段，交通便利，周边配套设施齐全。酒店拥有舒适的客房和完善的服务设施，是商务出行和休闲旅游的理想选择。",
+    "phone": "010-12345678",
+    "opening_date": "2020-01-01",
+    "nearby_info": "距离地铁站500米，周边有商场、餐厅",
+    "facilities": [
+      {"id": "wifi", "name": "免费WiFi"},
+      {"id": "parking", "name": "免费停车场"},
+      {"id": "air_conditioner", "name": "空调"},
+      {"id": "tv", "name": "电视"},
+      {"id": "breakfast", "name": "早餐"},
+      {"id": "gym", "name": "健身房"}
+    ],
+    "services": [
+      {"id": "reception", "name": "24小时前台"},
+      {"id": "luggage", "name": "行李寄存"},
+      {"id": "laundry", "name": "洗衣服务"},
+      {"id": "taxi", "name": "叫车服务"},
+      {"id": "concierge", "name": "concierge服务"}
+    ],
+    "policies": {
+      "cancellation": "入住前24小时可免费取消",
+      "payment": "支持现金、信用卡、移动支付",
+      "children": "12岁以下儿童可免费入住",
+      "pets": "不允许携带宠物"
+    },
+    "room_prices": [
+      {
+        "room_type": "大床房",
+        "price": 299.00,
+        "total_price": 299.00
+      },
+      {
+        "room_type": "双床房",
+        "price": 329.00,
+        "total_price": 329.00
+      }
+    ],
+    "main_image_url": [
+      "https://example.com/hotel1.jpg",
+      "https://example.com/hotel2.jpg",
+      "https://example.com/hotel3.jpg"
+    ],
+    "tags": ["亲子友好", "免费停车场", "含早餐"],
+    "location_info": {
+      "formatted_address": "北京市朝阳区阜通东大街6号",
       "country": "中国",
       "province": "北京市",
       "city": "北京市",
       "district": "朝阳区",
-      "street": "建国路",
-      "street_number": "88号"
-    },
-    "star_rating": 4,
-    "room_prices": [
-      {
-        "room_type": "大床房",
-        "price": 299.00
-      },
-      {
-        "room_type": "双床房",
-        "price": 329.00
-      }
-    ],
-    "opening_date": "2020-01-01"
+      "street": "阜通东大街",
+      "number": "6号",
+      "location": "116.482086,39.990496"
+    }
   }'
 ```
 
@@ -316,23 +711,19 @@ Authorization: Bearer {token}
         "hotel_id": "550e8400-e29b-41d4-a716-446655440001",
         "hotel_name_cn": "易宿酒店",
         "hotel_name_en": "Yisu Hotel",
-        "formatted_address": "北京市朝阳区建国路88号",
         "star_rating": 4,
-        "main_image_url": "https://example.com/hotel1.jpg",
-        "room_prices": [
-          {
-            "room_type": "大床房",
-            "price": 299.00,
-            "room_image_url": "https://example.com/room1.jpg"
-          },
-          {
-            "room_type": "双床房",
-            "price": 329.00,
-            "room_image_url": "https://example.com/room2.jpg"
-          }
+        "main_image_url": [
+          "https://example.com/hotel1.jpg",
+          "https://example.com/hotel2.jpg",
+          "https://example.com/hotel3.jpg"
         ],
+        "tags": ["亲子友好", "免费停车场", "含早餐"],
+        "location_info": {
+          "formatted_address": "北京市朝阳区阜通东大街6号",
+          "city": "北京市",
+          "district": "朝阳区"
+        },
         "status": "approved",
-        "created_by": "550e8400-e29b-41d4-a716-446655440000",
         "created_at": "2026-02-01T10:00:00.000Z",
         "updated_at": "2026-02-03T15:30:00.000Z"
       }
@@ -351,15 +742,14 @@ Authorization: Bearer {token}
 | list[].hotel_id | string | 酒店ID |
 | list[].hotel_name_cn | string | 酒店中文名称 |
 | list[].hotel_name_en | string | 酒店英文名称 |
-| list[].formatted_address | string | 完整地址 |
 | list[].star_rating | int | 酒店星级 |
-| list[].main_image_url | string | 酒店主图片URL |
-| list[].room_prices | array | 房型价格列表 |
-| list[].room_prices[].room_type | string | 房型名称 |
-| list[].room_prices[].price | number | 房型价格 |
-| list[].room_prices[].room_image_url | string | 房型图片URL |
-| list[].status | string | 状态 |
-| list[].created_by | string | 创建人ID |
+| list[].main_image_url | array | 酒店主图片URL列表 |
+| list[].tags | array | 酒店标签 |
+| list[].location_info | object | 位置信息 |
+| list[].location_info.formatted_address | string | 格式化地址 |
+| list[].location_info.city | string | 城市 |
+| list[].location_info.district | string | 区 |
+| list[].status | string | 状态：draft（草稿）、pending（待审核）、approved（已通过）、rejected（已拒绝） |
 | list[].created_at | string | 创建时间 |
 | list[].updated_at | string | 更新时间 |
 
@@ -402,37 +792,143 @@ Authorization: Bearer {token}
     "hotel_id": "550e8400-e29b-41d4-a716-446655440001",
     "hotel_name_cn": "易宿酒店",
     "hotel_name_en": "Yisu Hotel",
-    "formatted_address": "北京市朝阳区建国路88号",
-    "address_component": {
+    "star_rating": 4,
+    "description": "易宿酒店位于北京市朝阳区核心地段，交通便利，周边配套设施齐全。酒店拥有舒适的客房和完善的服务设施，是商务出行和休闲旅游的理想选择。",
+    "phone": "010-12345678",
+    "opening_date": "2020-01-01",
+    "nearby_info": "距离地铁站500米，周边有商场、餐厅",
+    "facilities": [
+      {"id": "wifi", "name": "免费WiFi"},
+      {"id": "parking", "name": "免费停车场"},
+      {"id": "air_conditioner", "name": "空调"},
+      {"id": "tv", "name": "电视"},
+      {"id": "breakfast", "name": "早餐"},
+      {"id": "gym", "name": "健身房"}
+    ],
+    "services": [
+      {"id": "reception", "name": "24小时前台"},
+      {"id": "luggage", "name": "行李寄存"},
+      {"id": "laundry", "name": "洗衣服务"},
+      {"id": "taxi", "name": "叫车服务"},
+      {"id": "concierge", "name": "concierge服务"}
+    ],
+    "policies": {
+      "cancellation": "入住前24小时可免费取消",
+      "payment": "支持现金、信用卡、移动支付",
+      "children": "12岁以下儿童可免费入住",
+      "pets": "不允许携带宠物"
+    },
+    "room_prices": {
+      "大床房": {
+        "bed_type": "king",
+        "area": 35,
+        "description": "豪华大床房，配备舒适的大床，适合情侣或独自出行。房间宽敞明亮，装修现代，设施齐全。",
+        "facilities": [
+          {"id": "free_wifi", "name": "免费WiFi"},
+          {"id": "air_conditioner", "name": "空调"},
+          {"id": "tv", "name": "平板电视"},
+          {"id": "minibar", "name": "迷你吧"},
+          {"id": "bathtub", "name": "浴缸"},
+          {"id": "workdesk", "name": "办公桌"}
+        ],
+        "room_image_url": "https://example.com/room1.jpg",
+        "policies": {
+          "cancellation": "入住前48小时可免费取消",
+          "payment": "支持现金、信用卡、移动支付",
+          "children": "12岁以下儿童可免费入住",
+          "pets": "不允许携带宠物"
+        },
+        "tags": ["受欢迎", "豪华", "性价比高"],
+        "services": [
+          {"id": "airport_transfer", "name": "机场接送服务"},
+          {"id": "laundry", "name": "洗衣服务"},
+          {"id": "room_service", "name": "24小时客房服务"}
+        ],
+        "prices": {
+          "2026-02-01": 299.00,
+          "2026-02-02": 299.00,
+          "2026-02-03": 399.00
+        }
+      },
+      "双床房": {
+        "bed_type": "twin",
+        "area": 40,
+        "description": "舒适双床房，配备两张单人床，适合朋友或商务出行。房间布局合理，采光良好。",
+        "facilities": [
+          {"id": "free_wifi", "name": "免费WiFi"},
+          {"id": "air_conditioner", "name": "空调"},
+          {"id": "tv", "name": "平板电视"},
+          {"id": "minibar", "name": "迷你吧"},
+          {"id": "workdesk", "name": "办公桌"}
+        ],
+        "room_image_url": "https://example.com/room2.jpg",
+        "policies": {
+          "cancellation": "入住前48小时可免费取消",
+          "payment": "支持现金、信用卡、移动支付",
+          "children": "12岁以下儿童可免费入住",
+          "pets": "不允许携带宠物"
+        },
+        "tags": ["舒适", "商务"],
+        "services": [
+          {"id": "laundry", "name": "洗衣服务"},
+          {"id": "room_service", "name": "24小时客房服务"}
+        ],
+        "prices": {
+          "2026-02-01": 329.00,
+          "2026-02-02": 329.00,
+          "2026-02-03": 429.00
+        }
+      },
+      "套房": {
+        "bed_type": "king",
+        "area": 60,
+        "description": "豪华套房，配备独立客厅和卧室，适合家庭或商务接待。空间宽敞，设施豪华。",
+        "facilities": [
+          {"id": "free_wifi", "name": "免费WiFi"},
+          {"id": "air_conditioner", "name": "空调"},
+          {"id": "tv", "name": "平板电视"},
+          {"id": "minibar", "name": "迷你吧"},
+          {"id": "bathtub", "name": "浴缸"},
+          {"id": "workdesk", "name": "办公桌"},
+          {"id": "sofa", "name": "沙发"}
+        ],
+        "room_image_url": "https://example.com/room3.jpg",
+        "policies": {
+          "cancellation": "入住前48小时可免费取消",
+          "payment": "支持现金、信用卡、移动支付",
+          "children": "12岁以下儿童可免费入住",
+          "pets": "不允许携带宠物"
+        },
+        "tags": ["豪华", "家庭", "商务"],
+        "services": [
+          {"id": "airport_transfer", "name": "机场接送服务"},
+          {"id": "laundry", "name": "洗衣服务"},
+          {"id": "room_service", "name": "24小时客房服务"},
+          {"id": "butler", "name": "管家服务"}
+        ],
+        "prices": {
+          "2026-02-01": 599.00,
+          "2026-02-02": 599.00,
+          "2026-02-03": 699.00
+        }
+      }
+    },
+    "main_image_url": [
+      "https://example.com/hotel1.jpg",
+      "https://example.com/hotel2.jpg",
+      "https://example.com/hotel3.jpg"
+    ],
+    "tags": ["亲子友好", "免费停车场", "含早餐"],
+    "location_info": {
+      "formatted_address": "北京市朝阳区阜通东大街6号",
       "country": "中国",
       "province": "北京市",
       "city": "北京市",
       "district": "朝阳区",
-      "street": "建国路",
-      "street_number": "88号"
+      "street": "阜通东大街",
+      "number": "6号",
+      "location": "116.482086,39.990496"
     },
-    "star_rating": 4,
-    "main_image_url": "https://example.com/hotel1.jpg",
-    "room_prices": [
-      {
-        "room_type": "大床房",
-        "price": 299.00,
-        "room_image_url": "https://example.com/room1.jpg"
-      },
-      {
-        "room_type": "双床房",
-        "price": 329.00,
-        "room_image_url": "https://example.com/room2.jpg"
-      },
-      {
-        "room_type": "套房",
-        "price": 599.00,
-        "room_image_url": "https://example.com/room3.jpg"
-      }
-    ],
-    "opening_date": "2020-01-01",
-    "nearby_info": "距离地铁站500米，周边有商场、餐厅",
-    "promotion_scenario": "节日优惠",
     "status": "approved",
     "created_by": "550e8400-e29b-41d4-a716-446655440000",
     "created_at": "2026-02-01T10:00:00.000Z",
@@ -447,17 +943,53 @@ Authorization: Bearer {token}
 | hotel_id | string | 酒店ID |
 | hotel_name_cn | string | 酒店中文名称 |
 | hotel_name_en | string | 酒店英文名称 |
-| formatted_address | string | 完整地址 |
-| address_component | object | 地址组件 |
 | star_rating | int | 酒店星级 |
-| main_image_url | string | 酒店主图片URL |
-| room_prices | array | 房型价格列表 |
-| room_prices[].room_type | string | 房型名称 |
-| room_prices[].price | number | 房型价格 |
-| room_prices[].room_image_url | string | 房型图片URL |
+| description | string | 酒店描述 |
+| phone | string | 酒店联系电话 |
 | opening_date | string | 开业时间 |
 | nearby_info | string | 周边信息 |
-| promotion_scenario | string | 优惠场景 |
+| facilities | array | 设施列表 |
+| facilities[].id | string | 设施ID |
+| facilities[].name | string | 设施名称 |
+| services | array | 服务列表 |
+| services[].id | string | 服务ID |
+| services[].name | string | 服务名称 |
+| policies | object | 政策信息 |
+| policies.cancellation | string | 取消政策 |
+| policies.payment | string | 支付政策 |
+| policies.children | string | 儿童政策 |
+| policies.pets | string | 宠物政策 |
+| room_prices | object | 房型价格列表 |
+| room_prices.{房型名称} | object | 房型信息 |
+| room_prices.{房型名称}.bed_type | string | 床型：king（大床）、twin（双床）、queen（中床） |
+| room_prices.{房型名称}.area | number | 房间面积（平方米） |
+| room_prices.{房型名称}.description | string | 房间描述 |
+| room_prices.{房型名称}.facilities | array | 房间设施列表 |
+| room_prices.{房型名称}.facilities[].id | string | 设施ID |
+| room_prices.{房型名称}.facilities[].name | string | 设施名称 |
+| room_prices.{房型名称}.room_image_url | string | 房型图片URL |
+| room_prices.{房型名称}.policies | object | 房间政策信息 |
+| room_prices.{房型名称}.policies.cancellation | string | 取消政策 |
+| room_prices.{房型名称}.policies.payment | string | 支付政策 |
+| room_prices.{房型名称}.policies.children | string | 儿童政策 |
+| room_prices.{房型名称}.policies.pets | string | 宠物政策 |
+| room_prices.{房型名称}.tags | array | 房间标签 |
+| room_prices.{房型名称}.services | array | 房间服务列表 |
+| room_prices.{房型名称}.services[].id | string | 服务ID |
+| room_prices.{房型名称}.services[].name | string | 服务名称 |
+| room_prices.{房型名称}.prices | object | 每日价格（日期-价格映射） |
+| room_prices.{房型名称}.prices.{日期} | number | 指定日期的价格（保留2位小数） |
+| main_image_url | array | 酒店主图片URL列表 |
+| tags | array | 酒店标签 |
+| location_info | object | 位置信息 |
+| location_info.formatted_address | string | 格式化地址 |
+| location_info.country | string | 国家 |
+| location_info.province | string | 省份 |
+| location_info.city | string | 城市 |
+| location_info.district | string | 区 |
+| location_info.street | string | 街道 |
+| location_info.number | string | 门牌号 |
+| location_info.location | string | 经纬度坐标 |
 | status | string | 状态 |
 | created_by | string | 创建人ID |
 | created_at | string | 创建时间 |
@@ -498,42 +1030,173 @@ Authorization: Bearer {token}
 {
   "hotel_name_cn": "易宿酒店（更新）",
   "hotel_name_en": "Yisu Hotel (Updated)",
-  "formatted_address": "北京市朝阳区建国路100号",
-  "address_component": {
+  "star_rating": 5,
+  "description": "易宿酒店位于北京市朝阳区核心地段，交通便利，周边配套设施齐全。酒店拥有舒适的客房和完善的服务设施，是商务出行和休闲旅游的理想选择。",
+  "phone": "010-12345678",
+  "opening_date": "2020-01-01",
+  "nearby_info": "距离地铁站300米，周边有商场、餐厅、公园",
+  "facilities": [
+    {"id": "wifi", "name": "免费WiFi"},
+    {"id": "parking", "name": "免费停车场"},
+    {"id": "air_conditioner", "name": "空调"},
+    {"id": "tv", "name": "电视"},
+    {"id": "breakfast", "name": "早餐"},
+    {"id": "gym", "name": "健身房"}
+  ],
+  "services": [
+    {"id": "reception", "name": "24小时前台"},
+    {"id": "luggage", "name": "行李寄存"},
+    {"id": "laundry", "name": "洗衣服务"},
+    {"id": "taxi", "name": "叫车服务"},
+    {"id": "concierge", "name": "concierge服务"}
+  ],
+  "policies": {
+    "cancellation": "入住前24小时可免费取消",
+    "payment": "支持现金、信用卡、移动支付",
+    "children": "12岁以下儿童可免费入住",
+    "pets": "不允许携带宠物"
+  },
+  "room_prices": {
+    "大床房": {
+      "bed_type": "king",
+      "area": 35,
+      "description": "豪华大床房，配备舒适的大床，适合情侣或独自出行。房间宽敞明亮，装修现代，设施齐全。",
+      "facilities": [
+        {"id": "free_wifi", "name": "免费WiFi"},
+        {"id": "air_conditioner", "name": "空调"},
+        {"id": "tv", "name": "平板电视"},
+        {"id": "minibar", "name": "迷你吧"},
+        {"id": "bathtub", "name": "浴缸"},
+        {"id": "workdesk", "name": "办公桌"}
+      ],
+      "room_image_url": "https://example.com/room1_updated.jpg",
+      "policies": {
+        "cancellation": "入住前48小时可免费取消",
+        "payment": "支持现金、信用卡、移动支付",
+        "children": "12岁以下儿童可免费入住",
+        "pets": "不允许携带宠物"
+      },
+      "tags": ["受欢迎", "豪华", "性价比高"],
+      "services": [
+        {"id": "airport_transfer", "name": "机场接送服务"},
+        {"id": "laundry", "name": "洗衣服务"},
+        {"id": "room_service", "name": "24小时客房服务"}
+      ],
+      "prices": {
+        "2026-02-01": 399.00,
+        "2026-02-02": 399.00,
+        "2026-02-03": 499.00
+      }
+    },
+    "双床房": {
+      "bed_type": "twin",
+      "area": 40,
+      "description": "舒适双床房，配备两张单人床，适合朋友或商务出行。房间布局合理，采光良好。",
+      "facilities": [
+        {"id": "free_wifi", "name": "免费WiFi"},
+        {"id": "air_conditioner", "name": "空调"},
+        {"id": "tv", "name": "平板电视"},
+        {"id": "minibar", "name": "迷你吧"},
+        {"id": "workdesk", "name": "办公桌"}
+      ],
+      "room_image_url": "https://example.com/room2_updated.jpg",
+      "policies": {
+        "cancellation": "入住前48小时可免费取消",
+        "payment": "支持现金、信用卡、移动支付",
+        "children": "12岁以下儿童可免费入住",
+        "pets": "不允许携带宠物"
+      },
+      "tags": ["舒适", "商务"],
+      "services": [
+        {"id": "laundry", "name": "洗衣服务"},
+        {"id": "room_service", "name": "24小时客房服务"}
+      ],
+      "prices": {
+        "2026-02-01": 429.00,
+        "2026-02-02": 429.00,
+        "2026-02-03": 529.00
+      }
+    },
+    "套房": {
+      "bed_type": "king",
+      "area": 60,
+      "description": "豪华套房，配备独立客厅和卧室，适合家庭或商务接待。空间宽敞，设施豪华。",
+      "facilities": [
+        {"id": "free_wifi", "name": "免费WiFi"},
+        {"id": "air_conditioner", "name": "空调"},
+        {"id": "tv", "name": "平板电视"},
+        {"id": "minibar", "name": "迷你吧"},
+        {"id": "bathtub", "name": "浴缸"},
+        {"id": "workdesk", "name": "办公桌"},
+        {"id": "sofa", "name": "沙发"}
+      ],
+      "room_image_url": "https://example.com/room3_updated.jpg",
+      "policies": {
+        "cancellation": "入住前48小时可免费取消",
+        "payment": "支持现金、信用卡、移动支付",
+        "children": "12岁以下儿童可免费入住",
+        "pets": "不允许携带宠物"
+      },
+      "tags": ["豪华", "家庭", "商务"],
+      "services": [
+        {"id": "airport_transfer", "name": "机场接送服务"},
+        {"id": "laundry", "name": "洗衣服务"},
+        {"id": "room_service", "name": "24小时客房服务"},
+        {"id": "butler", "name": "管家服务"}
+      ],
+      "prices": {
+        "2026-02-01": 699.00,
+        "2026-02-02": 699.00,
+        "2026-02-03": 799.00
+      }
+    },
+    "家庭房": {
+      "bed_type": "family",
+      "area": 50,
+      "description": "温馨家庭房，配备一张大床和一张单人床，适合一家三口入住。房间温馨舒适，设施齐全。",
+      "facilities": [
+        {"id": "free_wifi", "name": "免费WiFi"},
+        {"id": "air_conditioner", "name": "空调"},
+        {"id": "tv", "name": "平板电视"},
+        {"id": "minibar", "name": "迷你吧"},
+        {"id": "bathtub", "name": "浴缸"},
+        {"id": "workdesk", "name": "办公桌"}
+      ],
+      "room_image_url": "https://example.com/room4_updated.jpg",
+      "policies": {
+        "cancellation": "入住前48小时可免费取消",
+        "payment": "支持现金、信用卡、移动支付",
+        "children": "12岁以下儿童可免费入住",
+        "pets": "不允许携带宠物"
+      },
+      "tags": ["家庭", "温馨", "性价比高"],
+      "services": [
+        {"id": "laundry", "name": "洗衣服务"},
+        {"id": "room_service", "name": "24小时客房服务"}
+      ],
+      "prices": {
+        "2026-02-01": 599.00,
+        "2026-02-02": 599.00,
+        "2026-02-03": 699.00
+      }
+    }
+  },
+  "main_image_url": [
+    "https://example.com/hotel1_updated.jpg",
+    "https://example.com/hotel2_updated.jpg",
+    "https://example.com/hotel3_updated.jpg"
+  ],
+  "tags": ["亲子友好", "免费停车场", "含早餐", "商务中心"],
+  "location_info": {
+    "formatted_address": "北京市朝阳区阜通东大街100号",
     "country": "中国",
     "province": "北京市",
     "city": "北京市",
     "district": "朝阳区",
-    "street": "建国路",
-    "street_number": "100号"
-  },
-  "star_rating": 5,
-  "main_image_url": "https://example.com/hotel1_updated.jpg",
-  "room_prices": [
-    {
-      "room_type": "大床房",
-      "price": 399.00,
-      "room_image_url": "https://example.com/room1_updated.jpg"
-    },
-    {
-      "room_type": "双床房",
-      "price": 429.00,
-      "room_image_url": "https://example.com/room2_updated.jpg"
-    },
-    {
-      "room_type": "套房",
-      "price": 699.00,
-      "room_image_url": "https://example.com/room3_updated.jpg"
-    },
-    {
-      "room_type": "家庭房",
-      "price": 599.00,
-      "room_image_url": "https://example.com/room4_updated.jpg"
-    }
-  ],
-  "opening_date": "2020-01-01",
-  "nearby_info": "距离地铁站300米，周边有商场、餐厅、公园",
-  "promotion_scenario": "机票+酒店套餐"
+    "street": "阜通东大街",
+    "number": "100号",
+    "location": "116.482086,39.990496"
+  }
 }
 ```
 
@@ -542,17 +1205,53 @@ Authorization: Bearer {token}
 |--------|------|------|------|
 | hotel_name_cn | string | 否 | 酒店中文名称 |
 | hotel_name_en | string | 否 | 酒店英文名称 |
-| formatted_address | string | 否 | 完整地址 |
-| address_component | object | 否 | 地址组件 |
 | star_rating | int | 否 | 酒店星级（1-5星） |
-| main_image_url | string | 否 | 酒店主图片URL |
-| room_prices | array | 否 | 房型价格列表 |
-| room_prices[].room_type | string | 否 | 房型名称 |
-| room_prices[].price | number | 否 | 房型价格（保留2位小数） |
-| room_prices[].room_image_url | string | 否 | 房型图片URL |
+| description | string | 否 | 酒店描述 |
+| phone | string | 否 | 酒店联系电话 |
 | opening_date | string | 否 | 开业时间（格式：YYYY-MM-DD） |
-| nearby_info | string | 否 | 周边信息 |
-| promotion_scenario | string | 否 | 优惠场景 |
+| nearby_info | string | 否 | 周边信息（景点、交通等） |
+| facilities | array | 否 | 设施列表 |
+| facilities[].id | string | 否 | 设施ID |
+| facilities[].name | string | 否 | 设施名称 |
+| services | array | 否 | 服务列表 |
+| services[].id | string | 否 | 服务ID |
+| services[].name | string | 否 | 服务名称 |
+| policies | object | 否 | 政策信息 |
+| policies.cancellation | string | 否 | 取消政策 |
+| policies.payment | string | 否 | 支付政策 |
+| policies.children | string | 否 | 儿童政策 |
+| policies.pets | string | 否 | 宠物政策 |
+| room_prices | object | 否 | 房型价格列表 |
+| room_prices.{房型名称} | object | 否 | 房型信息 |
+| room_prices.{房型名称}.bed_type | string | 否 | 床型：king（大床）、twin（双床）、queen（中床）、family（家庭） |
+| room_prices.{房型名称}.area | number | 否 | 房间面积（平方米） |
+| room_prices.{房型名称}.description | string | 否 | 房间描述 |
+| room_prices.{房型名称}.facilities | array | 否 | 房间设施列表 |
+| room_prices.{房型名称}.facilities[].id | string | 否 | 设施ID |
+| room_prices.{房型名称}.facilities[].name | string | 否 | 设施名称 |
+| room_prices.{房型名称}.room_image_url | string | 否 | 房型图片URL |
+| room_prices.{房型名称}.policies | object | 否 | 房间政策信息 |
+| room_prices.{房型名称}.policies.cancellation | string | 否 | 取消政策 |
+| room_prices.{房型名称}.policies.payment | string | 否 | 支付政策 |
+| room_prices.{房型名称}.policies.children | string | 否 | 儿童政策 |
+| room_prices.{房型名称}.policies.pets | string | 否 | 宠物政策 |
+| room_prices.{房型名称}.tags | array | 否 | 房间标签 |
+| room_prices.{房型名称}.services | array | 否 | 房间服务列表 |
+| room_prices.{房型名称}.services[].id | string | 否 | 服务ID |
+| room_prices.{房型名称}.services[].name | string | 否 | 服务名称 |
+| room_prices.{房型名称}.prices | object | 否 | 每日价格（日期-价格映射） |
+| room_prices.{房型名称}.prices.{日期} | number | 否 | 指定日期的价格（保留2位小数） |
+| main_image_url | array | 否 | 酒店主图片URL列表 |
+| tags | array | 否 | 酒店标签（如：亲子友好、免费停车场、含早餐） |
+| location_info | object | 否 | 位置信息 |
+| location_info.formatted_address | string | 否 | 格式化地址 |
+| location_info.country | string | 否 | 国家 |
+| location_info.province | string | 否 | 省份 |
+| location_info.city | string | 否 | 城市 |
+| location_info.district | string | 否 | 区 |
+| location_info.street | string | 否 | 街道 |
+| location_info.number | string | 否 | 门牌号 |
+| location_info.location | string | 否 | 经纬度坐标 |
 
 **响应示例:**
 ```json
@@ -592,37 +1291,146 @@ curl -X PUT "http://localhost:{PORT}/hotel/update/550e8400-e29b-41d4-a716-446655
   -d '{
     "hotel_name_cn": "易宿酒店（更新）",
     "hotel_name_en": "Yisu Hotel (Updated)",
-    "formatted_address": "北京市朝阳区建国路100号",
-    "address_component": {
+    "location_info": {
+      "formatted_address": "北京市朝阳区建国路100号",
       "country": "中国",
       "province": "北京市",
       "city": "北京市",
       "district": "朝阳区",
       "street": "建国路",
-      "street_number": "100号"
+      "number": "100号",
+      "location": "116.482086,39.990496"
     },
     "star_rating": 5,
-    "room_prices": [
-      {
-        "room_type": "大床房",
-        "price": 399.00
+    "room_prices": {
+      "大床房": {
+        "bed_type": "king",
+        "area": 35,
+        "description": "豪华大床房，配备舒适的大床，适合情侣或独自出行。房间宽敞明亮，装修现代，设施齐全。",
+        "facilities": [
+          {"id": "free_wifi", "name": "免费WiFi"},
+          {"id": "air_conditioner", "name": "空调"},
+          {"id": "tv", "name": "平板电视"},
+          {"id": "minibar", "name": "迷你吧"},
+          {"id": "bathtub", "name": "浴缸"},
+          {"id": "workdesk", "name": "办公桌"}
+        ],
+        "room_image_url": "https://example.com/room1_updated.jpg",
+        "policies": {
+          "cancellation": "入住前48小时可免费取消",
+          "payment": "支持现金、信用卡、移动支付",
+          "children": "12岁以下儿童可免费入住",
+          "pets": "不允许携带宠物"
+        },
+        "tags": ["受欢迎", "豪华", "性价比高"],
+        "services": [
+          {"id": "airport_transfer", "name": "机场接送服务"},
+          {"id": "laundry", "name": "洗衣服务"},
+          {"id": "room_service", "name": "24小时客房服务"}
+        ],
+        "prices": {
+          "2026-02-01": 399.00,
+          "2026-02-02": 399.00,
+          "2026-02-03": 499.00
+        }
       },
-      {
-        "room_type": "双床房",
-        "price": 429.00
+      "双床房": {
+        "bed_type": "twin",
+        "area": 40,
+        "description": "舒适双床房，配备两张单人床，适合朋友或商务出行。房间布局合理，采光良好。",
+        "facilities": [
+          {"id": "free_wifi", "name": "免费WiFi"},
+          {"id": "air_conditioner", "name": "空调"},
+          {"id": "tv", "name": "平板电视"},
+          {"id": "minibar", "name": "迷你吧"},
+          {"id": "workdesk", "name": "办公桌"}
+        ],
+        "room_image_url": "https://example.com/room2_updated.jpg",
+        "policies": {
+          "cancellation": "入住前48小时可免费取消",
+          "payment": "支持现金、信用卡、移动支付",
+          "children": "12岁以下儿童可免费入住",
+          "pets": "不允许携带宠物"
+        },
+        "tags": ["舒适", "商务"],
+        "services": [
+          {"id": "laundry", "name": "洗衣服务"},
+          {"id": "room_service", "name": "24小时客房服务"}
+        ],
+        "prices": {
+          "2026-02-01": 429.00,
+          "2026-02-02": 429.00,
+          "2026-02-03": 529.00
+        }
       },
-      {
-        "room_type": "套房",
-        "price": 699.00
+      "套房": {
+        "bed_type": "king",
+        "area": 60,
+        "description": "豪华套房，配备独立客厅和卧室，适合家庭或商务接待。空间宽敞，设施豪华。",
+        "facilities": [
+          {"id": "free_wifi", "name": "免费WiFi"},
+          {"id": "air_conditioner", "name": "空调"},
+          {"id": "tv", "name": "平板电视"},
+          {"id": "minibar", "name": "迷你吧"},
+          {"id": "bathtub", "name": "浴缸"},
+          {"id": "workdesk", "name": "办公桌"},
+          {"id": "sofa", "name": "沙发"}
+        ],
+        "room_image_url": "https://example.com/room3_updated.jpg",
+        "policies": {
+          "cancellation": "入住前48小时可免费取消",
+          "payment": "支持现金、信用卡、移动支付",
+          "children": "12岁以下儿童可免费入住",
+          "pets": "不允许携带宠物"
+        },
+        "tags": ["豪华", "家庭", "商务"],
+        "services": [
+          {"id": "airport_transfer", "name": "机场接送服务"},
+          {"id": "laundry", "name": "洗衣服务"},
+          {"id": "room_service", "name": "24小时客房服务"},
+          {"id": "butler", "name": "管家服务"}
+        ],
+        "prices": {
+          "2026-02-01": 699.00,
+          "2026-02-02": 699.00,
+          "2026-02-03": 799.00
+        }
       },
-      {
-        "room_type": "家庭房",
-        "price": 599.00
+      "家庭房": {
+        "bed_type": "family",
+        "area": 50,
+        "description": "温馨家庭房，配备一张大床和一张单人床，适合一家三口入住。房间温馨舒适，设施齐全。",
+        "facilities": [
+          {"id": "free_wifi", "name": "免费WiFi"},
+          {"id": "air_conditioner", "name": "空调"},
+          {"id": "tv", "name": "平板电视"},
+          {"id": "minibar", "name": "迷你吧"},
+          {"id": "bathtub", "name": "浴缸"},
+          {"id": "workdesk", "name": "办公桌"}
+        ],
+        "room_image_url": "https://example.com/room4_updated.jpg",
+        "policies": {
+          "cancellation": "入住前48小时可免费取消",
+          "payment": "支持现金、信用卡、移动支付",
+          "children": "12岁以下儿童可免费入住",
+          "pets": "不允许携带宠物"
+        },
+        "tags": ["家庭", "温馨", "性价比高"],
+        "services": [
+          {"id": "laundry", "name": "洗衣服务"},
+          {"id": "room_service", "name": "24小时客房服务"}
+        ],
+        "prices": {
+          "2026-02-01": 599.00,
+          "2026-02-02": 599.00,
+          "2026-02-03": 699.00
+        }
       }
-    ],
+    },
     "opening_date": "2020-01-01",
     "nearby_info": "距离地铁站300米，周边有商场、餐厅、公园",
-    "promotion_scenario": "机票+酒店套餐"
+    "promotion_scenario": "机票+酒店套餐",
+    "tags": ["亲子友好", "免费停车场", "含早餐", "商务中心"]
   }'
 ```
 
@@ -701,12 +1509,39 @@ Authorization: Bearer {token}
         "modified_at": "2026-02-05T10:00:00.000Z",
         "changes": {
           "star_rating": 5,
-          "room_prices": [
-            {
-              "room_type": "大床房",
-              "price": 399.00
+          "room_prices": {
+            "大床房": {
+              "bed_type": "king",
+              "area": 35,
+              "description": "豪华大床房，配备舒适的大床，适合情侣或独自出行。房间宽敞明亮，装修现代，设施齐全。",
+              "facilities": [
+                {"id": "free_wifi", "name": "免费WiFi"},
+                {"id": "air_conditioner", "name": "空调"},
+                {"id": "tv", "name": "平板电视"},
+                {"id": "minibar", "name": "迷你吧"},
+                {"id": "bathtub", "name": "浴缸"},
+                {"id": "workdesk", "name": "办公桌"}
+              ],
+              "room_image_url": "https://example.com/room1_updated.jpg",
+              "policies": {
+                "cancellation": "入住前48小时可免费取消",
+                "payment": "支持现金、信用卡、移动支付",
+                "children": "12岁以下儿童可免费入住",
+                "pets": "不允许携带宠物"
+              },
+              "tags": ["受欢迎", "豪华", "性价比高"],
+              "services": [
+                {"id": "airport_transfer", "name": "机场接送服务"},
+                {"id": "laundry", "name": "洗衣服务"},
+                {"id": "room_service", "name": "24小时客房服务"}
+              ],
+              "prices": {
+                "2026-02-01": 399.00,
+                "2026-02-02": 399.00,
+                "2026-02-03": 499.00
+              }
             }
-          ]
+          }
         }
       },
       {
@@ -714,20 +1549,101 @@ Authorization: Bearer {token}
         "modified_by": "550e8400-e29b-41d4-a716-446655440001",
         "modified_at": "2026-02-03T15:30:00.000Z",
         "changes": {
-          "room_prices": [
-            {
-              "room_type": "大床房",
-              "price": 299.00
+          "room_prices": {
+            "大床房": {
+              "bed_type": "king",
+              "area": 35,
+              "description": "豪华大床房，配备舒适的大床，适合情侣或独自出行。房间宽敞明亮，装修现代，设施齐全。",
+              "facilities": [
+                {"id": "free_wifi", "name": "免费WiFi"},
+                {"id": "air_conditioner", "name": "空调"},
+                {"id": "tv", "name": "平板电视"},
+                {"id": "minibar", "name": "迷你吧"},
+                {"id": "bathtub", "name": "浴缸"},
+                {"id": "workdesk", "name": "办公桌"}
+              ],
+              "room_image_url": "https://example.com/room1.jpg",
+              "policies": {
+                "cancellation": "入住前48小时可免费取消",
+                "payment": "支持现金、信用卡、移动支付",
+                "children": "12岁以下儿童可免费入住",
+                "pets": "不允许携带宠物"
+              },
+              "tags": ["受欢迎", "豪华", "性价比高"],
+              "services": [
+                {"id": "airport_transfer", "name": "机场接送服务"},
+                {"id": "laundry", "name": "洗衣服务"},
+                {"id": "room_service", "name": "24小时客房服务"}
+              ],
+              "prices": {
+                "2026-02-01": 299.00,
+                "2026-02-02": 299.00,
+                "2026-02-03": 399.00
+              }
             },
-            {
-              "room_type": "双床房",
-              "price": 329.00
+            "双床房": {
+              "bed_type": "twin",
+              "area": 40,
+              "description": "舒适双床房，配备两张单人床，适合朋友或商务出行。房间布局合理，采光良好。",
+              "facilities": [
+                {"id": "free_wifi", "name": "免费WiFi"},
+                {"id": "air_conditioner", "name": "空调"},
+                {"id": "tv", "name": "平板电视"},
+                {"id": "minibar", "name": "迷你吧"},
+                {"id": "workdesk", "name": "办公桌"}
+              ],
+              "room_image_url": "https://example.com/room2.jpg",
+              "policies": {
+                "cancellation": "入住前48小时可免费取消",
+                "payment": "支持现金、信用卡、移动支付",
+                "children": "12岁以下儿童可免费入住",
+                "pets": "不允许携带宠物"
+              },
+              "tags": ["舒适", "商务"],
+              "services": [
+                {"id": "laundry", "name": "洗衣服务"},
+                {"id": "room_service", "name": "24小时客房服务"}
+              ],
+              "prices": {
+                "2026-02-01": 329.00,
+                "2026-02-02": 329.00,
+                "2026-02-03": 429.00
+              }
             },
-            {
-              "room_type": "套房",
-              "price": 599.00
+            "套房": {
+              "bed_type": "king",
+              "area": 60,
+              "description": "豪华套房，配备独立客厅和卧室，适合家庭或商务接待。空间宽敞，设施豪华。",
+              "facilities": [
+                {"id": "free_wifi", "name": "免费WiFi"},
+                {"id": "air_conditioner", "name": "空调"},
+                {"id": "tv", "name": "平板电视"},
+                {"id": "minibar", "name": "迷你吧"},
+                {"id": "bathtub", "name": "浴缸"},
+                {"id": "workdesk", "name": "办公桌"},
+                {"id": "sofa", "name": "沙发"}
+              ],
+              "room_image_url": "https://example.com/room3.jpg",
+              "policies": {
+                "cancellation": "入住前48小时可免费取消",
+                "payment": "支持现金、信用卡、移动支付",
+                "children": "12岁以下儿童可免费入住",
+                "pets": "不允许携带宠物"
+              },
+              "tags": ["豪华", "家庭", "商务"],
+              "services": [
+                {"id": "airport_transfer", "name": "机场接送服务"},
+                {"id": "laundry", "name": "洗衣服务"},
+                {"id": "room_service", "name": "24小时客房服务"},
+                {"id": "butler", "name": "管家服务"}
+              ],
+              "prices": {
+                "2026-02-01": 599.00,
+                "2026-02-02": 599.00,
+                "2026-02-03": 699.00
+              }
             }
-          ]
+          }
         }
       },
       {
@@ -792,18 +1708,13 @@ Authorization: Bearer {token}
   "msg": "查询成功",
   "data": {
     "formatted_address": "北京市朝阳区建国路88号",
-    "address_component": {
-      "country": "中国",
-      "province": "北京市",
-      "city": "北京市",
-      "district": "朝阳区",
-      "street": "建国路",
-      "street_number": "88号"
-    },
-    "location": {
-      "longitude": 116.397428,
-      "latitude": 39.90923
-    }
+    "country": "中国",
+    "province": "北京市",
+    "city": "北京市",
+    "district": "朝阳区",
+    "street": "建国路",
+    "number": "88号",
+    "location": "116.397428,39.90923"
   }
 }
 ```
@@ -812,16 +1723,13 @@ Authorization: Bearer {token}
 | 字段名 | 类型 | 说明 |
 |--------|------|------|
 | formatted_address | string | 完整地址 |
-| address_component | object | 地址组件 |
-| address_component.country | string | 国家 |
-| address_component.province | string | 省份 |
-| address_component.city | string | 城市 |
-| address_component.district | string | 区县 |
-| address_component.street | string | 街道 |
-| address_component.street_number | string | 门牌号 |
-| location | object | 经纬度 |
-| location.longitude | number | 经度 |
-| location.latitude | number | 纬度 |
+| country | string | 国家 |
+| province | string | 省份 |
+| city | string | 城市 |
+| district | string | 区县 |
+| street | string | 街道 |
+| number | string | 门牌号 |
+| location | string | 经纬度（格式：经度,纬度） |
 
 **错误码:**
 | 错误码 | 说明 |
@@ -861,18 +1769,13 @@ Authorization: Bearer {token}
   "msg": "查询成功",
   "data": {
     "formatted_address": "北京市朝阳区建国路88号",
-    "address_component": {
-      "country": "中国",
-      "province": "北京市",
-      "city": "北京市",
-      "district": "朝阳区",
-      "street": "建国路",
-      "street_number": "88号"
-    },
-    "location": {
-      "longitude": 116.397428,
-      "latitude": 39.90923
-    }
+    "country": "中国",
+    "province": "北京市",
+    "city": "北京市",
+    "district": "朝阳区",
+    "street": "建国路",
+    "number": "88号",
+    "location": "116.397428,39.90923"
   }
 }
 ```
@@ -881,16 +1784,13 @@ Authorization: Bearer {token}
 | 字段名 | 类型 | 说明 |
 |--------|------|------|
 | formatted_address | string | 完整地址 |
-| address_component | object | 地址组件 |
-| address_component.country | string | 国家 |
-| address_component.province | string | 省份 |
-| address_component.city | string | 城市 |
-| address_component.district | string | 区县 |
-| address_component.street | string | 街道 |
-| address_component.street_number | string | 门牌号 |
-| location | object | 经纬度 |
-| location.longitude | number | 经度 |
-| location.latitude | number | 纬度 |
+| country | string | 国家 |
+| province | string | 省份 |
+| city | string | 城市 |
+| district | string | 区县 |
+| street | string | 街道 |
+| number | string | 门牌号 |
+| location | string | 经纬度（格式：经度,纬度） |
 
 **错误码:**
 | 错误码 | 说明 |
