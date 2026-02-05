@@ -49,6 +49,7 @@
 | opening_date | DATE | NOT NULL | 开业时间 |
 | nearby_info | TEXT | NULL | 周边信息（景点、交通等） |
 | promotion_scenario | VARCHAR(100) | NULL | 优惠场景 |
+| main_image_url | VARCHAR(500) | NULL | 酒店主图片URL |
 | status | VARCHAR(20) | NOT NULL | 状态：draft（草稿）、pending（待审核）、auditing（审核中）、approved（已通过）、rejected（已拒绝）、published（已发布）、offline（已下线） |
 | created_by | UUID | NOT NULL, FOREIGN KEY (users.id) | 创建人ID |
 | created_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 创建时间 |
@@ -72,6 +73,7 @@
 | hotel_id | UUID | NOT NULL, FOREIGN KEY (hotels.id) | 酒店ID |
 | room_type | VARCHAR(50) | NOT NULL | 房型名称（如：大床房、双床房、套房） |
 | price | DECIMAL(10,2) | NOT NULL | 价格（保留2位小数） |
+| room_image_url | VARCHAR(500) | NULL | 房型图片URL |
 | created_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 创建时间 |
 | updated_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 更新时间 |
 
@@ -150,6 +152,7 @@
 | opening_date | - | 开业时间，格式：YYYY-MM-DD |
 | nearby_info | NULL | 周边信息，多行文本，描述景点、交通等 |
 | promotion_scenario | NULL | 优惠场景，如：节日优惠、机票+酒店套餐 |
+| main_image_url | NULL | 酒店主图片URL |
 | status | 'draft' | 酒店状态，枚举值 |
 | created_by | - | 创建人ID，关联users表 |
 | created_at | NOW() | 酒店创建时间 |
@@ -163,6 +166,7 @@
 | hotel_id | - | 关联的酒店ID |
 | room_type | - | 房型名称，如：大床房、双床房、套房、家庭房 |
 | price | - | 房型价格，DECIMAL类型，保留2位小数 |
+| room_image_url | NULL | 房型图片URL |
 
 ### 3.4 audit_logs 表字段
 
@@ -304,6 +308,7 @@ CREATE TABLE hotels (
   opening_date DATE NOT NULL,
   nearby_info TEXT,
   promotion_scenario VARCHAR(100),
+  main_image_url VARCHAR(500),
   status hotel_status NOT NULL DEFAULT 'draft',
   created_by UUID NOT NULL REFERENCES users(id),
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -316,6 +321,7 @@ CREATE TABLE hotel_prices (
   hotel_id UUID NOT NULL REFERENCES hotels(id) ON DELETE CASCADE,
   room_type VARCHAR(50) NOT NULL,
   price DECIMAL(10,2) NOT NULL,
+  room_image_url VARCHAR(500),
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
   CONSTRAINT uk_hotel_room_type UNIQUE (hotel_id, room_type)
