@@ -85,12 +85,6 @@ node app.js
 node src/tests/pc/auth.test.js
 ```
 
-## 技术栈
-
-- Node.js + Express.js
-- PostgreSQL + Sequelize
-- dotenv + cors
-
 ## 开发日志
 
 ### 2026-02-07
