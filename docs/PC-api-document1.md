@@ -94,7 +94,7 @@ curl -X GET http://localhost:{PORT}/api/test
 
 **接口地址:** `POST /auth/check-account`
 
-**描述:** 校验账号（手机号/邮箱）是否已被注册
+**描述:** 校验账号（手机号）是否已被注册
 
 **请求参数:** 无
 
