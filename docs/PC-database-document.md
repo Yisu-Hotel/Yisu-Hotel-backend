@@ -37,20 +37,16 @@
 | id | UUID | PRIMARY KEY | 酒店ID |
 | hotel_name_cn | VARCHAR(100) | NOT NULL | 酒店中文名称 |
 | hotel_name_en | VARCHAR(100) | NOT NULL | 酒店英文名称 |
-| description | TEXT | NULL | 酒店描述 |
-| phone | VARCHAR(20) | NULL | 酒店联系电话 |
-| formatted_address | VARCHAR(255) | NOT NULL | 完整地址 |
-| address_component | JSONB | NOT NULL | 地址组件（高德地图标准格式） |
-| longitude | DECIMAL(10, 7) | NULL | 经度 |
-| latitude | DECIMAL(10, 7) | NULL | 纬度 |
 | star_rating | INTEGER | NOT NULL, CHECK (star_rating >= 1 AND star_rating <= 5) | 酒店星级（1-5星） |
 | rating | DECIMAL(3, 2) | NULL | 酒店评分（1-5分，保留2位小数） |
 | review_count | INTEGER | NOT NULL, DEFAULT 0 | 评论数 |
+| description | TEXT | NULL | 酒店描述 |
+| phone | VARCHAR(20) | NULL | 酒店联系电话 |
 | opening_date | DATE | NOT NULL | 开业时间 |
 | nearby_info | TEXT | NULL | 周边信息（景点、交通等） |
-| promotion_scenario | VARCHAR(100) | NULL | 优惠场景 |
-| tags | VARCHAR(500) | NULL | 酒店标签（如：亲子友好、免费停车场、含早餐） |
 | main_image_url | JSONB | NULL | 酒店主图片URL数组 |
+| tags | JSONB | NULL | 酒店标签（如：亲子友好、免费停车场、含早餐） |
+| location_info | JSONB | NULL | 位置信息（包含格式化地址、国家、省份、城市、区、街道、门牌号、经纬度坐标） |
 | status | VARCHAR(20) | NOT NULL | 状态：draft（草稿）、pending（待审核）、auditing（审核中）、approved（已通过）、rejected（已拒绝）、published（已发布）、offline（已下线） |
 | created_by | UUID | NOT NULL, FOREIGN KEY (users.id) | 创建人ID |
 | created_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 创建时间 |
@@ -360,19 +356,22 @@
 | id | UUID | PRIMARY KEY | 预订ID |
 | user_id | UUID | NOT NULL, FOREIGN KEY (users.id) ON DELETE CASCADE | 用户ID |
 | hotel_id | UUID | NOT NULL, FOREIGN KEY (hotels.id) ON DELETE CASCADE | 酒店ID |
+| hotel_name | VARCHAR(100) | NULL | 酒店名称 |
 | room_type_id | UUID | NOT NULL, FOREIGN KEY (room_types.id) ON DELETE CASCADE | 房型ID |
-| room_type_name | VARCHAR(50) | NOT NULL | 房型名称 |
+| room_type_name | VARCHAR(50) | NOT NULL | 房型名称（如：大床房、双床房、套房） |
 | check_in_date | DATE | NOT NULL | 入住日期 |
 | check_out_date | DATE | NOT NULL | 离店日期 |
-| total_price | DECIMAL(10,2) | NOT NULL | 总价格 |
+| total_price | DECIMAL(10,2) | NOT NULL | 总价格（保留2位小数） |
 | original_total_price | DECIMAL(10,2) | NULL | 原价 |
 | discount_amount | DECIMAL(10,2) | NULL | 折扣金额 |
+| currency | VARCHAR(10) | NOT NULL, DEFAULT 'CNY' | 货币类型 |
 | status | VARCHAR(20) | NOT NULL | 状态：pending（待支付）、paid（已支付）、completed（已完成）、cancelled（已取消） |
 | contact_name | VARCHAR(50) | NOT NULL | 联系人姓名 |
 | contact_phone | VARCHAR(20) | NOT NULL | 联系人电话 |
 | special_requests | TEXT | NULL | 特殊要求 |
 | booking_token | VARCHAR(100) | NULL | 预订令牌（用于预订确认页） |
 | order_number | VARCHAR(50) | NULL | 订单编号 |
+| location_info | JSONB | NULL | 位置信息（包含格式化地址、国家、省份、城市、区、街道、门牌号、经纬度坐标） |
 | booked_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 预订时间 |
 | paid_at | TIMESTAMP | NULL | 支付时间 |
 
@@ -426,6 +425,7 @@
 | id | UUID | PRIMARY KEY | 用户优惠券ID |
 | user_id | UUID | NOT NULL, FOREIGN KEY (users.id) ON DELETE CASCADE | 用户ID |
 | coupon_id | UUID | NOT NULL, FOREIGN KEY (coupons.id) ON DELETE CASCADE | 优惠券ID |
+| booking_id | UUID | NULL, FOREIGN KEY (bookings.id) ON DELETE SET NULL | 预订ID（使用优惠券时关联） |
 | status | VARCHAR(20) | NOT NULL | 状态：available（可用）、used（已使用）、expired（已过期） |
 | used_at | TIMESTAMP | NULL | 使用时间 |
 | created_at | TIMESTAMP | NOT NULL, DEFAULT NOW() | 领取时间 |
@@ -434,6 +434,7 @@
 - `idx_user_coupons_user_id`: INDEX (user_id)
 - `idx_user_coupons_coupon_id`: INDEX (coupon_id)
 - `idx_user_coupons_status`: INDEX (status)
+- `idx_user_coupons_booking_id`: INDEX (booking_id)
 
 ### 2.21 verification_codes 表
 
