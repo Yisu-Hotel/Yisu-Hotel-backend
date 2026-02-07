@@ -3,19 +3,14 @@ const http = require('http');
 const testCheckAccount = async (phone) => {
   const postData = JSON.stringify({ phone });
 
-  const options = {
-    hostname: 'localhost',
-    port: 5050,
-    path: '/auth/check-account',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(postData)
-    }
-  };
-
   return new Promise((resolve, reject) => {
-    const req = http.request(options, (res) => {
+    const req = http.request({
+      hostname: 'localhost',
+      port: 5050,
+      path: '/auth/check-account',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    }, (res) => {
       let data = '';
       res.on('data', (chunk) => data += chunk);
       res.on('end', () => resolve(JSON.parse(data)));
@@ -36,7 +31,7 @@ const testCheckAccount = async (phone) => {
   for (const { phone, desc } of tests) {
     console.log(`测试手机号: ${phone} (${desc})`);
     const result = await testCheckAccount(phone);
-    console.log('结果:', JSON.stringify(result, null, 2));
+    console.log(JSON.stringify(result, null, 2));
     console.log();
   }
 })();
