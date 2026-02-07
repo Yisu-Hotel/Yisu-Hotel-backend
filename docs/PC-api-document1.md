@@ -254,7 +254,7 @@ curl -X POST "http://localhost:{PORT}/auth/send-code" \
 | token | string | JWT 认证令牌 |
 | user | object | 用户信息 |
 | user.id | string | 用户 ID（UUID） |
-| user.account | string | 账号 |
+| user.account | string | 手机号 |
 | user.role | string | 角色：merchant（商户）、admin（管理员） |
 
 **错误码:**
