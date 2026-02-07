@@ -3,19 +3,14 @@ const http = require('http');
 const testSendCode = async (phone, type) => {
   const postData = JSON.stringify({ phone, type });
 
-  const options = {
-    hostname: 'localhost',
-    port: 5050,
-    path: '/auth/send-code',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(postData)
-    }
-  };
-
   return new Promise((resolve, reject) => {
-    const req = http.request(options, (res) => {
+    const req = http.request({
+      hostname: 'localhost',
+      port: 5050,
+      path: '/auth/send-code',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    }, (res) => {
       let data = '';
       res.on('data', (chunk) => data += chunk);
       res.on('end', () => resolve(JSON.parse(data)));
@@ -36,7 +31,7 @@ const testSendCode = async (phone, type) => {
   for (const { phone, type, desc } of tests) {
     console.log(`测试${desc}: ${phone}`);
     const result = await testSendCode(phone, type);
-    console.log('结果:', JSON.stringify(result, null, 2));
+    console.log(JSON.stringify(result, null, 2));
     console.log();
     await new Promise(resolve => setTimeout(resolve, 2000));
   }

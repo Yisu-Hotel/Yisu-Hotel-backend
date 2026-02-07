@@ -3,19 +3,14 @@ const http = require('http');
 const testRegister = async (phone, password, code, role, agreed) => {
   const postData = JSON.stringify({ phone, password, code, role, agreed });
 
-  const options = {
-    hostname: 'localhost',
-    port: 5050,
-    path: '/auth/register',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(postData)
-    }
-  };
-
   return new Promise((resolve, reject) => {
-    const req = http.request(options, (res) => {
+    const req = http.request({
+      hostname: 'localhost',
+      port: 5050,
+      path: '/auth/register',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    }, (res) => {
       let data = '';
       res.on('data', (chunk) => data += chunk);
       res.on('end', () => resolve(JSON.parse(data)));
@@ -29,19 +24,14 @@ const testRegister = async (phone, password, code, role, agreed) => {
 const testSendCode = async (phone, type) => {
   const postData = JSON.stringify({ phone, type });
 
-  const options = {
-    hostname: 'localhost',
-    port: 5050,
-    path: '/auth/send-code',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(postData)
-    }
-  };
-
   return new Promise((resolve, reject) => {
-    const req = http.request(options, (res) => {
+    const req = http.request({
+      hostname: 'localhost',
+      port: 5050,
+      path: '/auth/send-code',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    }, (res) => {
       let data = '';
       res.on('data', (chunk) => data += chunk);
       res.on('end', () => resolve(JSON.parse(data)));
@@ -61,7 +51,7 @@ const testSendCode = async (phone, type) => {
 
     console.log('发送验证码到:', phone);
     const sendCodeResult = await testSendCode(phone, 'register');
-    console.log('发送验证码结果:', JSON.stringify(sendCodeResult, null, 2));
+    console.log(JSON.stringify(sendCodeResult, null, 2));
 
     if (sendCodeResult.code !== 0) {
       console.log('发送验证码失败:', sendCodeResult.msg);
@@ -90,7 +80,7 @@ const testSendCode = async (phone, type) => {
 
     const result = await testRegister(phone, password, code, role, agreed);
 
-    console.log('结果:', JSON.stringify(result, null, 2));
+    console.log(JSON.stringify(result, null, 2));
 
     if (result.code === 0) {
       console.log('注册成功！');
