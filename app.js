@@ -17,6 +17,10 @@ app.get('/api/test', (req, res) => {
 });
 
 const PORT = process.env.PORT;
+
+const authRoutes = require('./src/routes/pc/auth');
+app.use('/auth', authRoutes);
+
 app.listen(PORT, () => {
   console.log(`🚀 Express服务运行在：http://localhost:${PORT}`);
 });
