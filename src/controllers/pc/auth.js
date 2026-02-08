@@ -193,7 +193,7 @@ const register = async (req, res) => {
  */
 const login = async (req, res) => {
   try {
-    const { phone, password } = req.body;
+    const { phone, password, token_expires_in } = req.body;
 
     const user = await User.findOne({
       where: { phone }
@@ -225,10 +225,16 @@ const login = async (req, res) => {
       });
     }
 
+    let expiresIn = '2h';
+    const expiresInSeconds = Number(token_expires_in);
+    if (Number.isFinite(expiresInSeconds) && expiresInSeconds > 0) {
+      expiresIn = Math.floor(expiresInSeconds);
+    }
+
     const token = jwt.sign(
       { userId: user.id, phone: user.phone, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '2h' }
+      { expiresIn }
     );
 
     await user.update({
