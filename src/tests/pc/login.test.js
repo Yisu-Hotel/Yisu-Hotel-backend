@@ -19,5 +19,5 @@ const req = http.request({
 });
 
 req.on('error', (error) => console.error('请求失败:', error.message));
-req.write(JSON.stringify({ phone: '19883202629', password: '12345678' }));
+req.write(JSON.stringify({ phone: '19883202629', password: '123456' }));
 req.end();
