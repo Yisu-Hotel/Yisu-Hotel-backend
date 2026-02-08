@@ -21,6 +21,12 @@ const PORT = process.env.PORT;
 const authRoutes = require('./src/routes/pc/auth');
 app.use('/auth', authRoutes);
 
+const userRoutes = require('./src/routes/pc/user');
+app.use('/user', userRoutes);
+
+const hotelRoutes = require('./src/routes/pc/hotel');
+app.use('/hotel', hotelRoutes);
+
 app.listen(PORT, () => {
   console.log(`🚀 Express服务运行在：http://localhost:${PORT}`);
 });

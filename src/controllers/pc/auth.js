@@ -1,5 +1,6 @@
 const { User, VerificationCode, UserProfile } = require('../../models');
 const { generateCode } = require('../../utils/code');
+const { generateNickname } = require('../../utils/nickname');
 const AliyunSMS = require('../../utils/sms');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -148,14 +149,22 @@ const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const nickname = generateNickname(role || 'merchant');
+
     const user = await User.create({
       phone,
       password: hashedPassword,
       role: role || 'merchant',
+      nickname: nickname,
       login_count: 0
     });
 
     await verificationCode.update({ used: true });
+
+    await UserProfile.create({
+      user_id: user.id,
+      nickname: nickname
+    });
 
     const token = jwt.sign(
       { userId: user.id, phone: user.phone, role: user.role },
@@ -171,7 +180,8 @@ const register = async (req, res) => {
         user: {
           id: user.id,
           account: user.phone,
-          role: user.role
+          role: user.role,
+          nickname: nickname
         }
       }
     });
