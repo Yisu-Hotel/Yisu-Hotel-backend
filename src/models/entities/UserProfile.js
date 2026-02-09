@@ -20,7 +20,7 @@ const UserProfile = sequelize.define('UserProfile', {
     type: DataTypes.STRING(10),
     allowNull: true,
     validate: {
-      isIn: [['男', '女']]
+      isIn: [['男', '女', '保密']]
     }
   },
   birthday: {
@@ -29,6 +29,10 @@ const UserProfile = sequelize.define('UserProfile', {
   },
   avatar: {
     type: DataTypes.STRING(500),
+    allowNull: true
+  },
+  avatar_base64: {
+    type: DataTypes.TEXT,
     allowNull: true
   }
 }, {
