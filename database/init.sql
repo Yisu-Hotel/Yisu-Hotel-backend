@@ -188,9 +188,10 @@ CREATE INDEX idx_hotel_history_modified_at ON hotel_history(modified_at);
 CREATE TABLE user_profiles (
     user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     nickname VARCHAR(50),
-    gender VARCHAR(10) CHECK (gender IN ('男', '女')),
+    gender VARCHAR(10) CHECK (gender IN ('男', '女', '保密')),
     birthday DATE,
     avatar VARCHAR(500),
+    avatar_base64 TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
