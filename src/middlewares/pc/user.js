@@ -1,9 +1,16 @@
 const jwt = require('jsonwebtoken');
 
+/**
+ * 验证用户 Token 中间件
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @param {Function} next - 下一个中间件函数
+ * @returns {Promise<void>} - 无返回值
+ */
 const authenticateToken = (req, res, next) => {
   try {
     const authHeader = req.headers['authorization'];
-    
+
     if (!authHeader) {
       return res.status(401).json({
         code: 4008,
@@ -34,6 +41,13 @@ const authenticateToken = (req, res, next) => {
   }
 };
 
+/**
+ * 验证更新个人资料参数
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @param {Function} next - 下一个中间件函数
+ * @returns {Promise<void>} - 无返回值
+ */
 const validateUpdateProfile = (req, res, next) => {
   const hasNickname = Object.prototype.hasOwnProperty.call(req.body, 'nickname');
   const hasGender = Object.prototype.hasOwnProperty.call(req.body, 'gender');

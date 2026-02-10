@@ -1,5 +1,13 @@
 const { Op, literal, where } = require('sequelize');
 
+/**
+ * 构建酒店列表查询条件
+ * @param {Object} params - 查询参数
+ * @param {number} [params.userId] - 创建者ID
+ * @param {string} [params.status] - 酒店状态
+ * @param {string} [params.keyword] - 搜索关键字
+ * @returns {Object} - Sequelize where 查询对象
+ */
 const buildHotelListWhere = ({ userId, status, keyword }) => {
   const whereClause = { created_by: userId };
 
@@ -19,6 +27,10 @@ const buildHotelListWhere = ({ userId, status, keyword }) => {
   return whereClause;
 };
 
+/**
+ * 酒店列表查询属性配置
+ * @type {Array<string|Array>}
+ */
 const hotelListAttributes = [
   'id',
   'hotel_name_cn',
@@ -53,6 +65,11 @@ const hotelListAttributes = [
   ]
 ];
 
+/**
+ * 格式化酒店列表数据
+ * @param {Array<Object>} hotels - 原始酒店数据数组
+ * @returns {Array<Object>} - 格式化后的酒店数据数组
+ */
 const formatHotelList = (hotels) => hotels.map((hotel) => ({
   hotel_id: hotel.id,
   hotel_name_cn: hotel.hotel_name_cn,

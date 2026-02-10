@@ -1,59 +1,28 @@
-const { User, UserProfile } = require('../../models');
+const { getProfileService, updateProfileService } = require('../../services/pc/user');
 
+/**
+ * 获取用户个人资料
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @returns {Promise<void>} - 无返回值
+ */
 const getProfile = async (req, res) => {
   try {
     const { userId } = req.user;
-
-    const user = await User.findOne({
-      where: { id: userId }
-    });
-
-    if (!user) {
-      return res.status(404).json({
-        code: 4008,
-        msg: '用户不存在',
-        data: null
-      });
-    }
-
-    const profile = await UserProfile.findOne({
-      where: { user_id: userId }
-    });
-
-    const responseData = {
-      id: user.id,
-      account: user.phone,
-      role: user.role,
-      created_at: user.created_at,
-      updated_at: user.updated_at
-    };
-
-    if (profile) {
-      if (profile.nickname) {
-        responseData.nickname = profile.nickname;
-      }
-      if (profile.avatar) {
-        responseData.avatar = profile.avatar;
-      }
-      if (profile.avatar_base64) {
-        responseData.avatar_base64 = profile.avatar_base64;
-      }
-      if (profile.gender) {
-        responseData.gender = profile.gender;
-      }
-      if (profile.birthday) {
-        responseData.birthday = profile.birthday;
-      }
-    } else if (user.nickname) {
-      responseData.nickname = user.nickname;
-    }
-
+    const data = await getProfileService(userId);
     return res.json({
       code: 0,
       msg: '查询成功',
-      data: responseData
+      data
     });
   } catch (error) {
+    if (error.code) {
+      return res.status(error.httpStatus || 400).json({
+        code: error.code,
+        msg: error.message,
+        data: null
+      });
+    }
     console.error('Get profile error:', error);
     return res.status(500).json({
       code: 500,
@@ -63,72 +32,39 @@ const getProfile = async (req, res) => {
   }
 };
 
+/**
+ * 更新用户个人资料
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @returns {Promise<void>} - 无返回值
+ */
 const updateProfile = async (req, res) => {
   try {
     const { userId } = req.user;
-    const user = await User.findOne({
-      where: { id: userId }
-    });
+    const updateData = {};
+    const { nickname, gender, birthday, avatar, avatar_base64 } = req.body;
 
-    if (!user) {
-      return res.status(404).json({
-        code: 4008,
-        msg: '用户不存在',
-        data: null
-      });
-    }
+    if (Object.prototype.hasOwnProperty.call(req.body, 'nickname')) updateData.nickname = nickname;
+    if (Object.prototype.hasOwnProperty.call(req.body, 'gender')) updateData.gender = gender;
+    if (Object.prototype.hasOwnProperty.call(req.body, 'birthday')) updateData.birthday = birthday;
+    if (Object.prototype.hasOwnProperty.call(req.body, 'avatar')) updateData.avatar = avatar;
+    if (Object.prototype.hasOwnProperty.call(req.body, 'avatar_base64')) updateData.avatar_base64 = avatar_base64;
 
-    const profileUpdateData = {};
-    const hasNickname = Object.prototype.hasOwnProperty.call(req.body, 'nickname');
-    const hasGender = Object.prototype.hasOwnProperty.call(req.body, 'gender');
-    const hasBirthday = Object.prototype.hasOwnProperty.call(req.body, 'birthday');
-    const hasAvatar = Object.prototype.hasOwnProperty.call(req.body, 'avatar');
-    const hasAvatarBase64 = Object.prototype.hasOwnProperty.call(req.body, 'avatar_base64');
-
-    if (hasNickname) {
-      profileUpdateData.nickname = req.body.nickname === null ? null : req.body.nickname.trim();
-    }
-    if (hasGender) {
-      profileUpdateData.gender = req.body.gender === null ? null : req.body.gender;
-    }
-    if (hasBirthday) {
-      profileUpdateData.birthday = req.body.birthday === null ? null : req.body.birthday;
-    }
-    if (hasAvatar) {
-      profileUpdateData.avatar = req.body.avatar === null ? null : req.body.avatar.trim();
-    }
-    if (hasAvatarBase64) {
-      profileUpdateData.avatar_base64 = req.body.avatar_base64 === null ? null : req.body.avatar_base64.trim();
-    }
-
-    let profile = await UserProfile.findOne({
-      where: { user_id: userId }
-    });
-
-    if (profile) {
-      profile = await profile.update(profileUpdateData);
-    } else {
-      profile = await UserProfile.create({
-        user_id: userId,
-        ...profileUpdateData
-      });
-    }
-
-    if (hasNickname) {
-      await user.update({
-        nickname: profileUpdateData.nickname
-      });
-    }
+    const data = await updateProfileService(userId, updateData);
 
     return res.json({
       code: 0,
       msg: '更新成功',
-      data: {
-        id: user.id,
-        updated_at: profile.updated_at || user.updated_at
-      }
+      data
     });
   } catch (error) {
+    if (error.code) {
+      return res.status(error.httpStatus || 400).json({
+        code: error.code,
+        msg: error.message,
+        data: null
+      });
+    }
     console.error('Update profile error:', error);
     return res.status(500).json({
       code: 500,

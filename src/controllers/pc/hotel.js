@@ -1,10 +1,49 @@
 const { Hotel } = require('../../models');
-const {
-  buildHotelListWhere,
-  hotelListAttributes,
-  formatHotelList
-} = require('../../utils/hotel');
+const { createHotelService } = require('../../services/pc/hotel');
+const { buildHotelListWhere, hotelListAttributes, formatHotelList } = require('../../utils/hotel');
 
+/**
+ * 创建酒店
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @returns {Promise<void>} - 无返回值
+ */
+const createHotel = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const saveAsDraft = req.body?.save_as_draft === true || req.body?.save_as_draft === 'true' || req.body?.save_as_draft === 1 || req.body?.save_as_draft === '1';
+    const isDraft = req.hotelPayload?.isDraft ?? saveAsDraft;
+    const payload = { ...req.hotelPayload, isDraft, save_as_draft: saveAsDraft };
+    const data = await createHotelService(userId, payload);
+
+    return res.json({
+      code: 0,
+      msg: data.status === 'draft' ? '草稿已保存' : '酒店信息创建成功，等待审核',
+      data
+    });
+  } catch (error) {
+    if (error.code) {
+      return res.status(error.httpStatus || 400).json({
+        code: error.code,
+        msg: error.message,
+        data: null
+      });
+    }
+    console.error('Create hotel error:', error);
+    return res.status(500).json({
+      code: 500,
+      msg: '服务器错误',
+      data: null
+    });
+  }
+};
+
+/**
+ * 获取酒店列表
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @returns {Promise<void>} - 无返回值
+ */
 const getHotelList = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -47,5 +86,6 @@ const getHotelList = async (req, res) => {
 };
 
 module.exports = {
+  createHotel,
   getHotelList
 };

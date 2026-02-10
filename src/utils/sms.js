@@ -5,7 +5,14 @@ const OpenApi = require('@alicloud/openapi-client');
 const Util = require('@alicloud/tea-util');
 const Credential = require('@alicloud/credentials');
 
+/**
+ * 阿里云短信服务工具类
+ */
 class AliyunSMS {
+  /**
+   * 创建阿里云短信客户端
+   * @returns {Dypnsapi20170525.default} - 短信客户端实例
+   */
   static createClient() {
     const credential = new Credential.default({
       type: 'access_key',
@@ -21,6 +28,13 @@ class AliyunSMS {
     return new Dypnsapi20170525.default(config);
   }
 
+  /**
+   * 发送验证码短信
+   * @param {string} phoneNumber - 接收短信的手机号
+   * @param {string} code - 验证码
+   * @returns {Promise<Object>} - 发送结果
+   * @throws {Error} - 发送失败抛出异常
+   */
   static async sendVerifyCode(phoneNumber, code) {
     const client = this.createClient();
     const request = new Dypnsapi20170525.SendSmsVerifyCodeRequest({
