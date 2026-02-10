@@ -1,9 +1,11 @@
-const { User, VerificationCode, UserProfile } = require('../../models');
-const { generateCode } = require('../../utils/code');
-const { generateNickname } = require('../../utils/nickname');
-const AliyunSMS = require('../../utils/sms');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const {
+  checkAccountService,
+  sendCodeService,
+  registerService,
+  loginService,
+  forgotPasswordService,
+  resetPasswordService
+} = require('../../services/pc/auth');
 
 /**
  * 检查账号是否已被注册
@@ -14,26 +16,12 @@ const jwt = require('jsonwebtoken');
 const checkAccount = async (req, res) => {
   try {
     const { phone } = req.body;
-
-    const user = await User.findOne({
-      where: { phone }
-    });
-
-    if (user) {
-      return res.json({
-        code: 0,
-        msg: '该账号已被注册',
-        data: {
-          available: false
-        }
-      });
-    }
-
+    const data = await checkAccountService(phone);
     return res.json({
       code: 0,
-      msg: '账号可用',
+      msg: data.msg,
       data: {
-        available: true
+        available: data.available
       }
     });
   } catch (error) {
@@ -55,47 +43,20 @@ const checkAccount = async (req, res) => {
 const sendCode = async (req, res) => {
   try {
     const { phone, type } = req.body;
-
-    const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
-    const recentCode = await VerificationCode.findOne({
-      where: {
-        phone,
-        type,
-        created_at: {
-          [require('sequelize').Op.gte]: oneMinuteAgo
-        }
-      }
-    });
-
-    if (recentCode) {
-      return res.status(400).json({
-        code: 3002,
-        msg: '验证码发送频率限制（60秒内只能发送一次）',
-        data: null
-      });
-    }
-
-    const code = generateCode(6);
-    const expiresAt = new Date(Date.now() + 60 * 1000);
-
-    await VerificationCode.create({
-      phone,
-      code,
-      type,
-      expires_at: expiresAt,
-      used: false
-    });
-
-    await AliyunSMS.sendVerifyCode(phone, code);
-
+    const data = await sendCodeService(phone, type);
     return res.json({
       code: 0,
       msg: '验证码已发送',
-      data: {
-        expires_in: 60
-      }
+      data
     });
   } catch (error) {
+    if (error.code) {
+      return res.status(error.httpStatus || 400).json({
+        code: error.code,
+        msg: error.message,
+        data: null
+      });
+    }
     console.error('Send code error:', error);
     return res.status(500).json({
       code: 500,
@@ -113,79 +74,21 @@ const sendCode = async (req, res) => {
  */
 const register = async (req, res) => {
   try {
-    const { phone, password, code, role, agreed } = req.body;
-
-    const verificationCode = await VerificationCode.findOne({
-      where: {
-        phone,
-        type: 'register',
-        code,
-        used: false,
-        expires_at: {
-          [require('sequelize').Op.gt]: new Date()
-        }
-      }
-    });
-
-    if (!verificationCode) {
-      return res.status(400).json({
-        code: 3001,
-        msg: '验证码不正确或已过期',
-        data: null
-      });
-    }
-
-    const existingUser = await User.findOne({
-      where: { phone }
-    });
-
-    if (existingUser) {
-      return res.status(400).json({
-        code: 3001,
-        msg: '该手机号已被注册',
-        data: null
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const nickname = generateNickname(role || 'merchant');
-
-    const user = await User.create({
-      phone,
-      password: hashedPassword,
-      role: role || 'merchant',
-      nickname: nickname,
-      login_count: 0
-    });
-
-    await verificationCode.update({ used: true });
-
-    await UserProfile.create({
-      user_id: user.id,
-      nickname: nickname
-    });
-
-    const token = jwt.sign(
-      { userId: user.id, phone: user.phone, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '2h' }
-    );
-
+    const { phone, password, code, role } = req.body;
+    const data = await registerService({ phone, password, code, role });
     return res.json({
       code: 0,
       msg: '注册成功',
-      data: {
-        token,
-        user: {
-          id: user.id,
-          account: user.phone,
-          role: user.role,
-          nickname: nickname
-        }
-      }
+      data
     });
   } catch (error) {
+    if (error.code) {
+      return res.status(error.httpStatus || 400).json({
+        code: error.code,
+        msg: error.message,
+        data: null
+      });
+    }
     console.error('Register error:', error);
     return res.status(500).json({
       code: 500,
@@ -204,79 +107,20 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { phone, password, token_expires_in } = req.body;
-
-    const user = await User.findOne({
-      where: { phone }
-    });
-
-    if (!user) {
-      return res.status(400).json({
-        code: 3007,
-        msg: '手机号不存在',
-        data: null
-      });
-    }
-
-    if (!user.password) {
-      return res.status(400).json({
-        code: 3008,
-        msg: '密码错误',
-        data: null
-      });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res.status(400).json({
-        code: 3008,
-        msg: '密码错误',
-        data: null
-      });
-    }
-
-    let expiresIn = '2h';
-    const expiresInSeconds = Number(token_expires_in);
-    if (Number.isFinite(expiresInSeconds) && expiresInSeconds > 0) {
-      expiresIn = Math.floor(expiresInSeconds);
-    }
-
-    const token = jwt.sign(
-      { userId: user.id, phone: user.phone, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn }
-    );
-
-    await user.update({
-      last_login_at: new Date(),
-      login_count: user.login_count + 1
-    });
-
-    const profile = await UserProfile.findOne({
-      where: { user_id: user.id }
-    });
-
-    const responseData = {
-      token,
-      user: {
-        id: user.id,
-        account: user.phone,
-        role: user.role
-      }
-    };
-
-    if (profile) {
-      responseData.user.profile = {
-        nickname: profile.nickname
-      };
-    }
-
+    const data = await loginService(phone, password, token_expires_in);
     return res.json({
       code: 0,
       msg: '登录成功',
-      data: responseData
+      data
     });
   } catch (error) {
+    if (error.code) {
+      return res.status(error.httpStatus || 400).json({
+        code: error.code,
+        msg: error.message,
+        data: null
+      });
+    }
     console.error('Login error:', error);
     return res.status(500).json({
       code: 500,
@@ -295,59 +139,20 @@ const login = async (req, res) => {
 const forgotPassword = async (req, res) => {
   try {
     const { phone } = req.body;
-
-    const user = await User.findOne({
-      where: { phone }
-    });
-
-    if (!user) {
-      return res.status(400).json({
-        code: 3007,
-        msg: '手机号不存在',
-        data: null
-      });
-    }
-
-    const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
-    const recentCode = await VerificationCode.findOne({
-      where: {
-        phone,
-        type: 'reset',
-        created_at: {
-          [require('sequelize').Op.gte]: oneMinuteAgo
-        }
-      }
-    });
-
-    if (recentCode) {
-      return res.status(400).json({
-        code: 3002,
-        msg: '验证码发送频率限制（60秒内只能发送一次）',
-        data: null
-      });
-    }
-
-    const code = generateCode(6);
-    const expiresAt = new Date(Date.now() + 60 * 1000);
-
-    await VerificationCode.create({
-      phone,
-      code,
-      type: 'reset',
-      expires_at: expiresAt,
-      used: false
-    });
-
-    await AliyunSMS.sendVerifyCode(phone, code);
-
+    const data = await forgotPasswordService(phone);
     return res.json({
       code: 0,
       msg: '验证码已发送',
-      data: {
-        expires_in: 60
-      }
+      data
     });
   } catch (error) {
+    if (error.code) {
+      return res.status(error.httpStatus || 400).json({
+        code: error.code,
+        msg: error.message,
+        data: null
+      });
+    }
     console.error('Forgot password error:', error);
     return res.status(500).json({
       code: 500,
@@ -366,51 +171,20 @@ const forgotPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   try {
     const { phone, code, new_password } = req.body;
-
-    const user = await User.findOne({
-      where: { phone }
-    });
-
-    if (!user) {
-      return res.status(400).json({
-        code: 3007,
-        msg: '手机号不存在',
-        data: null
-      });
-    }
-
-    const verificationCode = await VerificationCode.findOne({
-      where: {
-        phone,
-        type: 'reset',
-        code,
-        used: false,
-        expires_at: {
-          [require('sequelize').Op.gt]: new Date()
-        }
-      }
-    });
-
-    if (!verificationCode) {
-      return res.status(400).json({
-        code: 3003,
-        msg: '验证码错误或已过期',
-        data: null
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(new_password, 10);
-
-    await user.update({ password: hashedPassword });
-
-    await verificationCode.update({ used: true });
-
+    await resetPasswordService(phone, code, new_password);
     return res.json({
       code: 0,
       msg: '密码重置成功',
       data: null
     });
   } catch (error) {
+    if (error.code) {
+      return res.status(error.httpStatus || 400).json({
+        code: error.code,
+        msg: error.message,
+        data: null
+      });
+    }
     console.error('Reset password error:', error);
     return res.status(500).json({
       code: 500,
