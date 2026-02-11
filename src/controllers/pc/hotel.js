@@ -1,5 +1,5 @@
 const { Hotel } = require('../../models');
-const { createHotelService } = require('../../services/pc/hotel');
+const { createHotelService, getHotelDetailService, deleteHotelService } = require('../../services/pc/hotel');
 const { buildHotelListWhere, hotelListAttributes, formatHotelList } = require('../../utils/hotel');
 
 /**
@@ -85,7 +85,70 @@ const getHotelList = async (req, res) => {
   }
 };
 
+/**
+ * 获取酒店详情
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @returns {Promise<void>} - 无返回值
+ */
+const getHotelDetail = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const hotelId = req.hotelId || req.params.id;
+    const data = await getHotelDetailService(userId, hotelId);
+
+    return res.json({
+      code: 0,
+      msg: '查询成功',
+      data
+    });
+  } catch (error) {
+    if (error.code) {
+      return res.status(error.httpStatus || 400).json({
+        code: error.code,
+        msg: error.message,
+        data: null
+      });
+    }
+    console.error('Get hotel detail error:', error);
+    return res.status(500).json({
+      code: 500,
+      msg: '服务器错误',
+      data: null
+    });
+  }
+};
+
+const deleteHotel = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const hotelId = req.hotelId || req.params.id;
+    await deleteHotelService(userId, hotelId);
+    return res.json({
+      code: 0,
+      msg: '删除成功',
+      data: null
+    });
+  } catch (error) {
+    if (error.code) {
+      return res.status(error.httpStatus || 400).json({
+        code: error.code,
+        msg: error.message,
+        data: null
+      });
+    }
+    console.error('Delete hotel error:', error);
+    return res.status(500).json({
+      code: 500,
+      msg: '服务器错误',
+      data: null
+    });
+  }
+};
+
 module.exports = {
   createHotel,
-  getHotelList
+  getHotelList,
+  getHotelDetail,
+  deleteHotel
 };

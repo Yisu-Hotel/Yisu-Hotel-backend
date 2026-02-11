@@ -260,7 +260,7 @@ const validateCreateHotelInput = (req, res, next) => {
         area: areaNumber,
         description: roomDesc || null,
         room_image_url: room_image_url || null,
-        room_image_base64: room_image_base64 || null,
+        room_image_base64: isNonEmptyString(room_image_base64) ? String(room_image_base64).trim() : null,
         facilities: normalizedRoomFacilities,
         services: normalizedRoomServices,
         tags: normalizedRoomTags,
@@ -343,7 +343,9 @@ const validateCreateHotelInput = (req, res, next) => {
   }
   const normalizedTags = Array.isArray(tags) ? tags.filter((t) => isNonEmptyString(t)).map((t) => String(t).trim()) : [];
   const normalizedMainImageUrl = Array.isArray(main_image_url) ? main_image_url.filter((u) => isNonEmptyString(u)).map((u) => String(u).trim()) : [];
-  const normalizedMainImageBase64 = Array.isArray(main_image_base64) ? main_image_base64.filter((b) => isNonEmptyString(b)).map((b) => String(b).trim()) : [];
+  const normalizedMainImageBase64 = Array.isArray(main_image_base64)
+    ? main_image_base64.filter((b) => isNonEmptyString(b)).map((b) => String(b).trim())
+    : (isNonEmptyString(main_image_base64) ? [String(main_image_base64).trim()] : []);
 
   if (!isDraft && policies && (typeof policies !== 'object' || Array.isArray(policies))) {
     return res.status(400).json({
@@ -394,7 +396,50 @@ const validateCreateHotelInput = (req, res, next) => {
   next();
 };
 
+/**
+ * 验证酒店详情参数
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @param {Function} next - 下一个中间件函数
+ * @returns {Promise<void>} - 无返回值
+ */
+const validateHotelDetailParam = (req, res, next) => {
+  const { id } = req.params;
+  const hotelId = isNonEmptyString(id) ? String(id).trim() : '';
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+  if (!hotelId || !uuidRegex.test(hotelId)) {
+    return res.status(400).json({
+      code: 4009,
+      msg: '参数格式不正确',
+      data: null
+    });
+  }
+
+  req.hotelId = hotelId;
+  next();
+};
+
+const validateHotelDeleteParam = (req, res, next) => {
+  const { id } = req.params;
+  const hotelId = isNonEmptyString(id) ? String(id).trim() : '';
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+  if (!hotelId || !uuidRegex.test(hotelId)) {
+    return res.status(400).json({
+      code: 4009,
+      msg: '参数格式不正确',
+      data: null
+    });
+  }
+
+  req.hotelId = hotelId;
+  next();
+};
+
 module.exports = {
   validateHotelListQuery,
-  validateCreateHotelInput
+  validateCreateHotelInput,
+  validateHotelDetailParam,
+  validateHotelDeleteParam
 };
