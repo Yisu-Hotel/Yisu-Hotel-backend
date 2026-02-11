@@ -5,6 +5,9 @@ const {
   sequelize,
   Hotel,
   HotelPolicy,
+  AuditLog,
+  User,
+  UserProfile,
   Facility,
   Service,
   HotelFacility,
@@ -238,6 +241,174 @@ const createHotelService = async (userId, payload) => {
   }
 };
 
+const updateHotelService = async (userId, hotelId, payload) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const hotel = await Hotel.findOne({
+      where: { id: hotelId, created_by: userId },
+      transaction
+    });
+    if (!hotel) {
+      const error = new Error('酒店不存在');
+      error.httpStatus = 404;
+      error.code = 4010;
+      throw error;
+    }
+
+    const isDraft = payload.isDraft === true || payload.save_as_draft === true || payload.save_as_draft === 'true' || payload.save_as_draft === 1 || payload.save_as_draft === '1';
+    const status = isDraft ? 'draft' : 'pending';
+
+    if (!isDraft) {
+      const exists = await Hotel.findOne({
+        where: {
+          id: { [Op.ne]: hotelId },
+          [Op.or]: [
+            { hotel_name_cn: payload.hotel_name_cn },
+            { hotel_name_en: payload.hotel_name_en }
+          ]
+        },
+        transaction
+      });
+      if (exists) {
+        const error = new Error('酒店名称已存在');
+        error.httpStatus = 400;
+        error.code = 4002;
+        throw error;
+      }
+    }
+
+    const mainImageUrls = [
+      ...(Array.isArray(payload.main_image_url) ? payload.main_image_url : payload.main_image_url ? [payload.main_image_url] : []),
+      ...saveBase64Images(payload.main_image_base64, 'hotel', HOTEL_IMAGE_DIR, HOTEL_IMAGE_URL_BASE)
+    ].filter(Boolean);
+
+    await Hotel.update({
+      hotel_name_cn: payload.hotel_name_cn,
+      hotel_name_en: payload.hotel_name_en,
+      star_rating: payload.star_rating,
+      description: payload.description,
+      phone: payload.phone,
+      opening_date: payload.opening_date,
+      nearby_info: payload.nearby_info,
+      main_image_url: mainImageUrls,
+      tags: payload.tags,
+      location_info: payload.location_info,
+      status
+    }, { where: { id: hotelId }, transaction });
+
+    await HotelPolicy.destroy({ where: { hotel_id: hotelId }, transaction });
+    if (payload.policy) {
+      await HotelPolicy.create({
+        hotel_id: hotelId,
+        cancellation_policy: payload.policy.cancellation_policy,
+        payment_policy: payload.policy.payment_policy,
+        children_policy: payload.policy.children_policy,
+        pets_policy: payload.policy.pets_policy
+      }, { transaction });
+    }
+
+    await HotelFacility.destroy({ where: { hotel_id: hotelId }, transaction });
+    for (const f of payload.facilities || []) {
+      await Facility.findOrCreate({
+        where: { id: f.id },
+        defaults: { id: f.id, name: f.name || f.id },
+        transaction
+      });
+      await HotelFacility.findOrCreate({
+        where: { hotel_id: hotelId, facility_id: f.id },
+        defaults: { hotel_id: hotelId, facility_id: f.id },
+        transaction
+      });
+    }
+
+    await HotelService.destroy({ where: { hotel_id: hotelId }, transaction });
+    for (const s of payload.services || []) {
+      await Service.findOrCreate({
+        where: { id: s.id },
+        defaults: { id: s.id, name: s.name || s.id },
+        transaction
+      });
+      await HotelService.findOrCreate({
+        where: { hotel_id: hotelId, service_id: s.id },
+        defaults: { hotel_id: hotelId, service_id: s.id },
+        transaction
+      });
+    }
+
+    await RoomType.destroy({ where: { hotel_id: hotelId }, transaction });
+    for (const rt of payload.room_types || []) {
+      const roomImageUrl = saveBase64Image(rt.room_image_base64, 'room', ROOM_IMAGE_DIR, ROOM_IMAGE_URL_BASE) || rt.room_image_url || null;
+      const roomType = await RoomType.create({
+        hotel_id: hotelId,
+        room_type_name: rt.room_type_name,
+        bed_type: rt.bed_type,
+        area: rt.area,
+        description: rt.description,
+        room_image_url: roomImageUrl
+      }, { transaction });
+
+      if (rt.policy) {
+        await RoomPolicy.create({
+          room_type_id: roomType.id,
+          cancellation_policy: rt.policy.cancellation_policy,
+          payment_policy: rt.policy.payment_policy,
+          children_policy: rt.policy.children_policy,
+          pets_policy: rt.policy.pets_policy
+        }, { transaction });
+      }
+
+      for (const f of rt.facilities || []) {
+        await Facility.findOrCreate({
+          where: { id: f.id },
+          defaults: { id: f.id, name: f.name || f.id },
+          transaction
+        });
+        await RoomFacility.findOrCreate({
+          where: { room_type_id: roomType.id, facility_id: f.id },
+          defaults: { room_type_id: roomType.id, facility_id: f.id },
+          transaction
+        });
+      }
+
+      for (const s of rt.services || []) {
+        await Service.findOrCreate({
+          where: { id: s.id },
+          defaults: { id: s.id, name: s.name || s.id },
+          transaction
+        });
+        await RoomService.findOrCreate({
+          where: { room_type_id: roomType.id, service_id: s.id },
+          defaults: { room_type_id: roomType.id, service_id: s.id },
+          transaction
+        });
+      }
+
+      for (const tagName of rt.tags || []) {
+        await RoomTag.create({
+          room_type_id: roomType.id,
+          tag_name: tagName
+        }, { transaction });
+      }
+
+      for (const priceItem of rt.prices || []) {
+        await RoomPrice.create({
+          room_type_id: roomType.id,
+          price_date: priceItem.price_date,
+          price: priceItem.price
+        }, { transaction });
+      }
+    }
+
+    await transaction.commit();
+    return { hotel_id: hotelId, status };
+  } catch (error) {
+    if (!transaction.finished || transaction.finished !== 'commit') {
+      await transaction.rollback();
+    }
+    throw error;
+  }
+};
+
 /**
  * 获取酒店详情服务
  * @param {string} userId - 当前用户ID
@@ -432,8 +603,40 @@ const deleteHotelService = async (userId, hotelId) => {
   return null;
 };
 
+const getHotelAuditStatusService = async (userId, hotelId) => {
+  const hotel = await Hotel.findByPk(hotelId);
+  if (!hotel) {
+    const error = new Error('酒店不存在');
+    error.httpStatus = 404;
+    error.code = 4010;
+    throw error;
+  }
+  if (String(hotel.created_by) !== String(userId)) {
+    const error = new Error('无权限查看此酒店审核状态');
+    error.httpStatus = 403;
+    error.code = 4011;
+    throw error;
+  }
+
+  const logs = await AuditLog.findAll({
+    where: { hotel_id: hotelId },
+    include: [
+      {
+        model: User,
+        as: 'auditor',
+        include: [{ model: UserProfile, as: 'profile' }]
+      }
+    ],
+    order: [['audited_at', 'DESC'], ['created_at', 'DESC']]
+  });
+
+  return logs;
+};
+
 module.exports = {
   createHotelService,
+  updateHotelService,
   getHotelDetailService,
-  deleteHotelService
+  deleteHotelService,
+  getHotelAuditStatusService
 };

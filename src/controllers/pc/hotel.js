@@ -1,6 +1,6 @@
 const { Hotel } = require('../../models');
-const { createHotelService, getHotelDetailService, deleteHotelService } = require('../../services/pc/hotel');
-const { buildHotelListWhere, hotelListAttributes, formatHotelList } = require('../../utils/hotel');
+const { createHotelService, updateHotelService, getHotelDetailService, deleteHotelService, getHotelAuditStatusService } = require('../../services/pc/hotel');
+const { buildHotelListWhere, hotelListAttributes, formatHotelList, formatAuditLogs } = require('../../utils/hotel');
 
 /**
  * 创建酒店
@@ -30,6 +30,37 @@ const createHotel = async (req, res) => {
       });
     }
     console.error('Create hotel error:', error);
+    return res.status(500).json({
+      code: 500,
+      msg: '服务器错误',
+      data: null
+    });
+  }
+};
+
+const updateHotel = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const hotelId = req.hotelId || req.params.id;
+    const saveAsDraft = req.body?.save_as_draft === true || req.body?.save_as_draft === 'true' || req.body?.save_as_draft === 1 || req.body?.save_as_draft === '1';
+    const isDraft = req.hotelPayload?.isDraft ?? saveAsDraft;
+    const payload = { ...req.hotelPayload, isDraft, save_as_draft: saveAsDraft };
+    const data = await updateHotelService(userId, hotelId, payload);
+
+    return res.json({
+      code: 0,
+      msg: data.status === 'draft' ? '草稿已保存' : '酒店信息更新成功，等待审核',
+      data
+    });
+  } catch (error) {
+    if (error.code) {
+      return res.status(error.httpStatus || 400).json({
+        code: error.code,
+        msg: error.message,
+        data: null
+      });
+    }
+    console.error('Update hotel error:', error);
     return res.status(500).json({
       code: 500,
       msg: '服务器错误',
@@ -119,6 +150,35 @@ const getHotelDetail = async (req, res) => {
   }
 };
 
+const getHotelAuditStatus = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const hotelId = req.hotelId || req.params.id;
+    const logs = await getHotelAuditStatusService(userId, hotelId);
+    const data = formatAuditLogs(logs);
+
+    return res.json({
+      code: 0,
+      msg: '查询成功',
+      data
+    });
+  } catch (error) {
+    if (error.code) {
+      return res.status(error.httpStatus || 400).json({
+        code: error.code,
+        msg: error.message,
+        data: null
+      });
+    }
+    console.error('Get hotel audit status error:', error);
+    return res.status(500).json({
+      code: 500,
+      msg: '服务器错误',
+      data: null
+    });
+  }
+};
+
 const deleteHotel = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -148,7 +208,9 @@ const deleteHotel = async (req, res) => {
 
 module.exports = {
   createHotel,
+  updateHotel,
   getHotelList,
   getHotelDetail,
+  getHotelAuditStatus,
   deleteHotel
 };

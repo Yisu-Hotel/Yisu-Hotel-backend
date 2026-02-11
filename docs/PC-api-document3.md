@@ -20,7 +20,7 @@
 
 **接口地址:** `GET /admin/hotel/audit-list`
 
-**描述:** 分页查询待审核酒店列表（管理员端，返回所有提交审核的酒店）
+**描述:** 分页查询酒店审核列表（管理员端，支持按状态、时间范围与关键词综合筛选）
 
 **请求参数:**
 | 参数名 | 类型 | 必填 | 说明 |
@@ -30,7 +30,7 @@
 | status | string | 否 | 状态筛选：pending（待审核）、auditing（审核中）、approved（已通过）、rejected（已拒绝） |
 | start_date | string | 否 | 开始时间（格式：YYYY-MM-DD） |
 | end_date | string | 否 | 结束时间（格式：YYYY-MM-DD） |
-| keyword | string | 否 | 搜索关键词（酒店名称） |
+| keyword | string | 否 | 搜索关键词（酒店名称/地址） |
 
 **请求头:**
 ```
@@ -54,7 +54,12 @@ Authorization: Bearer {token}
         "submitted_at": "2026-02-05T10:00:00.000Z",
         "submitted_by": "550e8400-e29b-41d4-a716-446655440000",
         "status": "pending",
-        "status_text": "待审核"
+        "status_text": "待审核",
+        "location_info": {
+          "formatted_address": "北京市朝阳区建国路88号",
+          "city": "北京市",
+          "district": "朝阳区"
+        }
       },
       {
         "hotel_id": "550e8400-e29b-41d4-a716-446655440002",
@@ -64,6 +69,11 @@ Authorization: Bearer {token}
         "submitted_by": "550e8400-e29b-41d4-a716-446655440001",
         "status": "approved",
         "status_text": "已通过",
+        "location_info": {
+          "formatted_address": "北京市朝阳区酒仙桥路99号",
+          "city": "北京市",
+          "district": "朝阳区"
+        },
         "audited_at": "2026-02-05T09:00:00.000Z",
         "audited_by": "550e8400-e29b-41d4-a716-446655440001"
       },
@@ -75,6 +85,11 @@ Authorization: Bearer {token}
         "submitted_by": "550e8400-e29b-41d4-a716-446655440002",
         "status": "rejected",
         "status_text": "已拒绝",
+        "location_info": {
+          "formatted_address": "北京市海淀区中关村大街1号",
+          "city": "北京市",
+          "district": "海淀区"
+        },
         "audited_at": "2026-02-04T10:00:00.000Z",
         "audited_by": "550e8400-e29b-41d4-a716-446655440001",
         "reject_reason": "酒店信息不完整，请补充周边信息"
@@ -98,6 +113,7 @@ Authorization: Bearer {token}
 | list[].submitted_by | string | 提交人ID |
 | list[].status | string | 状态：pending（待审核）、auditing（审核中）、approved（已通过）、rejected（已拒绝） |
 | list[].status_text | string | 状态文本 |
+| list[].location_info | object | 酒店位置信息 |
 | list[].audited_at | string | 审核时间（已审核时返回） |
 | list[].audited_by | string | 审核人ID（已审核时返回） |
 | list[].reject_reason | string | 拒绝原因（被拒绝时返回） |

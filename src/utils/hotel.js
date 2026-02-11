@@ -27,6 +27,38 @@ const buildHotelListWhere = ({ userId, status, keyword }) => {
   return whereClause;
 };
 
+const buildAdminHotelFilterWhere = ({ status, keyword, startDate, endDate }) => {
+  const whereClause = {};
+
+  if (status) {
+    whereClause.status = status;
+  }
+
+  if (startDate || endDate) {
+    whereClause.created_at = {};
+    if (startDate) {
+      whereClause.created_at[Op.gte] = new Date(`${startDate}T00:00:00.000Z`);
+    }
+    if (endDate) {
+      whereClause.created_at[Op.lte] = new Date(`${endDate}T23:59:59.999Z`);
+    }
+  }
+
+  if (keyword) {
+    const likeKeyword = `%${keyword}%`;
+    whereClause[Op.or] = [
+      { hotel_name_cn: { [Op.iLike]: likeKeyword } },
+      { hotel_name_en: { [Op.iLike]: likeKeyword } },
+      where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: likeKeyword }),
+      where(literal(`"Hotel"."location_info"->>'city'`), { [Op.iLike]: likeKeyword }),
+      where(literal(`"Hotel"."location_info"->>'district'`), { [Op.iLike]: likeKeyword }),
+      where(literal(`"Hotel"."location_info"->>'street'`), { [Op.iLike]: likeKeyword })
+    ];
+  }
+
+  return whereClause;
+};
+
 /**
  * 酒店列表查询属性配置
  * @type {Array<string|Array>}
@@ -92,8 +124,46 @@ const formatHotelList = (hotels) => hotels.map((hotel) => ({
   updated_at: hotel.updated_at
 }));
 
+const getAuditStatusText = (status) => {
+  if (status === 'draft') return '草稿';
+  if (status === 'pending') return '待审核';
+  if (status === 'auditing') return '审核中';
+  if (status === 'approved') return '已通过';
+  if (status === 'rejected') return '已拒绝';
+  if (status === 'published') return '已发布';
+  if (status === 'offline') return '已下线';
+  return '';
+};
+
+const getAuditorName = (auditor) => {
+  if (!auditor) return null;
+  if (auditor.profile && auditor.profile.nickname) return auditor.profile.nickname;
+  if (auditor.nickname) return auditor.nickname;
+  if (auditor.phone) return auditor.phone;
+  return auditor.id || null;
+};
+
+const formatAuditLogs = (logs) => (logs || []).map((log) => {
+  const status = log.result || log.status || '';
+  const auditedBy = getAuditorName(log.auditor) || log.auditor_id || null;
+  const item = {
+    hotel_id: log.hotel_id,
+    status,
+    status_text: getAuditStatusText(status),
+    submitted_at: log.created_at || null
+  };
+  if (log.audited_at) item.audited_at = log.audited_at;
+  if (auditedBy) item.audited_by = auditedBy;
+  if (log.reject_reason) item.reject_reason = log.reject_reason;
+  return item;
+});
+
 module.exports = {
   buildHotelListWhere,
+  buildAdminHotelFilterWhere,
   hotelListAttributes,
-  formatHotelList
+  formatHotelList,
+  getAuditStatusText,
+  formatAuditLogs,
+  getAuditorName
 };
