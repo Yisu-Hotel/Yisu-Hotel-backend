@@ -1,4 +1,6 @@
 const { Op } = require('sequelize');
+const fs = require('fs');
+const path = require('path');
 const {
   sequelize,
   Hotel,
@@ -14,6 +16,53 @@ const {
   RoomTag,
   RoomPolicy
 } = require('../../models');
+
+const ROOM_IMAGE_DIR = 'd:\\Yisu\\Yisu-Hotel-PC\\public\\room_image';
+const ROOM_IMAGE_URL_BASE = 'http://localhost:3000/room_image';
+const HOTEL_IMAGE_DIR = 'd:\\Yisu\\Yisu-Hotel-PC\\public\\main_image';
+const HOTEL_IMAGE_URL_BASE = 'http://localhost:3000/main_image';
+
+const ensureImageDir = (dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+};
+
+const parseBase64Image = (base64) => {
+  const dataUrlMatch = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/.exec(base64 || '');
+  if (dataUrlMatch) {
+    const mime = dataUrlMatch[1];
+    const data = dataUrlMatch[2];
+    const extension = mime.split('/')[1] || 'png';
+    return { buffer: Buffer.from(data, 'base64'), extension };
+  }
+  return { buffer: Buffer.from(base64, 'base64'), extension: 'png' };
+};
+
+const saveBase64Image = (base64, prefix, dir, urlBase) => {
+  if (!base64 || typeof base64 !== 'string') {
+    return null;
+  }
+  try {
+    ensureImageDir(dir);
+    const { buffer, extension } = parseBase64Image(base64);
+    const safeExtension = extension.replace(/[^a-zA-Z0-9]/g, '') || 'png';
+    const filename = `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}.${safeExtension}`;
+    const filePath = path.join(dir, filename);
+    fs.writeFileSync(filePath, buffer);
+    return `${urlBase}/${filename}`;
+  } catch (error) {
+    return null;
+  }
+};
+
+const saveBase64Images = (images, prefix, dir, urlBase) => {
+  if (!Array.isArray(images)) {
+    const single = saveBase64Image(images, prefix, dir, urlBase);
+    return single ? [single] : [];
+  }
+  return images.map((item) => saveBase64Image(item, prefix, dir, urlBase)).filter(Boolean);
+};
 
 /**
  * 创建酒店服务
@@ -50,6 +99,11 @@ const createHotelService = async (userId, payload) => {
       }
     }
 
+    const mainImageUrls = [
+      ...(Array.isArray(payload.main_image_url) ? payload.main_image_url : payload.main_image_url ? [payload.main_image_url] : []),
+      ...saveBase64Images(payload.main_image_base64, 'hotel', HOTEL_IMAGE_DIR, HOTEL_IMAGE_URL_BASE)
+    ].filter(Boolean);
+
     // 创建酒店基本信息
     const hotel = await Hotel.create({
       hotel_name_cn: payload.hotel_name_cn,
@@ -59,8 +113,7 @@ const createHotelService = async (userId, payload) => {
       phone: payload.phone,
       opening_date: payload.opening_date,
       nearby_info: payload.nearby_info,
-      main_image_url: payload.main_image_url,
-      main_image_base64: payload.main_image_base64,
+      main_image_url: mainImageUrls,
       tags: payload.tags,
       location_info: payload.location_info,
       status,
@@ -108,14 +161,14 @@ const createHotelService = async (userId, payload) => {
 
     // 处理房型信息
     for (const rt of payload.room_types || []) {
+      const roomImageUrl = saveBase64Image(rt.room_image_base64, 'room', ROOM_IMAGE_DIR, ROOM_IMAGE_URL_BASE) || rt.room_image_url || null;
       const roomType = await RoomType.create({
         hotel_id: hotel.id,
         room_type_name: rt.room_type_name,
         bed_type: rt.bed_type,
         area: rt.area,
         description: rt.description,
-        room_image_url: rt.room_image_url,
-        room_image_base64: rt.room_image_base64
+        room_image_url: roomImageUrl
       }, { transaction });
 
       // 房型政策
@@ -185,6 +238,202 @@ const createHotelService = async (userId, payload) => {
   }
 };
 
+/**
+ * 获取酒店详情服务
+ * @param {string} userId - 当前用户ID
+ * @param {string} hotelId - 酒店ID
+ * @returns {Promise<Object>} - 酒店详情
+ */
+const getHotelDetailService = async (userId, hotelId) => {
+  const hotel = await Hotel.findOne({
+    where: {
+      id: hotelId,
+      created_by: userId
+    },
+    include: [
+      { model: HotelPolicy, as: 'policy', required: false },
+      {
+        model: HotelFacility,
+        as: 'hotelFacilities',
+        required: false,
+        include: [{ model: Facility, as: 'facility', required: false }]
+      },
+      {
+        model: HotelService,
+        as: 'hotelServices',
+        required: false,
+        include: [{ model: Service, as: 'service', required: false }]
+      },
+      {
+        model: RoomType,
+        as: 'roomTypes',
+        required: false,
+        include: [
+          {
+            model: RoomFacility,
+            as: 'roomFacilities',
+            required: false,
+            include: [{ model: Facility, as: 'facility', required: false }]
+          },
+          {
+            model: RoomService,
+            as: 'roomServices',
+            required: false,
+            include: [{ model: Service, as: 'service', required: false }]
+          },
+          { model: RoomPrice, as: 'roomPrices', required: false },
+          { model: RoomTag, as: 'roomTags', required: false },
+          { model: RoomPolicy, as: 'policy', required: false }
+        ]
+      }
+    ],
+    order: [
+      ['created_at', 'DESC'],
+      [{ model: RoomType, as: 'roomTypes' }, 'created_at', 'ASC'],
+      [{ model: RoomType, as: 'roomTypes' }, { model: RoomPrice, as: 'roomPrices' }, 'price_date', 'ASC']
+    ]
+  });
+
+  if (!hotel) {
+    const error = new Error('酒店不存在');
+    error.httpStatus = 404;
+    error.code = 4010;
+    throw error;
+  }
+
+  const facilities = (hotel.hotelFacilities || [])
+    .map((item) => {
+      if (item.facility) {
+        return { id: item.facility.id, name: item.facility.name };
+      }
+      if (item.facility_id) {
+        return { id: item.facility_id, name: item.facility_id };
+      }
+      return null;
+    })
+    .filter(Boolean);
+
+  const services = (hotel.hotelServices || [])
+    .map((item) => {
+      if (item.service) {
+        return { id: item.service.id, name: item.service.name };
+      }
+      if (item.service_id) {
+        return { id: item.service_id, name: item.service_id };
+      }
+      return null;
+    })
+    .filter(Boolean);
+
+  const roomPrices = {};
+  for (const roomType of hotel.roomTypes || []) {
+    const roomFacilities = (roomType.roomFacilities || [])
+      .map((item) => {
+        if (item.facility) {
+          return { id: item.facility.id, name: item.facility.name };
+        }
+        if (item.facility_id) {
+          return { id: item.facility_id, name: item.facility_id };
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    const roomServices = (roomType.roomServices || [])
+      .map((item) => {
+        if (item.service) {
+          return { id: item.service.id, name: item.service.name };
+        }
+        if (item.service_id) {
+          return { id: item.service_id, name: item.service_id };
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    const roomTags = (roomType.roomTags || []).map((tag) => tag.tag_name);
+    const prices = {};
+    for (const priceItem of roomType.roomPrices || []) {
+      prices[priceItem.price_date] = Number(priceItem.price);
+    }
+
+    const roomPolicy = roomType.policy ? {
+      cancellation: roomType.policy.cancellation_policy,
+      payment: roomType.policy.payment_policy,
+      children: roomType.policy.children_policy,
+      pets: roomType.policy.pets_policy
+    } : null;
+
+    roomPrices[roomType.room_type_name] = {
+      bed_type: roomType.bed_type,
+      area: roomType.area,
+      description: roomType.description,
+      facilities: roomFacilities,
+      room_image_url: roomType.room_image_url,
+      policies: roomPolicy,
+      tags: roomTags,
+      services: roomServices,
+      prices
+    };
+  }
+
+  const policies = hotel.policy ? {
+    cancellation: hotel.policy.cancellation_policy,
+    payment: hotel.policy.payment_policy,
+    children: hotel.policy.children_policy,
+    pets: hotel.policy.pets_policy
+  } : null;
+
+  return {
+    hotel_id: hotel.id,
+    hotel_name_cn: hotel.hotel_name_cn,
+    hotel_name_en: hotel.hotel_name_en,
+    star_rating: hotel.star_rating,
+    description: hotel.description,
+    phone: hotel.phone,
+    opening_date: hotel.opening_date,
+    nearby_info: hotel.nearby_info,
+    facilities,
+    services,
+    policies,
+    room_prices: roomPrices,
+    main_image_url: hotel.main_image_url || [],
+    tags: hotel.tags || [],
+    location_info: hotel.location_info || null,
+    status: hotel.status,
+    created_by: hotel.created_by,
+    created_at: hotel.created_at,
+    updated_at: hotel.updated_at
+  };
+};
+
+const deleteHotelService = async (userId, hotelId) => {
+  const hotel = await Hotel.findByPk(hotelId);
+  if (!hotel) {
+    const error = new Error('酒店不存在');
+    error.httpStatus = 404;
+    error.code = 4010;
+    throw error;
+  }
+  if (String(hotel.created_by) !== String(userId)) {
+    const error = new Error('无权限删除此酒店');
+    error.httpStatus = 403;
+    error.code = 4011;
+    throw error;
+  }
+  const deletableStatuses = ['draft', 'rejected'];
+  if (!deletableStatuses.includes(hotel.status)) {
+    const error = new Error('酒店状态不允许删除');
+    error.httpStatus = 400;
+    error.code = 4012;
+    throw error;
+  }
+  await Hotel.destroy({ where: { id: hotelId } });
+  return null;
+};
+
 module.exports = {
-  createHotelService
+  createHotelService,
+  getHotelDetailService,
+  deleteHotelService
 };

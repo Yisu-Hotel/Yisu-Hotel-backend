@@ -59,10 +59,25 @@ const buildPayload = () => {
     nearby_info: '距离地铁站500米',
     facilities: [
       { id: 'wifi', name: '免费WiFi' },
-      { id: 'parking', name: '免费停车场' }
+      { id: 'parking', name: '免费停车场' },
+      { id: 'air_conditioner', name: '空调' },
+      { id: 'tv', name: '电视' },
+      { id: 'breakfast', name: '早餐' },
+      { id: 'gym', name: '健身房' },
+      { id: 'pool', name: '游泳池' },
+      { id: 'restaurant', name: '餐厅' },
+      { id: 'spa', name: 'SPA' },
+      { id: 'laundry', name: '洗衣房' }
     ],
     services: [
-      { id: 'reception', name: '24小时前台' }
+      { id: 'reception', name: '24小时前台' },
+      { id: 'luggage', name: '行李寄存' },
+      { id: 'laundry', name: '洗衣服务' },
+      { id: 'taxi', name: '叫车服务' },
+      { id: 'concierge', name: '礼宾服务' },
+      { id: 'room_service', name: '24小时客房服务' },
+      { id: 'airport_transfer', name: '机场接送' },
+      { id: 'butler', name: '管家服务' }
     ],
     policies: {
       cancellation: '入住前24小时可免费取消',
@@ -77,22 +92,112 @@ const buildPayload = () => {
         description: '豪华大床房',
         facilities: [
           { id: 'free_wifi', name: '免费WiFi' },
-          { id: 'air_conditioner', name: '空调' }
+          { id: 'air_conditioner', name: '空调' },
+          { id: 'tv', name: '平板电视' },
+          { id: 'minibar', name: '迷你吧' },
+          { id: 'workdesk', name: '办公桌' }
         ],
         room_image_base64: base64Image,
         services: [
-          { id: 'room_service', name: '24小时客房服务' }
+          { id: 'room_service', name: '24小时客房服务' },
+          { id: 'laundry', name: '洗衣服务' }
         ],
         prices: {
           '2026-02-01': 299.00,
           '2026-02-02': 299.00
         }
+      },
+      双床房: {
+        bed_type: 'twin',
+        area: 40,
+        description: '舒适双床房',
+        facilities: [
+          { id: 'free_wifi', name: '免费WiFi' },
+          { id: 'air_conditioner', name: '空调' },
+          { id: 'tv', name: '平板电视' },
+          { id: 'minibar', name: '迷你吧' },
+          { id: 'workdesk', name: '办公桌' }
+        ],
+        room_image_base64: base64Image,
+        services: [
+          { id: 'room_service', name: '24小时客房服务' },
+          { id: 'laundry', name: '洗衣服务' }
+        ],
+        prices: {
+          '2026-02-01': 329.00,
+          '2026-02-02': 329.00
+        }
+      },
+      套房: {
+        bed_type: 'king',
+        area: 60,
+        description: '豪华套房',
+        facilities: [
+          { id: 'free_wifi', name: '免费WiFi' },
+          { id: 'air_conditioner', name: '空调' },
+          { id: 'tv', name: '平板电视' },
+          { id: 'minibar', name: '迷你吧' },
+          { id: 'bathtub', name: '浴缸' },
+          { id: 'sofa', name: '沙发' }
+        ],
+        room_image_base64: base64Image,
+        services: [
+          { id: 'butler', name: '管家服务' },
+          { id: 'airport_transfer', name: '机场接送' }
+        ],
+        prices: {
+          '2026-02-01': 599.00,
+          '2026-02-02': 599.00
+        }
+      },
+      家庭房: {
+        bed_type: 'queen',
+        area: 50,
+        description: '亲子家庭房',
+        facilities: [
+          { id: 'free_wifi', name: '免费WiFi' },
+          { id: 'air_conditioner', name: '空调' },
+          { id: 'tv', name: '平板电视' },
+          { id: 'kids_bath', name: '儿童洗护用品' },
+          { id: 'sofa', name: '沙发' }
+        ],
+        room_image_base64: base64Image,
+        services: [
+          { id: 'room_service', name: '24小时客房服务' },
+          { id: 'luggage', name: '行李寄存' }
+        ],
+        prices: {
+          '2026-02-01': 429.00,
+          '2026-02-02': 429.00
+        }
+      },
+      影音房: {
+        bed_type: 'king',
+        area: 45,
+        description: '高清影音房',
+        facilities: [
+          { id: 'free_wifi', name: '免费WiFi' },
+          { id: 'air_conditioner', name: '空调' },
+          { id: 'projector', name: '投影仪' },
+          { id: 'sound_system', name: '音响系统' },
+          { id: 'minibar', name: '迷你吧' }
+        ],
+        room_image_base64: base64Image,
+        services: [
+          { id: 'room_service', name: '24小时客房服务' },
+          { id: 'concierge', name: '礼宾服务' }
+        ],
+        prices: {
+          '2026-02-01': 399.00,
+          '2026-02-02': 399.00
+        }
       }
     },
     main_image_url: [
-      'https://example.com/hotel1.jpg'
     ],
     main_image_base64: [
+      base64Image,
+      base64Image,
       base64Image
     ],
     tags: ['亲子友好', '含早餐'],
