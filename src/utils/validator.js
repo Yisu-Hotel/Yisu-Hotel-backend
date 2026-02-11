@@ -62,11 +62,19 @@ const toDecimal2 = (value) => {
   return Math.round(Number(value) * 100) / 100;
 };
 
+const isValidUuid = (value) => {
+  if (typeof value !== 'string') {
+    return false;
+  }
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value.trim());
+};
+
 module.exports = {
   validatePhone,
   isNonEmptyString,
   isValidDateYYYYMMDD,
   isValidStarRating,
   isValidLocationInfo,
-  toDecimal2
+  toDecimal2,
+  isValidUuid
 };

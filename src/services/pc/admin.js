@@ -1,5 +1,6 @@
 const { Hotel, AuditLog } = require('../../models');
 const { buildAdminHotelFilterWhere, getAuditStatusText } = require('../../utils/hotel');
+const { getHotelDetailByAdminService } = require('./hotel');
 
 const adminHotelAttributes = [
   'id',
@@ -75,5 +76,6 @@ const getAdminHotelAuditListService = async ({ status, startDate, endDate, keywo
 };
 
 module.exports = {
-  getAdminHotelAuditListService
+  getAdminHotelAuditListService,
+  getAdminHotelDetailService: getHotelDetailByAdminService
 };

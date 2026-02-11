@@ -409,18 +409,9 @@ const updateHotelService = async (userId, hotelId, payload) => {
   }
 };
 
-/**
- * 获取酒店详情服务
- * @param {string} userId - 当前用户ID
- * @param {string} hotelId - 酒店ID
- * @returns {Promise<Object>} - 酒店详情
- */
-const getHotelDetailService = async (userId, hotelId) => {
+const getHotelDetailByWhere = async (whereClause) => {
   const hotel = await Hotel.findOne({
-    where: {
-      id: hotelId,
-      created_by: userId
-    },
+    where: whereClause,
     include: [
       { model: HotelPolicy, as: 'policy', required: false },
       {
@@ -578,6 +569,23 @@ const getHotelDetailService = async (userId, hotelId) => {
   };
 };
 
+/**
+ * 获取酒店详情服务
+ * @param {string} userId - 当前用户ID
+ * @param {string} hotelId - 酒店ID
+ * @returns {Promise<Object>} - 酒店详情
+ */
+const getHotelDetailService = async (userId, hotelId) => {
+  return getHotelDetailByWhere({
+    id: hotelId,
+    created_by: userId
+  });
+};
+
+const getHotelDetailByAdminService = async (hotelId) => {
+  return getHotelDetailByWhere({ id: hotelId });
+};
+
 const deleteHotelService = async (userId, hotelId) => {
   const hotel = await Hotel.findByPk(hotelId);
   if (!hotel) {
@@ -637,6 +645,7 @@ module.exports = {
   createHotelService,
   updateHotelService,
   getHotelDetailService,
+  getHotelDetailByAdminService,
   deleteHotelService,
   getHotelAuditStatusService
 };
