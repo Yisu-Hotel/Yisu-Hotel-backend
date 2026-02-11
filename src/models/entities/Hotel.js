@@ -52,6 +52,10 @@ const Hotel = sequelize.define('Hotel', {
     type: DataTypes.JSONB,
     allowNull: true
   },
+  main_image_base64: {
+    type: DataTypes.JSONB,
+    allowNull: true
+  },
   tags: {
     type: DataTypes.JSONB,
     allowNull: true
