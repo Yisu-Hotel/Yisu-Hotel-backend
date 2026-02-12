@@ -1,4 +1,4 @@
-const { sequelize, Hotel, AuditLog } = require('../../models');
+const { sequelize, Hotel, AuditLog, Message } = require('../../models');
 const { buildAdminHotelFilterWhere, getAuditStatusText } = require('../../utils/hotel');
 const { getHotelDetailByAdminService } = require('./hotel');
 
@@ -80,7 +80,7 @@ const batchAuditHotelsService = async ({ hotelIds, status, auditorId, rejectReas
   try {
     const hotels = await Hotel.findAll({
       where: { id: hotelIds },
-      attributes: ['id'],
+      attributes: ['id', 'hotel_name_cn', 'created_by'],
       transaction,
       raw: true
     });
@@ -110,6 +110,25 @@ const batchAuditHotelsService = async ({ hotelIds, status, auditorId, rejectReas
     }));
 
     await AuditLog.bulkCreate(logs, { transaction });
+
+    const messages = hotels.map((hotel) => {
+      const content = {
+        hotel_id: hotel.id,
+        hotel_name: hotel.hotel_name_cn,
+        status
+      };
+      if (status === 'rejected') {
+        content.reject_reason = rejectReason;
+      }
+      return {
+        user_id: hotel.created_by,
+        sender: 'admin',
+        status: '未读',
+        content
+      };
+    });
+
+    await Message.bulkCreate(messages, { transaction });
 
     await transaction.commit();
 
