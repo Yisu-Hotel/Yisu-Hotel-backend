@@ -1,10 +1,10 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 const { User, VerificationCode, UserProfile } = require('../../models');
 const { generateCode } = require('../../utils/code');
 const { generateNickname } = require('../../utils/nickname');
 const AliyunSMS = require('../../utils/sms');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { Op } = require('sequelize');
 
 /**
  * 检查账号是否已被注册服务

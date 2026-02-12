@@ -1,6 +1,6 @@
-const { Op } = require('sequelize');
 const fs = require('fs');
 const path = require('path');
+const { Op } = require('sequelize');
 const {
   sequelize,
   Hotel,

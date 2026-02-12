@@ -1,5 +1,21 @@
 const { getProfileService, updateProfileService } = require('../../services/pc/user');
 
+const handleError = (res, error, logLabel) => {
+  if (error && error.code) {
+    return res.status(error.httpStatus || 400).json({
+      code: error.code,
+      msg: error.message,
+      data: null
+    });
+  }
+  console.error(logLabel, error);
+  return res.status(500).json({
+    code: 500,
+    msg: '服务器错误',
+    data: null
+  });
+};
+
 /**
  * 获取用户个人资料
  * @param {Object} req - 请求对象
@@ -16,19 +32,7 @@ const getProfile = async (req, res) => {
       data
     });
   } catch (error) {
-    if (error.code) {
-      return res.status(error.httpStatus || 400).json({
-        code: error.code,
-        msg: error.message,
-        data: null
-      });
-    }
-    console.error('Get profile error:', error);
-    return res.status(500).json({
-      code: 500,
-      msg: '服务器错误',
-      data: null
-    });
+    return handleError(res, error, 'Get profile error:');
   }
 };
 
@@ -58,19 +62,7 @@ const updateProfile = async (req, res) => {
       data
     });
   } catch (error) {
-    if (error.code) {
-      return res.status(error.httpStatus || 400).json({
-        code: error.code,
-        msg: error.message,
-        data: null
-      });
-    }
-    console.error('Update profile error:', error);
-    return res.status(500).json({
-      code: 500,
-      msg: '服务器错误',
-      data: null
-    });
+    return handleError(res, error, 'Update profile error:');
   }
 };
 

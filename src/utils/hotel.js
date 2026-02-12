@@ -164,6 +164,6 @@ module.exports = {
   hotelListAttributes,
   formatHotelList,
   getAuditStatusText,
-  formatAuditLogs,
-  getAuditorName
+  getAuditorName,
+  formatAuditLogs
 };
