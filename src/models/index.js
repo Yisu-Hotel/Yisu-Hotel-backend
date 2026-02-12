@@ -25,6 +25,7 @@ const UserThirdPartyAuth = require('./entities/UserThirdPartyAuth');
 const Banner = require('./entities/Banner');
 const City = require('./entities/City');
 const HotelReview = require('./entities/HotelReview');
+const Message = require('./entities/Message');
 
 User.hasOne(UserProfile, { foreignKey: 'user_id', as: 'profile' });
 UserProfile.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
@@ -40,6 +41,9 @@ Booking.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
 User.hasMany(UserCoupon, { foreignKey: 'user_id', as: 'userCoupons' });
 UserCoupon.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+User.hasMany(Message, { foreignKey: 'user_id', as: 'messages' });
+Message.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
 User.hasMany(Hotel, { foreignKey: 'created_by', as: 'createdHotels' });
 Hotel.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
@@ -145,5 +149,6 @@ module.exports = {
   UserThirdPartyAuth,
   Banner,
   City,
-  HotelReview
+  HotelReview,
+  Message
 };

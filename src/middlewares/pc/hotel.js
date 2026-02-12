@@ -3,7 +3,8 @@ const {
   isValidDateYYYYMMDD,
   isValidStarRating,
   isValidLocationInfo,
-  toDecimal2
+  toDecimal2,
+  isValidUuid
 } = require('../../utils/validator');
 
 /**
@@ -406,9 +407,24 @@ const validateCreateHotelInput = (req, res, next) => {
 const validateHotelDetailParam = (req, res, next) => {
   const { id } = req.params;
   const hotelId = isNonEmptyString(id) ? String(id).trim() : '';
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-  if (!hotelId || !uuidRegex.test(hotelId)) {
+  if (!hotelId || !isValidUuid(hotelId)) {
+    return res.status(400).json({
+      code: 4009,
+      msg: '参数格式不正确',
+      data: null
+    });
+  }
+
+  req.hotelId = hotelId;
+  next();
+};
+
+const validateAuditStatusParam = (req, res, next) => {
+  const { id } = req.params;
+  const hotelId = isNonEmptyString(id) ? String(id).trim() : '';
+
+  if (!hotelId || !isValidUuid(hotelId)) {
     return res.status(400).json({
       code: 4009,
       msg: '参数格式不正确',
@@ -423,9 +439,8 @@ const validateHotelDetailParam = (req, res, next) => {
 const validateHotelDeleteParam = (req, res, next) => {
   const { id } = req.params;
   const hotelId = isNonEmptyString(id) ? String(id).trim() : '';
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-  if (!hotelId || !uuidRegex.test(hotelId)) {
+  if (!hotelId || !isValidUuid(hotelId)) {
     return res.status(400).json({
       code: 4009,
       msg: '参数格式不正确',
@@ -441,5 +456,6 @@ module.exports = {
   validateHotelListQuery,
   validateCreateHotelInput,
   validateHotelDetailParam,
+  validateAuditStatusParam,
   validateHotelDeleteParam
 };

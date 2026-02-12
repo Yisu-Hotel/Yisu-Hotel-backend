@@ -87,6 +87,8 @@ const Hotel = sequelize.define('Hotel', {
   indexes: [
     { fields: ['created_by'] },
     { fields: ['status'] },
+    { fields: ['created_at'] },
+    { fields: ['status', 'created_at'] },
     { 
       type: 'FULLTEXT',
       fields: ['hotel_name_cn']

@@ -27,6 +27,9 @@ app.use('/user', userRoutes);
 const hotelRoutes = require('./src/routes/pc/hotel');
 app.use('/hotel', hotelRoutes);
 
+const adminRoutes = require('./src/routes/pc/admin');
+app.use('/admin', adminRoutes);
+
 app.listen(PORT, () => {
   console.log(`🚀 Express服务运行在：http://localhost:${PORT}`);
 });

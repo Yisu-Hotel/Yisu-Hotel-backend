@@ -163,5 +163,28 @@ const validateUpdateProfile = (req, res, next) => {
 
 module.exports = {
   authenticateToken,
-  validateUpdateProfile
+  validateUpdateProfile,
+  validateMessageListQuery: (req, res, next) => {
+    const { page } = req.query;
+    let pageNumber = 1;
+    let sizeNumber = 5;
+
+    if (page !== undefined) {
+      pageNumber = Number(page);
+      if (!Number.isFinite(pageNumber) || pageNumber < 1 || !Number.isInteger(pageNumber)) {
+        return res.status(400).json({
+          code: 4009,
+          msg: '参数格式不正确',
+          data: null
+        });
+      }
+    }
+
+    req.messageQuery = {
+      page: pageNumber,
+      pageSize: sizeNumber
+    };
+
+    next();
+  }
 };
