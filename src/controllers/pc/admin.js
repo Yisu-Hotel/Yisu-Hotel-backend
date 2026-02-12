@@ -1,4 +1,4 @@
-const { getAdminHotelAuditListService, getAdminHotelDetailService } = require('../../services/pc/admin');
+const { getAdminHotelAuditListService, getAdminHotelDetailService, batchAuditHotelsService } = require('../../services/pc/admin');
 
 const getAdminHotelAuditList = async (req, res) => {
   try {
@@ -55,6 +55,38 @@ module.exports = {
         });
       }
       console.error('Get admin hotel detail error:', error);
+      return res.status(500).json({
+        code: 500,
+        msg: '服务器错误',
+        data: null
+      });
+    }
+  },
+  batchAuditHotels: async (req, res) => {
+    try {
+      const { hotelIds, status, rejectReason } = req.adminBatchAudit || {};
+      const auditorId = req.user?.userId;
+      const data = await batchAuditHotelsService({
+        hotelIds,
+        status,
+        auditorId,
+        rejectReason
+      });
+
+      return res.json({
+        code: 0,
+        msg: '审核成功',
+        data
+      });
+    } catch (error) {
+      if (error.code) {
+        return res.status(error.httpStatus || 400).json({
+          code: error.code,
+          msg: error.message,
+          data: null
+        });
+      }
+      console.error('Batch audit error:', error);
       return res.status(500).json({
         code: 500,
         msg: '服务器错误',

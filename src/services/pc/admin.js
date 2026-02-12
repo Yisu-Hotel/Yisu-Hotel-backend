@@ -1,4 +1,4 @@
-const { Hotel, AuditLog } = require('../../models');
+const { sequelize, Hotel, AuditLog } = require('../../models');
 const { buildAdminHotelFilterWhere, getAuditStatusText } = require('../../utils/hotel');
 const { getHotelDetailByAdminService } = require('./hotel');
 
@@ -75,7 +75,59 @@ const getAdminHotelAuditListService = async ({ status, startDate, endDate, keywo
   };
 };
 
+const batchAuditHotelsService = async ({ hotelIds, status, auditorId, rejectReason }) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const hotels = await Hotel.findAll({
+      where: { id: hotelIds },
+      attributes: ['id'],
+      transaction,
+      raw: true
+    });
+
+    if (hotels.length !== hotelIds.length) {
+      const error = new Error('酒店不存在');
+      error.httpStatus = 404;
+      error.code = 4010;
+      throw error;
+    }
+
+    await Hotel.update(
+      { status },
+      {
+        where: { id: hotelIds },
+        transaction
+      }
+    );
+
+    const now = new Date();
+    const logs = hotelIds.map((hotelId) => ({
+      hotel_id: hotelId,
+      auditor_id: auditorId,
+      audited_at: now,
+      result: status,
+      reject_reason: status === 'rejected' ? rejectReason : null
+    }));
+
+    await AuditLog.bulkCreate(logs, { transaction });
+
+    await transaction.commit();
+
+    return {
+      updated: hotelIds.length,
+      hotel_ids: hotelIds,
+      status
+    };
+  } catch (error) {
+    if (!transaction.finished || transaction.finished !== 'commit') {
+      await transaction.rollback();
+    }
+    throw error;
+  }
+};
+
 module.exports = {
   getAdminHotelAuditListService,
-  getAdminHotelDetailService: getHotelDetailByAdminService
+  getAdminHotelDetailService: getHotelDetailByAdminService,
+  batchAuditHotelsService
 };

@@ -1,4 +1,4 @@
-const { isNonEmptyString, isValidDateYYYYMMDD } = require('../../utils/validator');
+const { isNonEmptyString, isValidDateYYYYMMDD, isValidUuid } = require('../../utils/validator');
 
 const requireAdmin = (req, res, next) => {
   if (!req.user || req.user.role !== 'admin') {
@@ -117,5 +117,54 @@ const validateAdminHotelAuditListQuery = (req, res, next) => {
 
 module.exports = {
   requireAdmin,
-  validateAdminHotelAuditListQuery
+  validateAdminHotelAuditListQuery,
+  validateAdminBatchAudit: (req, res, next) => {
+    const { hotel_ids, status, reject_reason } = req.body || {};
+
+    if (!Array.isArray(hotel_ids) || hotel_ids.length === 0) {
+      return res.status(400).json({
+        code: 4009,
+        msg: '参数格式不正确',
+        data: null
+      });
+    }
+
+    const uniqueIds = Array.from(new Set(hotel_ids.map((item) => (typeof item === 'string' ? item.trim() : '')).filter(Boolean)));
+    if (uniqueIds.length === 0 || uniqueIds.some((id) => !isValidUuid(id))) {
+      return res.status(400).json({
+        code: 4009,
+        msg: '参数格式不正确',
+        data: null
+      });
+    }
+
+    const statusValue = isNonEmptyString(status) ? String(status).trim() : '';
+    if (!['approved', 'rejected'].includes(statusValue)) {
+      return res.status(400).json({
+        code: 4009,
+        msg: '参数格式不正确',
+        data: null
+      });
+    }
+
+    let rejectReasonValue = null;
+    if (statusValue === 'rejected') {
+      rejectReasonValue = isNonEmptyString(reject_reason) ? String(reject_reason).trim() : '';
+      if (!rejectReasonValue) {
+        return res.status(400).json({
+          code: 4009,
+          msg: '参数格式不正确',
+          data: null
+        });
+      }
+    }
+
+    req.adminBatchAudit = {
+      hotelIds: uniqueIds,
+      status: statusValue,
+      rejectReason: rejectReasonValue || null
+    };
+
+    next();
+  }
 };

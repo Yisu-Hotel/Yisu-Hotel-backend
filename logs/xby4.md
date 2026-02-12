@@ -75,3 +75,6 @@
 
 ### 删除文件
 - src/middlewares/auth.js - 移至 middlewares/pc/user.js
+
+启动：
+node --max-old-space-size=12288 app.js
