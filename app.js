@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 
 const authRoutes = require('./src/routes/pc/auth');
+const mobileAuthRoutes = require('./src/routes/mobile/auth');
 const userRoutes = require('./src/routes/pc/user');
 const hotelRoutes = require('./src/routes/pc/hotel');
 const adminRoutes = require('./src/routes/pc/admin');
@@ -33,6 +34,7 @@ app.get('/api/test', (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.use('/auth', authRoutes);
+app.use('/mobile/auth', mobileAuthRoutes);
 app.use('/user', userRoutes);
 app.use('/hotel', hotelRoutes);
 app.use('/admin', adminRoutes);
