@@ -2,6 +2,12 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+
+const authRoutes = require('./src/routes/pc/auth');
+const userRoutes = require('./src/routes/pc/user');
+const hotelRoutes = require('./src/routes/pc/hotel');
+const adminRoutes = require('./src/routes/pc/admin');
+
 const app = express();
 
 app.use(cors());
@@ -13,21 +19,22 @@ app.get('/api/status', (req, res) => {
 });
 
 app.get('/api/test', (req, res) => {
-  res.json({code: 200, msg: '前后端连通性测试成功', data: {timestamp: new Date().toISOString(), method: req.method, path: req.path}});
+  res.json({
+    code: 200,
+    msg: '前后端连通性测试成功',
+    data: {
+      timestamp: new Date().toISOString(),
+      method: req.method,
+      path: req.path
+    }
+  });
 });
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
-const authRoutes = require('./src/routes/pc/auth');
 app.use('/auth', authRoutes);
-
-const userRoutes = require('./src/routes/pc/user');
 app.use('/user', userRoutes);
-
-const hotelRoutes = require('./src/routes/pc/hotel');
 app.use('/hotel', hotelRoutes);
-
-const adminRoutes = require('./src/routes/pc/admin');
 app.use('/admin', adminRoutes);
 
 app.listen(PORT, () => {

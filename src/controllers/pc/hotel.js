@@ -2,6 +2,22 @@ const { Hotel } = require('../../models');
 const { createHotelService, updateHotelService, getHotelDetailService, deleteHotelService, getHotelAuditStatusService } = require('../../services/pc/hotel');
 const { buildHotelListWhere, hotelListAttributes, formatHotelList, formatAuditLogs } = require('../../utils/hotel');
 
+const handleError = (res, error, logLabel) => {
+  if (error && error.code) {
+    return res.status(error.httpStatus || 400).json({
+      code: error.code,
+      msg: error.message,
+      data: null
+    });
+  }
+  console.error(logLabel, error);
+  return res.status(500).json({
+    code: 500,
+    msg: '服务器错误',
+    data: null
+  });
+};
+
 /**
  * 创建酒店
  * @param {Object} req - 请求对象
@@ -22,19 +38,7 @@ const createHotel = async (req, res) => {
       data
     });
   } catch (error) {
-    if (error.code) {
-      return res.status(error.httpStatus || 400).json({
-        code: error.code,
-        msg: error.message,
-        data: null
-      });
-    }
-    console.error('Create hotel error:', error);
-    return res.status(500).json({
-      code: 500,
-      msg: '服务器错误',
-      data: null
-    });
+    return handleError(res, error, 'Create hotel error:');
   }
 };
 
@@ -53,19 +57,7 @@ const updateHotel = async (req, res) => {
       data
     });
   } catch (error) {
-    if (error.code) {
-      return res.status(error.httpStatus || 400).json({
-        code: error.code,
-        msg: error.message,
-        data: null
-      });
-    }
-    console.error('Update hotel error:', error);
-    return res.status(500).json({
-      code: 500,
-      msg: '服务器错误',
-      data: null
-    });
+    return handleError(res, error, 'Update hotel error:');
   }
 };
 
@@ -107,12 +99,7 @@ const getHotelList = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get hotel list error:', error);
-    return res.status(500).json({
-      code: 500,
-      msg: '服务器错误',
-      data: null
-    });
+    return handleError(res, error, 'Get hotel list error:');
   }
 };
 
@@ -134,19 +121,7 @@ const getHotelDetail = async (req, res) => {
       data
     });
   } catch (error) {
-    if (error.code) {
-      return res.status(error.httpStatus || 400).json({
-        code: error.code,
-        msg: error.message,
-        data: null
-      });
-    }
-    console.error('Get hotel detail error:', error);
-    return res.status(500).json({
-      code: 500,
-      msg: '服务器错误',
-      data: null
-    });
+    return handleError(res, error, 'Get hotel detail error:');
   }
 };
 
@@ -163,19 +138,7 @@ const getHotelAuditStatus = async (req, res) => {
       data
     });
   } catch (error) {
-    if (error.code) {
-      return res.status(error.httpStatus || 400).json({
-        code: error.code,
-        msg: error.message,
-        data: null
-      });
-    }
-    console.error('Get hotel audit status error:', error);
-    return res.status(500).json({
-      code: 500,
-      msg: '服务器错误',
-      data: null
-    });
+    return handleError(res, error, 'Get hotel audit status error:');
   }
 };
 
@@ -190,19 +153,7 @@ const deleteHotel = async (req, res) => {
       data: null
     });
   } catch (error) {
-    if (error.code) {
-      return res.status(error.httpStatus || 400).json({
-        code: error.code,
-        msg: error.message,
-        data: null
-      });
-    }
-    console.error('Delete hotel error:', error);
-    return res.status(500).json({
-      code: 500,
-      msg: '服务器错误',
-      data: null
-    });
+    return handleError(res, error, 'Delete hotel error:');
   }
 };
 

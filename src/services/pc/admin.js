@@ -1,6 +1,6 @@
 const { sequelize, Hotel, AuditLog, Message } = require('../../models');
 const { buildAdminHotelFilterWhere, getAuditStatusText } = require('../../utils/hotel');
-const { getHotelDetailByAdminService } = require('./hotel');
+const { getHotelDetailByAdminService: getAdminHotelDetailService } = require('./hotel');
 
 const adminHotelAttributes = [
   'id',
@@ -147,6 +147,6 @@ const batchAuditHotelsService = async ({ hotelIds, status, auditorId, rejectReas
 
 module.exports = {
   getAdminHotelAuditListService,
-  getAdminHotelDetailService: getHotelDetailByAdminService,
+  getAdminHotelDetailService,
   batchAuditHotelsService
 };

@@ -4,7 +4,9 @@
   "description": "易宿酒店预订平台后端",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:init": "node database/init-all.js",
+    "db:reset": "node database/reset-all.js"
   },
   "repository": {
     "type": "git",

@@ -7,6 +7,22 @@ const {
   resetPasswordService
 } = require('../../services/pc/auth');
 
+const handleError = (res, error, logLabel) => {
+  if (error && error.code) {
+    return res.status(error.httpStatus || 400).json({
+      code: error.code,
+      msg: error.message,
+      data: null
+    });
+  }
+  console.error(logLabel, error);
+  return res.status(500).json({
+    code: 500,
+    msg: '服务器错误',
+    data: null
+  });
+};
+
 /**
  * 检查账号是否已被注册
  * @param {Object} req - 请求对象
@@ -25,12 +41,7 @@ const checkAccount = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Check account error:', error);
-    return res.status(500).json({
-      code: 500,
-      msg: '服务器错误',
-      data: null
-    });
+    return handleError(res, error, 'Check account error:');
   }
 };
 
@@ -50,19 +61,7 @@ const sendCode = async (req, res) => {
       data
     });
   } catch (error) {
-    if (error.code) {
-      return res.status(error.httpStatus || 400).json({
-        code: error.code,
-        msg: error.message,
-        data: null
-      });
-    }
-    console.error('Send code error:', error);
-    return res.status(500).json({
-      code: 500,
-      msg: '服务器错误',
-      data: null
-    });
+    return handleError(res, error, 'Send code error:');
   }
 };
 
@@ -82,19 +81,7 @@ const register = async (req, res) => {
       data
     });
   } catch (error) {
-    if (error.code) {
-      return res.status(error.httpStatus || 400).json({
-        code: error.code,
-        msg: error.message,
-        data: null
-      });
-    }
-    console.error('Register error:', error);
-    return res.status(500).json({
-      code: 500,
-      msg: '服务器错误',
-      data: null
-    });
+    return handleError(res, error, 'Register error:');
   }
 };
 
@@ -114,19 +101,7 @@ const login = async (req, res) => {
       data
     });
   } catch (error) {
-    if (error.code) {
-      return res.status(error.httpStatus || 400).json({
-        code: error.code,
-        msg: error.message,
-        data: null
-      });
-    }
-    console.error('Login error:', error);
-    return res.status(500).json({
-      code: 500,
-      msg: '服务器错误',
-      data: null
-    });
+    return handleError(res, error, 'Login error:');
   }
 };
 
@@ -146,19 +121,7 @@ const forgotPassword = async (req, res) => {
       data
     });
   } catch (error) {
-    if (error.code) {
-      return res.status(error.httpStatus || 400).json({
-        code: error.code,
-        msg: error.message,
-        data: null
-      });
-    }
-    console.error('Forgot password error:', error);
-    return res.status(500).json({
-      code: 500,
-      msg: '服务器错误',
-      data: null
-    });
+    return handleError(res, error, 'Forgot password error:');
   }
 };
 
@@ -178,19 +141,7 @@ const resetPassword = async (req, res) => {
       data: null
     });
   } catch (error) {
-    if (error.code) {
-      return res.status(error.httpStatus || 400).json({
-        code: error.code,
-        msg: error.message,
-        data: null
-      });
-    }
-    console.error('Reset password error:', error);
-    return res.status(500).json({
-      code: 500,
-      msg: '服务器错误',
-      data: null
-    });
+    return handleError(res, error, 'Reset password error:');
   }
 };
 
