@@ -68,7 +68,10 @@ async function seedDatabase() {
 
 async function seedUsers() {
   console.log('\n📝 Seeding users...');
+<<<<<<< HEAD
   
+=======
+>>>>>>> main
   const users = await User.findOrCreate({
     where: { phone: '13800138000' },
     defaults: {
@@ -294,7 +297,10 @@ async function seedRoomTypes() {
   console.log('\n🛏️ Seeding room types...');
   
   const hotels = await Hotel.findAll();
+<<<<<<< HEAD
   
+=======
+>>>>>>> main
   const roomTypesData = [
     {
       hotel_id: hotels[0].id,
@@ -515,7 +521,10 @@ async function seedBookings() {
   const users = await User.findAll({ where: { role: 'mobile' } });
   const hotels = await Hotel.findAll();
   const roomTypes = await RoomType.findAll();
+<<<<<<< HEAD
   
+=======
+>>>>>>> main
   const bookings = [
     {
       user_id: users[0].id,
@@ -799,7 +808,10 @@ async function seedFavorites() {
   
   const users = await User.findAll({ where: { role: 'mobile' } });
   const hotels = await Hotel.findAll();
+<<<<<<< HEAD
   
+=======
+>>>>>>> main
   const favorites = [
     {
       user_id: users[0].id,
@@ -1028,7 +1040,10 @@ async function seedHotelReviews() {
   const users = await User.findAll({ where: { role: 'mobile' } });
   const roomTypes = await RoomType.findAll();
   const bookings = await Booking.findAll();
+<<<<<<< HEAD
   
+=======
+>>>>>>> main
   const reviews = [
     {
       hotel_id: hotels[0].id,

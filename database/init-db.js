@@ -1,6 +1,10 @@
 const fs = require('fs');
 const path = require('path');
+<<<<<<< HEAD
 require('dotenv').config();
+=======
+require('dotenv').config(); 
+>>>>>>> main
 
 const { Client } = require('pg');
 
@@ -18,7 +22,26 @@ async function initDatabase() {
         const sql = fs.readFileSync(sqlFilePath, 'utf8');
 
         console.log('Executing SQL script...');
+<<<<<<< HEAD
         await client.query(sql);
+=======
+        const statements = sql
+            .split(';')
+            .map((statement) => statement.trim())
+            .filter(Boolean);
+
+        for (const statement of statements) {
+            try {
+                await client.query(statement);
+            } catch (error) {
+                if (error.code === '42P07' || error.code === '42710') {
+                    continue;
+                }
+                throw error;
+            }
+        }
+
+>>>>>>> main
         console.log('Database initialized successfully!');
 
     } catch (error) {
