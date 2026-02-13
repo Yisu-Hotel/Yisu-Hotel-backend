@@ -1,30 +1,31 @@
 const sequelize = require('../config/database');
 
-const User = require('./entities/User');
-const Hotel = require('./entities/Hotel');
-const Facility = require('./entities/Facility');
-const Service = require('./entities/Service');
-const HotelFacility = require('./entities/HotelFacility');
-const HotelService = require('./entities/HotelService');
-const HotelPolicy = require('./entities/HotelPolicy');
-const RoomType = require('./entities/RoomType');
-const RoomFacility = require('./entities/RoomFacility');
-const RoomService = require('./entities/RoomService');
-const RoomPrice = require('./entities/RoomPrice');
-const RoomTag = require('./entities/RoomTag');
-const RoomPolicy = require('./entities/RoomPolicy');
 const AuditLog = require('./entities/AuditLog');
-const HotelHistory = require('./entities/HotelHistory');
-const UserProfile = require('./entities/UserProfile');
-const Favorite = require('./entities/Favorite');
-const Booking = require('./entities/Booking');
-const Coupon = require('./entities/Coupon');
-const UserCoupon = require('./entities/UserCoupon');
-const VerificationCode = require('./entities/VerificationCode');
-const UserThirdPartyAuth = require('./entities/UserThirdPartyAuth');
 const Banner = require('./entities/Banner');
+const Booking = require('./entities/Booking');
 const City = require('./entities/City');
+const Coupon = require('./entities/Coupon');
+const Favorite = require('./entities/Favorite');
+const Facility = require('./entities/Facility');
+const Hotel = require('./entities/Hotel');
+const HotelFacility = require('./entities/HotelFacility');
+const HotelHistory = require('./entities/HotelHistory');
+const HotelPolicy = require('./entities/HotelPolicy');
 const HotelReview = require('./entities/HotelReview');
+const HotelService = require('./entities/HotelService');
+const Message = require('./entities/Message');
+const RoomFacility = require('./entities/RoomFacility');
+const RoomPolicy = require('./entities/RoomPolicy');
+const RoomPrice = require('./entities/RoomPrice');
+const RoomService = require('./entities/RoomService');
+const RoomTag = require('./entities/RoomTag');
+const RoomType = require('./entities/RoomType');
+const Service = require('./entities/Service');
+const User = require('./entities/User');
+const UserCoupon = require('./entities/UserCoupon');
+const UserProfile = require('./entities/UserProfile');
+const UserThirdPartyAuth = require('./entities/UserThirdPartyAuth');
+const VerificationCode = require('./entities/VerificationCode');
 
 User.hasOne(UserProfile, { foreignKey: 'user_id', as: 'profile' });
 UserProfile.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
@@ -41,6 +42,8 @@ Booking.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 User.hasMany(UserCoupon, { foreignKey: 'user_id', as: 'userCoupons' });
 UserCoupon.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
+User.hasMany(Message, { foreignKey: 'user_id', as: 'messages' });
+Message.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 User.hasMany(Hotel, { foreignKey: 'created_by', as: 'createdHotels' });
 Hotel.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
 
@@ -121,29 +124,30 @@ UserCoupon.belongsTo(Coupon, { foreignKey: 'coupon_id', as: 'coupon' });
 
 module.exports = {
   sequelize,
-  User,
-  Hotel,
-  Facility,
-  Service,
-  HotelFacility,
-  HotelService,
-  HotelPolicy,
-  RoomType,
-  RoomFacility,
-  RoomService,
-  RoomPrice,
-  RoomTag,
-  RoomPolicy,
   AuditLog,
-  HotelHistory,
-  UserProfile,
-  Favorite,
-  Booking,
-  Coupon,
-  UserCoupon,
-  VerificationCode,
-  UserThirdPartyAuth,
   Banner,
+  Booking,
   City,
-  HotelReview
+  Coupon,
+  Favorite,
+  Facility,
+  Hotel,
+  HotelFacility,
+  HotelHistory,
+  HotelPolicy,
+  HotelReview,
+  HotelService,
+  Message,
+  RoomFacility,
+  RoomPolicy,
+  RoomPrice,
+  RoomService,
+  RoomTag,
+  RoomType,
+  Service,
+  User,
+  UserCoupon,
+  UserProfile,
+  UserThirdPartyAuth,
+  VerificationCode
 };
