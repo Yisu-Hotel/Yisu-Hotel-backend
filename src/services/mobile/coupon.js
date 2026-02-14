@@ -8,17 +8,17 @@ const getCouponListService = async (user_id, type = 'all') => {
   // 查询所有可用的优惠券
   const availableCoupons = await Coupon.findAll({
     where: {
-      start_time: {
+      valid_from: {
         [Op.lte]: now
       },
-      end_time: {
+      valid_until: {
         [Op.gte]: now
       },
-      stock: {
+      total_count: {
         [Op.gt]: 0
       }
     },
-    attributes: ['id', 'coupon_code', 'coupon_name', 'discount_type', 'discount_value', 'min_spend', 'max_discount', 'start_time', 'end_time', 'is_public']
+    attributes: ['id', 'title', 'description', 'discount_type', 'discount_value', 'min_order_amount', 'valid_from', 'valid_until', 'total_count', 'used_count', 'is_new_user_only', 'rules']
   });
   
   // 查询用户已领取的优惠券
@@ -29,7 +29,8 @@ const getCouponListService = async (user_id, type = 'all') => {
     include: [
       {
         model: Coupon,
-        attributes: ['id', 'coupon_code', 'coupon_name', 'discount_type', 'discount_value', 'min_spend', 'max_discount', 'start_time', 'end_time']
+        as: 'coupon',
+        attributes: ['id', 'title', 'description', 'discount_type', 'discount_value', 'min_order_amount', 'valid_from', 'valid_until', 'total_count', 'used_count', 'is_new_user_only', 'rules']
       }
     ],
     attributes: ['id', 'coupon_id', 'status', 'created_at']
@@ -38,52 +39,61 @@ const getCouponListService = async (user_id, type = 'all') => {
   // 格式化数据
   const formattedAvailableCoupons = availableCoupons.map(coupon => ({
     coupon_id: coupon.id,
-    coupon_code: coupon.coupon_code,
-    coupon_name: coupon.coupon_name,
+    title: coupon.title,
+    description: coupon.description,
     discount_type: coupon.discount_type,
     discount_value: coupon.discount_value,
-    min_spend: coupon.min_spend,
-    max_discount: coupon.max_discount,
-    start_time: coupon.start_time,
-    end_time: coupon.end_time,
-    is_public: coupon.is_public
+    min_order_amount: coupon.min_order_amount,
+    valid_from: coupon.valid_from,
+    valid_until: coupon.valid_until,
+    total_count: coupon.total_count,
+    used_count: coupon.used_count,
+    is_new_user_only: coupon.is_new_user_only,
+    rules: coupon.rules
   }));
   
   const formattedUserCoupons = userCoupons.map(userCoupon => ({
     id: userCoupon.id,
     coupon_id: userCoupon.coupon_id,
-    coupon_code: userCoupon.Coupon.coupon_code,
-    coupon_name: userCoupon.Coupon.coupon_name,
-    discount_type: userCoupon.Coupon.discount_type,
-    discount_value: userCoupon.Coupon.discount_value,
-    min_spend: userCoupon.Coupon.min_spend,
-    max_discount: userCoupon.Coupon.max_discount,
-    start_time: userCoupon.Coupon.start_time,
-    end_time: userCoupon.Coupon.end_time,
+    title: userCoupon.coupon.title,
+    description: userCoupon.coupon.description,
+    discount_type: userCoupon.coupon.discount_type,
+    discount_value: userCoupon.coupon.discount_value,
+    min_order_amount: userCoupon.coupon.min_order_amount,
+    valid_from: userCoupon.coupon.valid_from,
+    valid_until: userCoupon.coupon.valid_until,
+    total_count: userCoupon.coupon.total_count,
+    used_count: userCoupon.coupon.used_count,
+    is_new_user_only: userCoupon.coupon.is_new_user_only,
+    rules: userCoupon.coupon.rules,
     status: userCoupon.status,
     receive_time: userCoupon.created_at
   }));
   
   if (type === 'available') {
     return {
-      available_coupons: formattedAvailableCoupons,
-      received_coupons: formattedUserCoupons.filter(coupon => coupon.status === 'unused')
+      coupons: [
+        ...formattedAvailableCoupons.map(coupon => ({ ...coupon, status: 'available' })),
+        ...formattedUserCoupons.filter(coupon => coupon.status === 'unused').map(coupon => ({ ...coupon, status: 'available' }))
+      ]
     };
   } else if (type === 'used') {
     return {
-      used_coupons: formattedUserCoupons.filter(coupon => coupon.status === 'used')
+      coupons: formattedUserCoupons.filter(coupon => coupon.status === 'used').map(coupon => ({ ...coupon, status: 'used' }))
     };
   } else if (type === 'expired') {
     return {
-      expired_coupons: formattedUserCoupons.filter(coupon => coupon.status === 'expired')
+      coupons: formattedUserCoupons.filter(coupon => coupon.status === 'expired').map(coupon => ({ ...coupon, status: 'expired' }))
     };
   } else {
     // 返回所有优惠券
     return {
-      available_coupons: formattedAvailableCoupons,
-      received_coupons: formattedUserCoupons.filter(coupon => coupon.status === 'unused'),
-      used_coupons: formattedUserCoupons.filter(coupon => coupon.status === 'used'),
-      expired_coupons: formattedUserCoupons.filter(coupon => coupon.status === 'expired')
+      coupons: [
+        ...formattedAvailableCoupons.map(coupon => ({ ...coupon, status: 'available' })),
+        ...formattedUserCoupons.filter(coupon => coupon.status === 'unused').map(coupon => ({ ...coupon, status: 'available' })),
+        ...formattedUserCoupons.filter(coupon => coupon.status === 'used').map(coupon => ({ ...coupon, status: 'used' })),
+        ...formattedUserCoupons.filter(coupon => coupon.status === 'expired').map(coupon => ({ ...coupon, status: 'expired' }))
+      ]
     };
   }
 };
@@ -96,13 +106,13 @@ const receiveCouponService = async (user_id, coupon_id) => {
   const coupon = await Coupon.findOne({
     where: {
       id: coupon_id,
-      start_time: {
+      valid_from: {
         [Op.lte]: now
       },
-      end_time: {
+      valid_until: {
         [Op.gte]: now
       },
-      stock: {
+      total_count: {
         [Op.gt]: 0
       }
     }
@@ -139,7 +149,7 @@ const receiveCouponService = async (user_id, coupon_id) => {
   
   // 减少优惠券库存
   await coupon.update({
-    stock: coupon.stock - 1
+    used_count: coupon.used_count + 1
   });
   
   return {

@@ -7,6 +7,9 @@ const { hotelSearchValidator } = require('../../middlewares/mobile/validator');
 // 获取酒店列表
 router.get('/list', hotelController.getHotelList);
 
+// 搜索酒店
+router.get('/search', hotelController.searchHotels);
+
 // 获取酒店详情
 router.get('/detail/:id', authMiddleware, hotelController.getHotelDetail);
 

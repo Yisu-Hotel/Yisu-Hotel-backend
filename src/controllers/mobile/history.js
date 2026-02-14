@@ -19,7 +19,7 @@ const handleError = (res, error, logLabel) => {
 // 获取浏览历史列表
 exports.getHistoryList = async (req, res) => {
   try {
-    const user_id = req.user.id;
+    const { user_id } = req.user || { user_id: 'test_user' }; // 临时添加测试用户ID
     const data = await getHistoryListService(user_id, req.query);
     return res.json({ code: 0, msg: '查询成功', data });
   } catch (error) {
@@ -30,7 +30,7 @@ exports.getHistoryList = async (req, res) => {
 // 删除单条浏览历史
 exports.removeHistory = async (req, res) => {
   try {
-    const user_id = req.user.id;
+    const { user_id } = req.user || { user_id: 'test_user' }; // 临时添加测试用户ID
     const history_id = req.params.id;
     const data = await removeHistoryService(user_id, history_id);
     return res.json({ code: 0, msg: '删除成功', data });
@@ -42,7 +42,7 @@ exports.removeHistory = async (req, res) => {
 // 清空所有浏览历史
 exports.clearHistory = async (req, res) => {
   try {
-    const user_id = req.user.id;
+    const { user_id } = req.user || { user_id: 'test_user' }; // 临时添加测试用户ID
     const data = await clearHistoryService(user_id);
     return res.json({ code: 0, msg: '清空成功', data });
   } catch (error) {

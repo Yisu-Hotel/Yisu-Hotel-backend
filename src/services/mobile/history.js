@@ -11,6 +11,7 @@ const getHistoryListService = async (user_id, { page = 1, pageSize = 10 } = {}) 
       include: [
         {
           model: Hotel,
+          as: 'hotel',
           attributes: ['id', 'hotel_name_cn', 'location_info', 'star_rating', 'min_price', 'main_image_url'],
           required: false
         }
@@ -22,7 +23,7 @@ const getHistoryListService = async (user_id, { page = 1, pageSize = 10 } = {}) 
 
     // 格式化数据
     const formattedHistories = histories.map(history => {
-      if (!history.Hotel) {
+      if (!history.hotel) {
         return {
           id: history.id,
           hotel_id: history.hotel_id,
@@ -34,12 +35,12 @@ const getHistoryListService = async (user_id, { page = 1, pageSize = 10 } = {}) 
         id: history.id,
         hotel_id: history.hotel_id,
         hotel: {
-          id: history.Hotel.id,
-          name: history.Hotel.hotel_name_cn,
-          address: history.Hotel.location_info?.formatted_address || '',
-          star_rating: history.Hotel.star_rating,
-          price: history.Hotel.min_price || 0,
-          image: history.Hotel.main_image_url?.[0] || ''
+          id: history.hotel.id,
+          name: history.hotel.hotel_name_cn,
+          address: history.hotel.location_info?.formatted_address || '',
+          star_rating: history.hotel.star_rating,
+          price: history.hotel.min_price || 0,
+          image: Array.isArray(history.hotel.main_image_url) ? history.hotel.main_image_url?.[0] || '' : history.hotel.main_image_url || ''
         },
         viewed_at: history.viewed_at
       };

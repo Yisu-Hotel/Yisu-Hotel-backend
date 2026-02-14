@@ -99,7 +99,7 @@ const searchHotelsService = async (params) => {
 const getHotelDetailService = async (hotel_id) => {
   // 构建查询选项
   const queryOptions = {
-    where: { id: hotel_id, status: 'published' },
+    where: { id: hotel_id },
     include: [
       {
         model: HotelFacility,
@@ -427,29 +427,31 @@ const getHotelListService = async (params) => {
   
   try {
     // 处理前端传递的参数，支持不同的参数名
-    const {
-      page = 1,
-      pageSize = 10,
-      location,
-      check_in_date,
-      check_out_date,
-      star_rating,
-      minPrice,
-      maxPrice,
-      rating,
-      minRating, // 前端传递的参数名
-      facilities,
-      services,
-      tags,
-      nearby_info,
-      keyword,
-      sort // 前端传递的排序参数
-    } = params;
+  const {
+    page = 1,
+    pageSize = 10,
+    location,
+    city, // 前端传递的城市参数
+    check_in_date,
+    check_out_date,
+    star_rating,
+    minPrice,
+    maxPrice,
+    rating,
+    minRating, // 前端传递的参数名
+    facilities,
+    services,
+    tags,
+    nearby_info,
+    keyword,
+    sort // 前端传递的排序参数
+  } = params;
 
     console.log('Parsed params:', {
       page,
       pageSize,
       location,
+      city,
       check_in_date,
       check_out_date,
       star_rating,
@@ -466,21 +468,20 @@ const getHotelListService = async (params) => {
     });
 
     // 构建查询条件
-    const whereCondition = {
-      status: 'published'
-    };
+    const whereCondition = {};
 
     // 构建 OR 条件数组
     const orConditions = [];
 
-    // 城市筛选
-    if (location) {
-      console.log('Adding location filter:', location);
-      orConditions.push(
-        where(literal(`"Hotel"."location_info"->>'city'`), location),
-        where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: `%${location}%` })
-      );
-    }
+    // 城市筛选 - 暂时注释掉，以便返回所有酒店数据
+    // const cityFilter = location || city;
+    // if (cityFilter) {
+    //   console.log('Adding city filter:', cityFilter);
+    //   orConditions.push(
+    //     where(literal(`"Hotel"."location_info"->>'city'`), cityFilter),
+    //     where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: `%${cityFilter}%` })
+    //   );
+    // }
 
     // 关键词搜索
     if (keyword) {

@@ -63,7 +63,8 @@ const getFavoriteListService = async (user_id, { page = 1, pageSize = 10 } = {})
       include: [
         {
           model: Hotel,
-          attributes: ['id', 'hotel_name_cn', 'location_info', 'star_rating', 'min_price', 'main_image_url'],
+          as: 'hotel',
+          attributes: ['id', 'hotel_name_cn', 'location_info', 'star_rating', 'main_image_url'],
           required: false
         }
       ],
@@ -74,14 +75,13 @@ const getFavoriteListService = async (user_id, { page = 1, pageSize = 10 } = {})
     
     // 格式化数据
     const formattedFavorites = favorites.map(favorite => {
-      if (!favorite.Hotel) {
+      if (!favorite.hotel) {
         return {
           favorite_id: favorite.id,
           hotel_id: favorite.hotel_id,
           hotel_name: '未知酒店',
           hotel_address: '',
           hotel_star: 0,
-          min_price: 0,
           main_image_url: '',
           created_at: favorite.created_at
         };
@@ -90,11 +90,10 @@ const getFavoriteListService = async (user_id, { page = 1, pageSize = 10 } = {})
       return {
         favorite_id: favorite.id,
         hotel_id: favorite.hotel_id,
-        hotel_name: favorite.Hotel.hotel_name_cn || '未知酒店',
-        hotel_address: favorite.Hotel.location_info?.formatted_address || '',
-        hotel_star: favorite.Hotel.star_rating || 0,
-        min_price: favorite.Hotel.min_price || 0,
-        main_image_url: favorite.Hotel.main_image_url?.[0] || '',
+        hotel_name: favorite.hotel.hotel_name_cn || '未知酒店',
+        hotel_address: favorite.hotel.location_info?.formatted_address || '',
+        hotel_star: favorite.hotel.star_rating || 0,
+        main_image_url: favorite.hotel.main_image_url?.[0] || '',
         created_at: favorite.created_at
       };
     });
