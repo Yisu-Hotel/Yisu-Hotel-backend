@@ -38,6 +38,10 @@ const RoomType = sequelize.define('RoomType', {
   room_image_url: {
     type: DataTypes.STRING(500),
     allowNull: true
+  },
+  room_image_base64: {
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 }, {
   tableName: 'room_types',

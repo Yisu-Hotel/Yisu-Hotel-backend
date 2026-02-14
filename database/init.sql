@@ -188,14 +188,28 @@ CREATE INDEX idx_hotel_history_modified_at ON hotel_history(modified_at);
 CREATE TABLE user_profiles (
     user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     nickname VARCHAR(50),
-    gender VARCHAR(10) CHECK (gender IN ('男', '女')),
+    gender VARCHAR(10) CHECK (gender IN ('男', '女', '保密')),
     birthday DATE,
     avatar VARCHAR(500),
+    avatar_base64 TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_user_profiles_nickname ON user_profiles(nickname);
+
+CREATE TABLE messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    sender VARCHAR(50) NOT NULL,
+    status VARCHAR(10) NOT NULL CHECK (status IN ('已读', '未读')) DEFAULT '未读',
+    content JSONB NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_messages_user_id ON messages(user_id);
+CREATE INDEX idx_messages_status ON messages(status);
+CREATE INDEX idx_messages_created_at ON messages(created_at);
 
 CREATE TABLE favorites (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
