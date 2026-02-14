@@ -52,13 +52,10 @@ const Hotel = sequelize.define('Hotel', {
     type: DataTypes.JSONB,
     allowNull: true
   },
-<<<<<<< HEAD
-=======
   main_image_base64: {
     type: DataTypes.JSONB,
     allowNull: true
   },
->>>>>>> main
   tags: {
     type: DataTypes.JSONB,
     allowNull: true
@@ -90,11 +87,8 @@ const Hotel = sequelize.define('Hotel', {
   indexes: [
     { fields: ['created_by'] },
     { fields: ['status'] },
-<<<<<<< HEAD
-=======
     { fields: ['created_at'] },
     { fields: ['status', 'created_at'] },
->>>>>>> main
     { 
       type: 'FULLTEXT',
       fields: ['hotel_name_cn']
