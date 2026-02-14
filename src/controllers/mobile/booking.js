@@ -67,8 +67,8 @@ exports.getBookingDetail = async (req, res) => {
 exports.cancelBooking = async (req, res) => {
   try {
     const { user_id } = req.user || { user_id: 'test_user' }; // 临时添加测试用户ID
-    const { id } = req.params;
-    const data = await cancelBookingService(user_id, id);
+    const { order_id } = req.body;
+    const data = await cancelBookingService(user_id, order_id);
     return res.json({ code: 0, msg: '取消成功', data });
   } catch (error) {
     return handleError(res, error, 'Cancel booking error:');
@@ -79,12 +79,12 @@ exports.cancelBooking = async (req, res) => {
 exports.payBooking = async (req, res) => {
   try {
     const { user_id } = req.user || { user_id: 'test_user' }; // 临时添加测试用户ID
-    const { booking_id, payment_method, amount } = req.body;
+    const { order_id, payment_method } = req.body;
     
     // 转换参数格式以匹配service层的期望
     const paymentData = {
-      booking_id,
-      payment_method,
+      booking_id: order_id,
+      payment_method: payment_method || 'wechat',
       transaction_id: `TXN_${Date.now()}`.toString() // 确保交易ID是字符串格式
     };
     

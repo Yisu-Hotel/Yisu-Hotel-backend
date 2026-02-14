@@ -7,6 +7,7 @@ const City = require('./entities/City');
 const Coupon = require('./entities/Coupon');
 const Favorite = require('./entities/Favorite');
 const Facility = require('./entities/Facility');
+const History = require('./entities/History');
 const Hotel = require('./entities/Hotel');
 const HotelFacility = require('./entities/HotelFacility');
 const HotelHistory = require('./entities/HotelHistory');
@@ -52,6 +53,12 @@ AuditLog.belongsTo(User, { foreignKey: 'auditor_id', as: 'auditor' });
 
 User.hasMany(HotelHistory, { foreignKey: 'modified_by', as: 'hotelHistories' });
 HotelHistory.belongsTo(User, { foreignKey: 'modified_by', as: 'modifier' });
+
+User.hasMany(History, { foreignKey: 'user_id', as: 'userHistories' });
+History.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+Hotel.hasMany(History, { foreignKey: 'hotel_id', as: 'hotelHistories' });
+History.belongsTo(Hotel, { foreignKey: 'hotel_id', as: 'hotel' });
 
 Hotel.hasMany(HotelFacility, { foreignKey: 'hotel_id', as: 'hotelFacilities' });
 HotelFacility.belongsTo(Hotel, { foreignKey: 'hotel_id', as: 'hotel' });
@@ -131,6 +138,7 @@ module.exports = {
   Coupon,
   Favorite,
   Facility,
+  History,
   Hotel,
   HotelFacility,
   HotelHistory,

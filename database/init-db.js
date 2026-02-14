@@ -14,7 +14,7 @@ async function initDatabase() {
         await client.connect();
         console.log('Connected successfully!');
 
-        const sqlFilePath = path.join(__dirname, '..', 'database', 'init.sql');
+        const sqlFilePath = path.join(__dirname, 'init.sql');
         const sql = fs.readFileSync(sqlFilePath, 'utf8');
 
         console.log('Executing SQL script...');

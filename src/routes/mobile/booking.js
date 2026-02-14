@@ -14,7 +14,7 @@ router.get('/list', authMiddleware, bookingController.getBookingList);
 router.get('/detail/:id', authMiddleware, bookingController.getBookingDetail);
 
 // 取消预订
-router.post('/cancel/:id', authMiddleware, bookingController.cancelBooking);
+router.post('/cancel', authMiddleware, bookingController.cancelBooking);
 
 // 支付预订
 router.post('/pay', authMiddleware, payValidator, bookingController.payBooking);

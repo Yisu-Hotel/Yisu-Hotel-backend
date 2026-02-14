@@ -199,9 +199,51 @@ const loginService = async (phone, password, tokenExpiresIn) => {
   return responseData;
 };
 
+const resetPasswordService = async ({ phone, code, password }) => {
+  // 验证验证码
+  const verificationCode = await VerificationCode.findOne({
+    where: {
+      phone,
+      type: 'reset',
+      code,
+      used: false,
+      expires_at: {
+        [Op.gt]: new Date()
+      }
+    }
+  });
+
+  if (!verificationCode) {
+    const error = new Error('验证码错误或已过期');
+    error.code = 3003;
+    error.httpStatus = 400;
+    throw error;
+  }
+
+  // 检查用户是否存在
+  const user = await User.findOne({
+    where: { phone }
+  });
+
+  if (!user) {
+    const error = new Error('手机号不存在');
+    error.code = 3007;
+    error.httpStatus = 400;
+    throw error;
+  }
+
+  // 更新密码
+  const hashedPassword = await bcrypt.hash(password, 10);
+  await user.update({ password: hashedPassword });
+
+  // 标记验证码为已使用
+  await verificationCode.update({ used: true });
+};
+
 module.exports = {
   sendCodeService,
   checkPhoneService,
   registerService,
-  loginService
+  loginService,
+  resetPasswordService
 };

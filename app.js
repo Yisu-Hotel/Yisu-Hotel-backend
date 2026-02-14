@@ -22,6 +22,8 @@ const mobilePaymentRoutes = require('./src/routes/mobile/payment');
 const mobilePromotionRoutes = require('./src/routes/mobile/promotion');
 const mobileLocationRoutes = require('./src/routes/mobile/location');
 const mobileNearbyRoutes = require('./src/routes/mobile/nearby');
+const mobileCouponRoutes = require('./src/routes/mobile/coupon');
+const mobileHistoryRoutes = require('./src/routes/mobile/history');
 
 const app = express();
 
@@ -66,6 +68,8 @@ app.use('/mobile/payment', mobilePaymentRoutes);
 app.use('/mobile/promotion', mobilePromotionRoutes);
 app.use('/mobile/location', mobileLocationRoutes);
 app.use('/mobile/nearby', mobileNearbyRoutes);
+app.use('/mobile/coupon', mobileCouponRoutes);
+app.use('/mobile/history', mobileHistoryRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Express服务运行在：http://localhost:${PORT}`);

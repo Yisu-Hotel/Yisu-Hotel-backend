@@ -1,4 +1,4 @@
-const { checkPhoneService, sendCodeService, registerService, loginService } = require('../../services/mobile/auth');
+const { checkPhoneService, sendCodeService, registerService, loginService, resetPasswordService } = require('../../services/mobile/auth');
 
 const handleError = (res, error, logLabel) => {
   if (error && error.code) {
@@ -71,5 +71,22 @@ exports.register = async (req, res) => {
     return res.json({ code: 0, msg: '注册成功', data });
   } catch (error) {
     return handleError(res, error, 'Register error:');
+  }
+};
+
+// 重置密码
+exports.resetPassword = async (req, res) => {
+  try {
+    const { phone, code, password } = req.body;
+    if (!/^1[3-9]\d{9}$/.test(phone)) {
+      return res.status(400).json({ code: 3001, msg: '手机号格式不正确', data: null });
+    }
+    if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,16}$/.test(password)) {
+      return res.status(400).json({ code: 3006, msg: '密码格式不正确', data: null });
+    }
+    await resetPasswordService({ phone, code, password });
+    return res.json({ code: 0, msg: '密码重置成功', data: null });
+  } catch (error) {
+    return handleError(res, error, 'Reset password error:');
   }
 };

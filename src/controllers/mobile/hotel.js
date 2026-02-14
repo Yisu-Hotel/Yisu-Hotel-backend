@@ -1,4 +1,4 @@
-const { searchHotelsService, getHotelDetailService, getHotelImagesService, getHotelAvailabilityService, calculatePriceService, getRoomTypesService, getRoomTypeDetailService } = require('../../services/mobile/hotel');
+const { searchHotelsService, getHotelDetailService, getHotelImagesService, getHotelAvailabilityService, calculatePriceService, getRoomTypesService, getRoomTypeDetailService, getHotelListService, getHotelTagsService } = require('../../services/mobile/hotel');
 const { Hotel } = require('../../models');
 
 const handleError = (res, error, logLabel) => {
@@ -27,15 +27,35 @@ exports.searchHotels = async (req, res) => {
   }
 };
 
+// 获取酒店列表
+exports.getHotelList = async (req, res) => {
+  try {
+    const data = await getHotelListService(req.query);
+    return res.json({ code: 0, msg: '查询成功', data });
+  } catch (error) {
+    return handleError(res, error, 'Get hotel list error:');
+  }
+};
+
 // 获取酒店详情
 exports.getHotelDetail = async (req, res) => {
   try {
-    const { hotel_id } = req.params;
-    const { check_in, check_out } = req.query;
-    const data = await getHotelDetailService(hotel_id, check_in, check_out);
-    return res.json({ code: 0, msg: '获取成功', data });
+    const { id } = req.params;
+    const data = await getHotelDetailService(id);
+    return res.json({ code: 0, msg: '查询成功', data });
   } catch (error) {
     return handleError(res, error, 'Get hotel detail error:');
+  }
+};
+
+// 获取城市热门标签与周边信息
+exports.getHotelTags = async (req, res) => {
+  try {
+    const { city } = req.query;
+    const data = await getHotelTagsService(city);
+    return res.json({ code: 0, msg: '查询成功', data });
+  } catch (error) {
+    return handleError(res, error, 'Get hotel tags error:');
   }
 };
 

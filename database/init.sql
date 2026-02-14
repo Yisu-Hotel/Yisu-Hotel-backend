@@ -27,8 +27,10 @@ CREATE TABLE hotels (
     opening_date DATE NOT NULL,
     nearby_info TEXT,
     main_image_url JSONB,
+    image_urls JSONB,
     tags JSONB,
     location_info JSONB,
+    min_price DECIMAL(10, 2),
     status VARCHAR(20) NOT NULL CHECK (status IN ('draft', 'pending', 'auditing', 'approved', 'rejected', 'published', 'offline')),
     created_by UUID NOT NULL REFERENCES users(id),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -95,8 +97,10 @@ CREATE TABLE room_types (
     room_type_name VARCHAR(50) NOT NULL,
     bed_type VARCHAR(20) NOT NULL CHECK (bed_type IN ('king', 'twin', 'queen')),
     area INTEGER NOT NULL,
+    max_guests INTEGER NOT NULL DEFAULT 2,
     description TEXT,
-    room_image_url VARCHAR(500),
+    main_image_url VARCHAR(500),
+    base_price DECIMAL(10, 2) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     UNIQUE (hotel_id, room_type_name)
@@ -373,3 +377,15 @@ CREATE INDEX idx_hotel_reviews_user_id ON hotel_reviews(user_id);
 CREATE INDEX idx_hotel_reviews_rating ON hotel_reviews(rating);
 CREATE INDEX idx_hotel_reviews_created_at ON hotel_reviews(created_at);
 CREATE UNIQUE INDEX uk_hotel_user_booking ON hotel_reviews(hotel_id, user_id, booking_id);
+
+-- 用户浏览历史表
+CREATE TABLE histories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    hotel_id UUID NOT NULL REFERENCES hotels(id) ON DELETE CASCADE,
+    viewed_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_histories_user_id ON histories(user_id);
+CREATE INDEX idx_histories_hotel_id ON histories(hotel_id);
+CREATE INDEX idx_histories_viewed_at ON histories(viewed_at);

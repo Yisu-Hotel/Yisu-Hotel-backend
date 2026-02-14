@@ -96,7 +96,7 @@ const searchHotelsService = async (params) => {
   };
 };
 
-const getHotelDetailService = async (hotel_id, check_in, check_out) => {
+const getHotelDetailService = async (hotel_id) => {
   // 构建查询选项
   const queryOptions = {
     where: { id: hotel_id, status: 'published' },
@@ -124,17 +124,10 @@ const getHotelDetailService = async (hotel_id, check_in, check_out) => {
       {
         model: HotelPolicy,
         as: 'policy',
-        attributes: ['cancellation_policy']
-      },
-      {
-        model: HotelReview,
-        as: 'reviews',
-        limit: 5,
-        order: [['created_at', 'DESC']],
-        attributes: ['id', 'user_id', 'rating', 'content', 'is_anonymous', 'created_at']
+        attributes: ['cancellation_policy', 'payment_policy', 'children_policy', 'pets_policy']
       }
     ],
-    attributes: ['id', 'hotel_name_cn', 'star_rating', 'rating', 'location_info', 'description', 'main_image_url', 'min_price']
+    attributes: ['id', 'hotel_name_cn', 'hotel_name_en', 'star_rating', 'rating', 'location_info', 'description', 'phone', 'opening_date', 'nearby_info', 'main_image_url', 'tags']
   };
   
   // 并行执行查询，提高性能
@@ -142,13 +135,13 @@ const getHotelDetailService = async (hotel_id, check_in, check_out) => {
     Hotel.findOne(queryOptions),
     RoomType.findAll({
       where: { hotel_id },
-      attributes: ['id']
+      attributes: ['id', 'room_type_name', 'bed_type', 'area', 'description']
     })
   ]);
 
   if (!hotel) {
     const error = new Error('酒店不存在');
-    error.code = 404;
+    error.code = 4010;
     error.httpStatus = 404;
     throw error;
   }
@@ -166,41 +159,70 @@ const getHotelDetailService = async (hotel_id, check_in, check_out) => {
   }));
 
   // 格式化政策
-  const policies = [];
-  if (hotel.policy) {
-    policies.push({ id: 1, type: 'check_in', value: '14:00后' });
-    policies.push({ id: 2, type: 'check_out', value: '12:00前' });
-    if (hotel.policy.cancellation_policy) {
-      policies.push({ id: 3, type: 'cancellation', value: hotel.policy.cancellation_policy });
-    }
-  }
+  const policies = {
+    cancellation: hotel.policy?.cancellation_policy || '入住前24小时免费取消',
+    payment: hotel.policy?.payment_policy || '支持信用卡及移动支付',
+    children: hotel.policy?.children_policy || '12岁以下免费入住',
+    pets: hotel.policy?.pets_policy || '不可携带宠物'
+  };
 
-  // 格式化评价
-  const reviews = hotel.reviews.map(review => ({
-    id: review.id,
-    user_id: review.user_id,
-    user_name: review.is_anonymous ? '匿名用户' : '用户',
-    rating: review.rating,
-    content: review.content,
-    created_at: review.created_at
-  }));
+  // 格式化房型
+  const roomTypesWithPrices = await Promise.all(
+    roomTypes.map(async (roomType) => {
+      // 生成未来30天的价格
+      const prices = [];
+      const today = new Date();
+      for (let i = 0; i < 30; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() + i);
+        const dateString = date.toISOString().split('T')[0];
+        prices.push({
+          date: dateString,
+          price: Math.floor(300 + Math.random() * 200) // 模拟价格
+        });
+      }
+
+      return {
+        id: roomType.id,
+        room_type_name: roomType.room_type_name,
+        bed_type: roomType.bed_type,
+        area: roomType.area,
+        description: roomType.description,
+        room_image_url: `http://example.com/room_${roomType.id}.jpg`, // 模拟数据
+        tags: ['推荐', '高楼层', '景观房'], // 模拟数据
+        facilities: [], // 模拟数据
+        services: [], // 模拟数据
+        policies: {
+          cancellation: '不可取消',
+          payment: '在线支付',
+          children: '不允许携带儿童',
+          pets: '不允许携带宠物'
+        },
+        prices
+      };
+    })
+  );
 
   return {
-    id: hotel.id,
-    name: hotel.hotel_name_cn,
-    star: hotel.star_rating,
+    hotel_id: hotel.id,
+    hotel_name_cn: hotel.hotel_name_cn,
+    hotel_name_en: hotel.hotel_name_en,
+    star_rating: hotel.star_rating,
     rating: hotel.rating || 0,
-    address: hotel.location_info?.formatted_address || '',
-    distance: Math.random() * 5, // 模拟距离
+    review_count: Math.floor(Math.random() * 1000), // 模拟数据
     description: hotel.description,
-    main_image_url: hotel.main_image_url?.[0] || '',
-    min_price: hotel.min_price || 0,
+    phone: hotel.phone || '',
+    opening_date: hotel.opening_date || '',
+    nearby_info: hotel.nearby_info || '',
+    main_image_url: hotel.main_image_url || [],
+    tags: hotel.tags || [],
+    location_info: hotel.location_info || {},
+    favorite_count: Math.floor(Math.random() * 1000), // 模拟数据
+    booking_count: Math.floor(Math.random() * 5000), // 模拟数据
     facilities,
     services,
     policies,
-    reviews,
-    check_in: check_in || '',
-    check_out: check_out || ''
+    room_types: roomTypesWithPrices
   };
 };
 
@@ -399,6 +421,234 @@ const getRoomTypeDetailService = async (hotel_id, room_type_id, check_in, check_
   };
 };
 
+const getHotelListService = async (params) => {
+  console.log('=== Start getHotelListService ===');
+  console.log('Get hotel list params:', params);
+  
+  try {
+    // 处理前端传递的参数，支持不同的参数名
+    const {
+      page = 1,
+      pageSize = 10,
+      location,
+      check_in_date,
+      check_out_date,
+      star_rating,
+      minPrice,
+      maxPrice,
+      rating,
+      minRating, // 前端传递的参数名
+      facilities,
+      services,
+      tags,
+      nearby_info,
+      keyword,
+      sort // 前端传递的排序参数
+    } = params;
+
+    console.log('Parsed params:', {
+      page,
+      pageSize,
+      location,
+      check_in_date,
+      check_out_date,
+      star_rating,
+      minPrice,
+      maxPrice,
+      rating,
+      minRating,
+      facilities,
+      services,
+      tags,
+      nearby_info,
+      keyword,
+      sort
+    });
+
+    // 构建查询条件
+    const whereCondition = {
+      status: 'published'
+    };
+
+    // 构建 OR 条件数组
+    const orConditions = [];
+
+    // 城市筛选
+    if (location) {
+      console.log('Adding location filter:', location);
+      orConditions.push(
+        where(literal(`"Hotel"."location_info"->>'city'`), location),
+        where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: `%${location}%` })
+      );
+    }
+
+    // 关键词搜索
+    if (keyword) {
+      console.log('Adding keyword filter:', keyword);
+      orConditions.push(
+        { hotel_name_cn: { [Op.iLike]: `%${keyword}%` } },
+        { hotel_name_en: { [Op.iLike]: `%${keyword}%` } },
+        { description: { [Op.iLike]: `%${keyword}%` } },
+        where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: `%${keyword}%` }),
+        { nearby_info: { [Op.iLike]: `%${keyword}%` } }
+      );
+    }
+
+    // 添加 OR 条件到查询条件
+    if (orConditions.length > 0) {
+      whereCondition[Op.or] = orConditions;
+      console.log('Added OR conditions:', orConditions.length);
+    }
+
+    // 星级筛选
+    if (star_rating) {
+      console.log('Adding star rating filter:', star_rating);
+      whereCondition.star_rating = star_rating;
+    }
+
+    // 评分筛选（支持前端传递的 minRating 参数）
+    const ratingValue = rating || minRating;
+    if (ratingValue) {
+      console.log('Adding rating filter:', ratingValue);
+      whereCondition.rating = { [Op.gte]: ratingValue };
+    }
+
+    // 价格筛选 - 暂时注释掉，因为数据库中没有 min_price 字段
+    // if (minPrice) {
+    //   console.log('Adding min price filter:', minPrice);
+    //   whereCondition.min_price = { [Op.gte]: minPrice };
+    // }
+    // if (maxPrice) {
+    //   console.log('Adding max price filter:', maxPrice);
+    //   whereCondition.min_price = { 
+    //     ...whereCondition.min_price,
+    //     [Op.lte]: maxPrice 
+    //   };
+    // }
+
+    // 周边信息筛选
+    if (nearby_info) {
+      console.log('Adding nearby info filter:', nearby_info);
+      whereCondition.nearby_info = { [Op.iLike]: `%${nearby_info}%` };
+    }
+
+    console.log('Final where condition:', whereCondition);
+
+    // 计算偏移量
+    const offset = (parseInt(page) - 1) * parseInt(pageSize);
+    console.log('Pagination:', { page, pageSize, offset });
+
+    // 构建排序条件
+    let orderCondition = [['created_at', 'DESC']];
+    if (sort === 'rating') {
+      orderCondition = [['rating', 'DESC']];
+    }
+    console.log('Order condition:', orderCondition);
+
+    // 并行执行查询，提高性能
+    console.log('Executing Hotel.findAll...');
+    const [hotels, total] = await Promise.all([
+      Hotel.findAll({
+        where: whereCondition,
+        limit: parseInt(pageSize),
+        offset: offset,
+        order: orderCondition,
+        attributes: ['id', 'hotel_name_cn', 'hotel_name_en', 'star_rating', 'rating', 'nearby_info', 'main_image_url', 'tags', 'location_info']
+      }),
+      Hotel.count({ where: whereCondition })
+    ]);
+
+    console.log('Found hotels:', hotels.length, 'total:', total);
+
+    // 格式化酒店数据
+    const formattedHotels = hotels.map(hotel => ({
+      hotel_id: hotel.id,
+      hotel_name_cn: hotel.hotel_name_cn,
+      hotel_name_en: hotel.hotel_name_en,
+      star_rating: hotel.star_rating,
+      rating: hotel.rating || 0,
+      nearby_info: hotel.nearby_info || '',
+      main_image_url: hotel.main_image_url || [],
+      tags: hotel.tags || [],
+      location_info: hotel.location_info || {},
+      favorite_count: Math.floor(Math.random() * 1000), // 模拟数据
+      average_rating: hotel.rating || 0,
+      booking_count: Math.floor(Math.random() * 5000), // 模拟数据
+      review_count: Math.floor(Math.random() * 1000), // 模拟数据
+      min_price: Math.floor(Math.random() * 3000) + 500 // 模拟数据，500-3500之间的随机价格
+    }));
+
+    console.log('Formatted hotels:', formattedHotels.length);
+
+    const result = {
+      list: formattedHotels,
+      total,
+      page: parseInt(page),
+      pageSize: parseInt(pageSize)
+    };
+
+    console.log('Returning result:', result);
+    console.log('=== End getHotelListService ===');
+
+    return result;
+  } catch (error) {
+    console.error('=== Get hotel list error ===', error);
+    // 抛出更友好的错误
+    const friendlyError = new Error('获取酒店列表失败');
+    friendlyError.code = 500;
+    friendlyError.httpStatus = 500;
+    throw friendlyError;
+  }
+};
+
+const getHotelTagsService = async (city) => {
+  if (!city) {
+    const error = new Error('参数缺失（未提供城市名称）');
+    error.code = 4009;
+    error.httpStatus = 400;
+    throw error;
+  }
+
+  // 查询指定城市的所有酒店
+  const hotels = await Hotel.findAll({
+    where: {
+      status: 'published',
+      [Op.or]: [
+        where(literal(`"Hotel"."location_info"->>'city'`), city),
+        where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: `%${city}%` })
+      ]
+    },
+    attributes: ['tags', 'nearby_info']
+  });
+
+  // 提取并去重标签
+  const allTags = new Set();
+  const allNearbyInfo = new Set();
+
+  hotels.forEach(hotel => {
+    // 处理标签
+    if (hotel.tags && Array.isArray(hotel.tags)) {
+      hotel.tags.forEach(tag => {
+        if (tag) allTags.add(tag);
+      });
+    }
+
+    // 处理周边信息
+    if (hotel.nearby_info) {
+      allNearbyInfo.add(hotel.nearby_info);
+    }
+  });
+
+  // 限制数量并转换为数组
+  const tagsList = Array.from(allTags).slice(0, 10);
+  const nearbyInfoList = Array.from(allNearbyInfo).slice(0, 10);
+
+  return {
+    tags: tagsList,
+    nearby_info: nearbyInfoList
+  };
+};
+
 module.exports = {
   searchHotelsService,
   getHotelDetailService,
@@ -406,5 +656,7 @@ module.exports = {
   getHotelAvailabilityService,
   calculatePriceService,
   getRoomTypesService,
-  getRoomTypeDetailService
+  getRoomTypeDetailService,
+  getHotelListService,
+  getHotelTagsService
 };

@@ -24,14 +24,17 @@ const getCityService = async (params = {}) => {
     where: query,
     order: order,
     limit: type === 'hot' ? 5 : parseInt(limit),
-    attributes: ['id', 'city_name', 'province']
+    attributes: ['id', 'city_name', 'province', 'latitude', 'longitude', 'sort']
   });
 
   // 转换为前端需要的格式
   return cities.map(city => ({
     id: city.id,
-    name: city.city_name,
-    code: city.city_name.substring(0, 3).toUpperCase() // 简单生成code，实际项目中可能需要单独存储
+    city_name: city.city_name,
+    province: city.province,
+    latitude: city.latitude || 0,
+    longitude: city.longitude || 0,
+    sort: city.sort || 0
   }));
 };
 

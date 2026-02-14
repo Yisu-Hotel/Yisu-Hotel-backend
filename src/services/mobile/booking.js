@@ -173,12 +173,18 @@ const getBookingDetailService = async (user_id, booking_id) => {
   
   console.log('Parsed bookingId:', { bookingIdStr });
   
-  // 查询预订详情
+  // 查询预订详情，同时关联酒店信息
   const booking = await Booking.findOne({
     where: {
       id: bookingIdStr,
       user_id
-    }
+    },
+    include: [
+      {
+        model: Hotel,
+        attributes: ['hotel_name_cn', 'phone', 'location_info']
+      }
+    ]
   });
   
   if (!booking) {
@@ -188,20 +194,32 @@ const getBookingDetailService = async (user_id, booking_id) => {
     throw error;
   }
   
+  // 计算价格明细
+  const originalPrice = parseFloat(booking.total_price) || 0;
+  const discountAmount = 0; // 暂时设为0，后续可以根据优惠规则计算
+  const finalPrice = originalPrice - discountAmount;
+  
   // 格式化数据
   return {
     id: booking.id,
+    order_number: booking.order_number || `ORD${booking.id.substring(0, 8).toUpperCase()}`,
     hotel_id: booking.hotel_id,
     hotel_name: booking.hotel_name,
+    hotel_phone: booking.Hotel?.phone || '',
+    hotel_address: booking.Hotel?.location_info?.formatted_address || '',
     room_type: booking.room_type_name,
     check_in_date: booking.check_in_date,
     check_out_date: booking.check_out_date,
-    total_price: parseFloat(booking.total_price) || 0,
-    status: booking.status,
-    status_text: getStatusText(booking.status),
     contact_name: booking.contact_name,
     contact_phone: booking.contact_phone,
     special_requests: booking.special_requests,
+    price_detail: {
+      original_price: originalPrice,
+      discount_amount: discountAmount,
+      total_price: finalPrice
+    },
+    status: booking.status,
+    status_text: getStatusText(booking.status),
     booked_at: booking.booked_at,
     paid_at: booking.paid_at,
     payment_method: null
