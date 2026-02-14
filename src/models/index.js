@@ -44,7 +44,6 @@ UserCoupon.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
 User.hasMany(Message, { foreignKey: 'user_id', as: 'messages' });
 Message.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
-
 User.hasMany(Hotel, { foreignKey: 'created_by', as: 'createdHotels' });
 Hotel.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
 

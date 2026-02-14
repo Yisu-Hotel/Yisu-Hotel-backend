@@ -210,7 +210,6 @@ CREATE TABLE messages (
 CREATE INDEX idx_messages_user_id ON messages(user_id);
 CREATE INDEX idx_messages_status ON messages(status);
 CREATE INDEX idx_messages_created_at ON messages(created_at);
-
 CREATE TABLE favorites (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

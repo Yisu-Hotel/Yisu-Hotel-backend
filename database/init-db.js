@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config(); 
+require('dotenv').config();
 
 const { Client } = require('pg');
 
@@ -33,7 +33,6 @@ async function initDatabase() {
                 throw error;
             }
         }
-
         console.log('Database initialized successfully!');
 
     } catch (error) {

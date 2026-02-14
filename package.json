@@ -10,15 +10,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Xiangbingyu/Yisu-Hotel-backend.git"
+    "url": "git+https://github.com/05nanci/Yisu-Hotel-backend.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Xiangbingyu/Yisu-Hotel-backend/issues"
+    "url": "https://github.com/05nanci/Yisu-Hotel-backend/issues"
   },
-  "homepage": "https://github.com/Xiangbingyu/Yisu-Hotel-backend#readme",
+  "homepage": "https://github.com/05nanci/Yisu-Hotel-backend#readme",
   "dependencies": {
     "@alicloud/credentials": "latest",
     "@alicloud/dypnsapi20170525": "^2.0.0",

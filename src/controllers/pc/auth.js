@@ -35,9 +35,9 @@ const checkAccount = async (req, res) => {
     const data = await checkAccountService(phone);
     return res.json({
       code: 0,
-      msg: data.msg,
+      msg: data.exists ? '该手机号已被注册' : '手机号可用',
       data: {
-        available: data.available
+        exists: data.exists
       }
     });
   } catch (error) {
