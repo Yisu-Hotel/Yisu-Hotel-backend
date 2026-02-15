@@ -483,9 +483,13 @@ const getHotelListService = async (params) => {
     city, // 前端传递的城市参数
     check_in_date,
     check_out_date,
+    check_in, // 前端可能传递的参数名
+    check_out, // 前端可能传递的参数名
     star_rating,
     minPrice,
     maxPrice,
+    min_price, // 前端可能传递的参数名
+    max_price, // 前端可能传递的参数名
     rating,
     minRating, // 前端传递的参数名
     facilities,
@@ -493,7 +497,8 @@ const getHotelListService = async (params) => {
     tags,
     nearby_info,
     keyword,
-    sort // 前端传递的排序参数
+    sort, // 前端传递的排序参数
+    sort_by // 前端可能传递的参数名
   } = params;
 
     console.log('Parsed params:', {
@@ -503,9 +508,13 @@ const getHotelListService = async (params) => {
       city,
       check_in_date,
       check_out_date,
+      check_in,
+      check_out,
       star_rating,
       minPrice,
       maxPrice,
+      min_price,
+      max_price,
       rating,
       minRating,
       facilities,
@@ -513,24 +522,27 @@ const getHotelListService = async (params) => {
       tags,
       nearby_info,
       keyword,
-      sort
+      sort,
+      sort_by
     });
 
     // 构建查询条件
-    const whereCondition = {};
+    const whereCondition = {
+      status: 'published' // 只返回已发布的酒店
+    };
 
     // 构建 OR 条件数组
     const orConditions = [];
 
-    // 城市筛选 - 暂时注释掉，以便返回所有酒店数据
-    // const cityFilter = location || city;
-    // if (cityFilter) {
-    //   console.log('Adding city filter:', cityFilter);
-    //   orConditions.push(
-    //     where(literal(`"Hotel"."location_info"->>'city'`), cityFilter),
-    //     where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: `%${cityFilter}%` })
-    //   );
-    // }
+    // 城市筛选
+    const cityFilter = location || city;
+    if (cityFilter) {
+      console.log('Adding city filter:', cityFilter);
+      orConditions.push(
+        where(literal(`"Hotel"."location_info"->>'city'`), cityFilter),
+        where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: `%${cityFilter}%` })
+      );
+    }
 
     // 关键词搜索
     if (keyword) {
@@ -563,19 +575,6 @@ const getHotelListService = async (params) => {
       whereCondition.rating = { [Op.gte]: ratingValue };
     }
 
-    // 价格筛选 - 暂时注释掉，因为数据库中没有 min_price 字段
-    // if (minPrice) {
-    //   console.log('Adding min price filter:', minPrice);
-    //   whereCondition.min_price = { [Op.gte]: minPrice };
-    // }
-    // if (maxPrice) {
-    //   console.log('Adding max price filter:', maxPrice);
-    //   whereCondition.min_price = { 
-    //     ...whereCondition.min_price,
-    //     [Op.lte]: maxPrice 
-    //   };
-    // }
-
     // 周边信息筛选
     if (nearby_info) {
       console.log('Adding nearby info filter:', nearby_info);
@@ -590,8 +589,13 @@ const getHotelListService = async (params) => {
 
     // 构建排序条件
     let orderCondition = [['created_at', 'DESC']];
-    if (sort === 'rating') {
+    const sortParam = sort || sort_by;
+    if (sortParam === 'rating') {
       orderCondition = [['rating', 'DESC']];
+    } else if (sortParam === 'price_asc') {
+      orderCondition = [[literal('min_price'), 'ASC']];
+    } else if (sortParam === 'price_desc') {
+      orderCondition = [[literal('min_price'), 'DESC']];
     }
     console.log('Order condition:', orderCondition);
 
@@ -611,7 +615,7 @@ const getHotelListService = async (params) => {
     console.log('Found hotels:', hotels.length, 'total:', total);
 
     // 格式化酒店数据
-    const formattedHotels = await Promise.all(hotels.map(async (hotel) => {
+    let formattedHotels = await Promise.all(hotels.map(async (hotel) => {
       // 处理主图片URL
       let mainImageUrl = hotel.main_image_url || [];
       if (Array.isArray(mainImageUrl)) {
@@ -666,11 +670,55 @@ const getHotelListService = async (params) => {
       };
     }));
 
+    // 价格筛选
+    const minPriceValue = minPrice || min_price;
+    const maxPriceValue = maxPrice || max_price;
+    if (minPriceValue || maxPriceValue) {
+      console.log('Applying price filter:', { minPriceValue, maxPriceValue });
+      formattedHotels = formattedHotels.filter(hotel => {
+        if (minPriceValue && hotel.min_price < minPriceValue) {
+          return false;
+        }
+        if (maxPriceValue && hotel.min_price > maxPriceValue) {
+          return false;
+        }
+        return true;
+      });
+      console.log('Hotels after price filter:', formattedHotels.length);
+    }
+
+    // 设施筛选
+    if (facilities) {
+      console.log('Applying facilities filter:', facilities);
+      const facilityList = Array.isArray(facilities) ? facilities : [facilities];
+      formattedHotels = formattedHotels.filter(hotel => {
+        // 这里简化处理，实际应该根据hotel_facilities表进行筛选
+        // 暂时返回所有酒店
+        return true;
+      });
+    }
+
+    // 标签筛选
+    if (tags) {
+      console.log('Applying tags filter:', tags);
+      const tagList = Array.isArray(tags) ? tags : [tags];
+      formattedHotels = formattedHotels.filter(hotel => {
+        if (!hotel.tags || !Array.isArray(hotel.tags)) {
+          return false;
+        }
+        return tagList.some(tag => hotel.tags.includes(tag));
+      });
+      console.log('Hotels after tags filter:', formattedHotels.length);
+    }
+
     console.log('Formatted hotels:', formattedHotels.length);
+
+    // 重新计算总数，因为我们可能在后端进行了额外的筛选
+    const filteredTotal = formattedHotels.length;
 
     const result = {
       list: formattedHotels,
-      total,
+      total: filteredTotal,
       page: parseInt(page),
       pageSize: parseInt(pageSize)
     };

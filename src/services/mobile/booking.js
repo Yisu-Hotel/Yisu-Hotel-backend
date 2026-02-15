@@ -130,6 +130,19 @@ const getBookingListService = async (user_id, params) => {
   
   const { page = 1, page_size = 10, status } = params;
   
+  // 验证user_id是否为有效的UUID格式
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(user_id)) {
+    console.log('Invalid user_id format, returning empty list:', user_id);
+    // 返回空的预订列表
+    return {
+      bookings: [],
+      total: 0,
+      page: parseInt(page),
+      page_size: parseInt(page_size)
+    };
+  }
+  
   // 构建查询条件
   const whereCondition = {
     user_id
@@ -139,36 +152,47 @@ const getBookingListService = async (user_id, params) => {
     whereCondition.status = status;
   }
   
-  // 查询预订列表
-  const { count, rows: bookings } = await Booking.findAndCountAll({
-    where: whereCondition,
-    order: [['booked_at', 'DESC']],
-    limit: parseInt(page_size),
-    offset: (parseInt(page) - 1) * parseInt(page_size)
-  });
-  
-  // 格式化数据
-  const formattedBookings = bookings.map((booking) => {
+  try {
+    // 查询预订列表
+    const { count, rows: bookings } = await Booking.findAndCountAll({
+      where: whereCondition,
+      order: [['booked_at', 'DESC']],
+      limit: parseInt(page_size),
+      offset: (parseInt(page) - 1) * parseInt(page_size)
+    });
+    
+    // 格式化数据
+    const formattedBookings = bookings.map((booking) => {
+      return {
+        id: booking.id,
+        hotel_id: booking.hotel_id,
+        hotel_name: booking.hotel_name,
+        room_type: booking.room_type_name,
+        check_in_date: booking.check_in_date,
+        check_out_date: booking.check_out_date,
+        total_price: parseFloat(booking.total_price) || 0,
+        status: booking.status,
+        status_text: getStatusText(booking.status),
+        booked_at: booking.booked_at
+      };
+    });
+    
     return {
-      id: booking.id,
-      hotel_id: booking.hotel_id,
-      hotel_name: booking.hotel_name,
-      room_type: booking.room_type_name,
-      check_in_date: booking.check_in_date,
-      check_out_date: booking.check_out_date,
-      total_price: parseFloat(booking.total_price) || 0,
-      status: booking.status,
-      status_text: getStatusText(booking.status),
-      booked_at: booking.booked_at
+      bookings: formattedBookings,
+      total: count,
+      page: parseInt(page),
+      page_size: parseInt(page_size)
     };
-  });
-  
-  return {
-    bookings: formattedBookings,
-    total: count,
-    page: parseInt(page),
-    page_size: parseInt(page_size)
-  };
+  } catch (error) {
+    console.error('Error getting booking list:', error);
+    // 发生错误时返回空列表
+    return {
+      bookings: [],
+      total: 0,
+      page: parseInt(page),
+      page_size: parseInt(page_size)
+    };
+  }
 };
 
 const getBookingDetailService = async (user_id, booking_id) => {

@@ -21,22 +21,7 @@ const getCouponListService = async (user_id, type = 'all') => {
     attributes: ['id', 'title', 'description', 'discount_type', 'discount_value', 'min_order_amount', 'valid_from', 'valid_until', 'total_count', 'used_count', 'is_new_user_only', 'rules']
   });
   
-  // 查询用户已领取的优惠券
-  const userCoupons = await UserCoupon.findAll({
-    where: {
-      user_id
-    },
-    include: [
-      {
-        model: Coupon,
-        as: 'coupon',
-        attributes: ['id', 'title', 'description', 'discount_type', 'discount_value', 'min_order_amount', 'valid_from', 'valid_until', 'total_count', 'used_count', 'is_new_user_only', 'rules']
-      }
-    ],
-    attributes: ['id', 'coupon_id', 'status', 'created_at']
-  });
-  
-  // 格式化数据
+  // 格式化可用优惠券数据
   const formattedAvailableCoupons = availableCoupons.map(coupon => ({
     coupon_id: coupon.id,
     title: coupon.title,
@@ -52,23 +37,51 @@ const getCouponListService = async (user_id, type = 'all') => {
     rules: coupon.rules
   }));
   
-  const formattedUserCoupons = userCoupons.map(userCoupon => ({
-    id: userCoupon.id,
-    coupon_id: userCoupon.coupon_id,
-    title: userCoupon.coupon.title,
-    description: userCoupon.coupon.description,
-    discount_type: userCoupon.coupon.discount_type,
-    discount_value: userCoupon.coupon.discount_value,
-    min_order_amount: userCoupon.coupon.min_order_amount,
-    valid_from: userCoupon.coupon.valid_from,
-    valid_until: userCoupon.coupon.valid_until,
-    total_count: userCoupon.coupon.total_count,
-    used_count: userCoupon.coupon.used_count,
-    is_new_user_only: userCoupon.coupon.is_new_user_only,
-    rules: userCoupon.coupon.rules,
-    status: userCoupon.status,
-    receive_time: userCoupon.created_at
-  }));
+  // 验证user_id是否为有效的UUID格式
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  let formattedUserCoupons = [];
+  
+  if (uuidRegex.test(user_id)) {
+    try {
+      // 查询用户已领取的优惠券
+      const userCoupons = await UserCoupon.findAll({
+        where: {
+          user_id
+        },
+        include: [
+          {
+            model: Coupon,
+            as: 'coupon',
+            attributes: ['id', 'title', 'description', 'discount_type', 'discount_value', 'min_order_amount', 'valid_from', 'valid_until', 'total_count', 'used_count', 'is_new_user_only', 'rules']
+          }
+        ],
+        attributes: ['id', 'coupon_id', 'status', 'created_at']
+      });
+      
+      // 格式化用户优惠券数据
+      formattedUserCoupons = userCoupons.map(userCoupon => ({
+        id: userCoupon.id,
+        coupon_id: userCoupon.coupon_id,
+        title: userCoupon.coupon.title,
+        description: userCoupon.coupon.description,
+        discount_type: userCoupon.coupon.discount_type,
+        discount_value: userCoupon.coupon.discount_value,
+        min_order_amount: userCoupon.coupon.min_order_amount,
+        valid_from: userCoupon.coupon.valid_from,
+        valid_until: userCoupon.coupon.valid_until,
+        total_count: userCoupon.coupon.total_count,
+        used_count: userCoupon.coupon.used_count,
+        is_new_user_only: userCoupon.coupon.is_new_user_only,
+        rules: userCoupon.coupon.rules,
+        status: userCoupon.status,
+        receive_time: userCoupon.created_at
+      }));
+    } catch (error) {
+      console.error('Error getting user coupons:', error);
+      // 发生错误时，只返回可用的优惠券
+      formattedUserCoupons = [];
+    }
+  }
   
   if (type === 'available') {
     return {

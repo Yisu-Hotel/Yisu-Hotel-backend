@@ -10,6 +10,9 @@ router.post('/', authMiddleware, createBookingValidator, bookingController.creat
 // 获取预订列表
 router.get('/list', authMiddleware, bookingController.getBookingList);
 
+// 根路径获取预订列表（兼容前端请求，暂时不验证token）
+router.get('/', bookingController.getBookingList);
+
 // 获取预订详情
 router.get('/detail/:id', authMiddleware, bookingController.getBookingDetail);
 

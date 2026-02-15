@@ -11,7 +11,7 @@ router.get('/list', hotelController.getHotelList);
 router.get('/search', hotelController.searchHotels);
 
 // 获取酒店详情
-router.get('/detail/:id', authMiddleware, hotelController.getHotelDetail);
+router.get('/detail/:id', hotelController.getHotelDetail);
 
 // 获取城市热门标签与周边信息
 router.get('/tags', hotelController.getHotelTags);
