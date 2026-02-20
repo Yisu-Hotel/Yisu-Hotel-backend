@@ -25,6 +25,7 @@
     "@alicloud/openapi-client": "^0.4.15",
     "@alicloud/tea-typescript": "^1.0.0",
     "@alicloud/tea-util": "^1.4.9",
+    "axios": "^1.13.5",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",

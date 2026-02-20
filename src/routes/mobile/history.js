@@ -4,12 +4,12 @@ const historyController = require('../../controllers/mobile/history');
 const authMiddleware = require('../../middlewares/mobile/auth');
 
 // 获取浏览历史列表
-router.get('/list', historyController.getHistoryList);
+router.get('/list', authMiddleware, historyController.getHistoryList);
 
 // 删除单条浏览历史
-router.delete('/:id', historyController.removeHistory);
+router.delete('/:id', authMiddleware, historyController.removeHistory);
 
 // 清空所有浏览历史
-router.delete('/clear', historyController.clearHistory);
+router.delete('/clear', authMiddleware, historyController.clearHistory);
 
 module.exports = router;

@@ -10,9 +10,19 @@ const searchHotelsService = async (params) => {
 
   // 添加城市筛选
   if (city) {
+    // 构建更灵活的城市匹配条件
+    const cityLikeCondition = city.includes('市') ? city : `${city}市`;
     whereClause[Op.or] = [
+      // 精确匹配城市名称
       where(literal(`"Hotel"."location_info"->>'city'`), city),
-      where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: `%${city}%` })
+      // 匹配包含"市"后缀的城市名称
+      where(literal(`"Hotel"."location_info"->>'city'`), cityLikeCondition),
+      // 模糊匹配城市名称（去除"市"后缀）
+      where(literal(`"Hotel"."location_info"->>'city'`), { [Op.iLike]: `%${city}%` }),
+      // 模糊匹配格式化地址
+      where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: `%${city}%` }),
+      // 匹配省份（有些城市名称和省份名称相同）
+      where(literal(`"Hotel"."location_info"->>'province'`), { [Op.iLike]: `%${city}%` })
     ];
   }
 
@@ -111,6 +121,8 @@ const searchHotelsService = async (params) => {
       distance: Math.random() * 5, // 模拟距离
       description: hotel.description,
       main_image_url: mainImageUrl,
+      image: mainImageUrl, // 兼容前端使用的image字段
+      imageUrl: mainImageUrl, // 兼容前端使用的imageUrl字段
       min_price: minPrice,
       facilities,
       services
@@ -126,6 +138,14 @@ const searchHotelsService = async (params) => {
 };
 
 const getHotelDetailService = async (hotel_id) => {
+  // 验证酒店ID
+  if (!hotel_id || hotel_id === 'undefined' || hotel_id === 'null') {
+    const error = new Error('酒店id不能为空');
+    error.code = 400;
+    error.httpStatus = 400;
+    throw error;
+  }
+
   // 构建查询选项
   const queryOptions = {
     where: { id: hotel_id },
@@ -220,11 +240,13 @@ const getHotelDetailService = async (hotel_id) => {
 
       return {
         id: roomType.id,
+        name: roomType.room_type_name,
         room_type_name: roomType.room_type_name,
         bed_type: roomType.bed_type,
         area: roomType.area,
         description: roomType.description,
         room_image_url: `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=hotel%20room%20interior%20${roomType.id}%20default%20placeholder&image_size=landscape_4_3`, // 默认占位图片
+        img: `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=hotel%20room%20interior%20${roomType.id}%20default%20placeholder&image_size=landscape_4_3`, // 兼容前端使用的img字段
         tags: ['推荐', '高楼层', '景观房'], // 模拟数据
         facilities: [], // 模拟数据
         services: [], // 模拟数据
@@ -476,54 +498,93 @@ const getHotelListService = async (params) => {
   
   try {
     // 处理前端传递的参数，支持不同的参数名
-  const {
-    page = 1,
-    pageSize = 10,
-    location,
-    city, // 前端传递的城市参数
-    check_in_date,
-    check_out_date,
-    check_in, // 前端可能传递的参数名
-    check_out, // 前端可能传递的参数名
-    star_rating,
-    minPrice,
-    maxPrice,
-    min_price, // 前端可能传递的参数名
-    max_price, // 前端可能传递的参数名
-    rating,
-    minRating, // 前端传递的参数名
-    facilities,
-    services,
-    tags,
-    nearby_info,
-    keyword,
-    sort, // 前端传递的排序参数
-    sort_by // 前端可能传递的参数名
-  } = params;
+    const {
+      page = 1,
+      pageSize = 10,
+      location,
+      city, // 前端传递的城市参数
+      cityName, // 可能的城市参数名
+      destination, // 可能的城市参数名
+      check_in_date,
+      check_out_date,
+      check_in, // 前端可能传递的参数名
+      check_out, // 前端可能传递的参数名
+      dateRange, // 可能的日期范围参数
+      star_rating,
+      starLevels, // 可能的星级参数名
+      stars, // 可能的星级参数名
+      minPrice,
+      maxPrice,
+      min_price, // 前端可能传递的参数名
+      max_price, // 前端可能传递的参数名
+      priceRange, // 可能的价格范围参数
+      rating,
+      minRating, // 前端传递的参数名
+      facilities,
+      amenities, // 可能的设施参数名
+      services,
+      tags,
+      nearby_info,
+      keyword,
+      searchText, // 可能的关键词参数名
+      sort, // 前端传递的排序参数
+      sort_by, // 前端可能传递的参数名
+      orderBy, // 可能的排序参数名
+      // 新增：处理前端传递的selectedTags和selectedFacilities参数
+      selectedTags, // 前端传递的选中标签
+      selectedFacilities, // 前端传递的选中设施
+      selectedFilterValue, // 前端传递的选中筛选值
+      currentFilterType, // 前端传递的当前筛选类型
+      // 新增：处理更多可能的参数名
+      checkInDate, // 前端传递的入住日期参数名
+      checkOutDate, // 前端传递的离店日期参数名
+      destinationCity, // 可能的目的地城市参数名
+      searchKeyword, // 可能的搜索关键词参数名
+      sortType, // 可能的排序类型参数名
+      orderType // 可能的排序顺序参数名
+    } = params;
 
     console.log('Parsed params:', {
       page,
       pageSize,
       location,
       city,
+      cityName,
+      destination,
       check_in_date,
       check_out_date,
       check_in,
       check_out,
+      checkInDate,
+      checkOutDate,
+      dateRange,
       star_rating,
+      starLevels,
+      stars,
       minPrice,
       maxPrice,
       min_price,
       max_price,
+      priceRange,
       rating,
       minRating,
       facilities,
+      amenities,
       services,
       tags,
+      selectedTags,
+      selectedFacilities,
+      selectedFilterValue,
+      currentFilterType,
       nearby_info,
       keyword,
+      searchText,
+      searchKeyword,
       sort,
-      sort_by
+      sort_by,
+      orderBy,
+      sortType,
+      orderType
     });
 
     // 构建查询条件
@@ -534,25 +595,36 @@ const getHotelListService = async (params) => {
     // 构建 OR 条件数组
     const orConditions = [];
 
-    // 城市筛选
-    const cityFilter = location || city;
+    // 城市筛选 - 支持多种参数名
+    const cityFilter = location || city || cityName || destination || destinationCity;
     if (cityFilter) {
       console.log('Adding city filter:', cityFilter);
+      // 构建更灵活的城市匹配条件
+      const cityLikeCondition = cityFilter.includes('市') ? cityFilter : `${cityFilter}市`;
       orConditions.push(
+        // 精确匹配城市名称
         where(literal(`"Hotel"."location_info"->>'city'`), cityFilter),
-        where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: `%${cityFilter}%` })
+        // 匹配包含"市"后缀的城市名称
+        where(literal(`"Hotel"."location_info"->>'city'`), cityLikeCondition),
+        // 模糊匹配城市名称（去除"市"后缀）
+        where(literal(`"Hotel"."location_info"->>'city'`), { [Op.iLike]: `%${cityFilter}%` }),
+        // 模糊匹配格式化地址
+        where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: `%${cityFilter}%` }),
+        // 匹配省份（有些城市名称和省份名称相同）
+        where(literal(`"Hotel"."location_info"->>'province'`), { [Op.iLike]: `%${cityFilter}%` })
       );
     }
 
-    // 关键词搜索
-    if (keyword) {
-      console.log('Adding keyword filter:', keyword);
+    // 关键词搜索 - 支持多种参数名
+    const keywordFilter = keyword || searchText || searchKeyword;
+    if (keywordFilter) {
+      console.log('Adding keyword filter:', keywordFilter);
       orConditions.push(
-        { hotel_name_cn: { [Op.iLike]: `%${keyword}%` } },
-        { hotel_name_en: { [Op.iLike]: `%${keyword}%` } },
-        { description: { [Op.iLike]: `%${keyword}%` } },
-        where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: `%${keyword}%` }),
-        { nearby_info: { [Op.iLike]: `%${keyword}%` } }
+        { hotel_name_cn: { [Op.iLike]: `%${keywordFilter}%` } },
+        { hotel_name_en: { [Op.iLike]: `%${keywordFilter}%` } },
+        { description: { [Op.iLike]: `%${keywordFilter}%` } },
+        where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: `%${keywordFilter}%` }),
+        { nearby_info: { [Op.iLike]: `%${keywordFilter}%` } }
       );
     }
 
@@ -562,10 +634,27 @@ const getHotelListService = async (params) => {
       console.log('Added OR conditions:', orConditions.length);
     }
 
-    // 星级筛选
-    if (star_rating) {
-      console.log('Adding star rating filter:', star_rating);
-      whereCondition.star_rating = star_rating;
+    // 星级筛选 - 支持多种参数名
+    const starFilter = star_rating || starLevels || stars;
+    if (starFilter) {
+      console.log('Adding star rating filter:', starFilter);
+      // 处理数组格式的星级参数
+      if (Array.isArray(starFilter)) {
+        whereCondition.star_rating = { [Op.in]: starFilter };
+      } else if (typeof starFilter === 'string' && starFilter.includes(',')) {
+        // 处理逗号分隔的字符串格式
+        const starArray = starFilter.split(',').map(s => parseInt(s)).filter(s => !isNaN(s));
+        whereCondition.star_rating = { [Op.in]: starArray };
+      } else {
+        whereCondition.star_rating = starFilter;
+      }
+    } else if (selectedFilterValue && currentFilterType === 'star') {
+      // 处理前端传递的selectedFilterValue和currentFilterType参数
+      console.log('Adding star rating filter from selectedFilterValue:', selectedFilterValue);
+      const starLevel = parseInt(selectedFilterValue);
+      if (!isNaN(starLevel)) {
+        whereCondition.star_rating = starLevel;
+      }
     }
 
     // 评分筛选（支持前端传递的 minRating 参数）
@@ -589,13 +678,16 @@ const getHotelListService = async (params) => {
 
     // 构建排序条件
     let orderCondition = [['created_at', 'DESC']];
-    const sortParam = sort || sort_by;
-    if (sortParam === 'rating') {
+    const sortParam = sort || sort_by || orderBy || sortType || orderType;
+    if (sortParam === 'rating' || sortParam === 'rating_desc') {
       orderCondition = [['rating', 'DESC']];
     } else if (sortParam === 'price_asc') {
       orderCondition = [[literal('min_price'), 'ASC']];
     } else if (sortParam === 'price_desc') {
       orderCondition = [[literal('min_price'), 'DESC']];
+    } else if (sortParam === 'distance') {
+      // 距离排序（需要根据实际情况实现）
+      orderCondition = [['created_at', 'DESC']];
     }
     console.log('Order condition:', orderCondition);
 
@@ -666,13 +758,41 @@ const getHotelListService = async (params) => {
         average_rating: hotel.rating || 0,
         booking_count: Math.floor(Math.random() * 5000), // 模拟数据
         review_count: Math.floor(Math.random() * 1000), // 模拟数据
-        min_price: minPrice
+        min_price: minPrice,
+        // 添加距离字段（模拟数据）
+        distance: Math.random() * 5
       };
     }));
 
-    // 价格筛选
-    const minPriceValue = minPrice || min_price;
-    const maxPriceValue = maxPrice || max_price;
+    // 价格筛选 - 支持多种参数名和格式
+    let minPriceValue = minPrice || min_price;
+    let maxPriceValue = maxPrice || max_price;
+    // 处理价格范围数组
+    if (priceRange && Array.isArray(priceRange) && priceRange.length === 2) {
+      minPriceValue = priceRange[0];
+      maxPriceValue = priceRange[1];
+    }
+    // 处理前端传递的selectedFilterValue和currentFilterType参数
+    if (selectedFilterValue && currentFilterType === 'price') {
+      console.log('Adding price filter from selectedFilterValue:', selectedFilterValue);
+      const priceValue = selectedFilterValue;
+      if (priceValue === '0-500') {
+        minPriceValue = 0;
+        maxPriceValue = 500;
+      } else if (priceValue === '500-1000') {
+        minPriceValue = 500;
+        maxPriceValue = 1000;
+      } else if (priceValue === '1000-1500') {
+        minPriceValue = 1000;
+        maxPriceValue = 1500;
+      } else if (priceValue === '1500-2000') {
+        minPriceValue = 1500;
+        maxPriceValue = 2000;
+      } else if (priceValue === '2000+') {
+        minPriceValue = 2000;
+        maxPriceValue = 5000;
+      }
+    }
     if (minPriceValue || maxPriceValue) {
       console.log('Applying price filter:', { minPriceValue, maxPriceValue });
       formattedHotels = formattedHotels.filter(hotel => {
@@ -687,21 +807,39 @@ const getHotelListService = async (params) => {
       console.log('Hotels after price filter:', formattedHotels.length);
     }
 
-    // 设施筛选
-    if (facilities) {
-      console.log('Applying facilities filter:', facilities);
-      const facilityList = Array.isArray(facilities) ? facilities : [facilities];
+    // 设施筛选 - 支持多种参数名
+    const facilitiesFilter = facilities || amenities || selectedFacilities;
+    if (facilitiesFilter) {
+      console.log('Applying facilities filter:', facilitiesFilter);
+      let facilityList = [];
+      if (Array.isArray(facilitiesFilter)) {
+        facilityList = facilitiesFilter;
+      } else if (typeof facilitiesFilter === 'string' && facilitiesFilter.includes(',')) {
+        // 处理逗号分隔的字符串格式
+        facilityList = facilitiesFilter.split(',').filter(f => f.trim() !== '');
+      } else {
+        facilityList = [facilitiesFilter];
+      }
+      // 过滤酒店，保留包含指定设施的酒店
       formattedHotels = formattedHotels.filter(hotel => {
         // 这里简化处理，实际应该根据hotel_facilities表进行筛选
-        // 暂时返回所有酒店
-        return true;
+        // 暂时基于酒店标签进行筛选
+        return facilityList.some(facility => {
+          // 检查酒店标签是否包含设施
+          if (hotel.tags && Array.isArray(hotel.tags)) {
+            return hotel.tags.includes(facility);
+          }
+          return false;
+        });
       });
+      console.log('Hotels after facilities filter:', formattedHotels.length);
     }
 
-    // 标签筛选
-    if (tags) {
-      console.log('Applying tags filter:', tags);
-      const tagList = Array.isArray(tags) ? tags : [tags];
+    // 标签筛选 - 支持前端传递的selectedTags参数
+    const tagsFilter = tags || selectedTags;
+    if (tagsFilter) {
+      console.log('Applying tags filter:', tagsFilter);
+      const tagList = Array.isArray(tagsFilter) ? tagsFilter : [tagsFilter];
       formattedHotels = formattedHotels.filter(hotel => {
         if (!hotel.tags || !Array.isArray(hotel.tags)) {
           return false;
@@ -709,6 +847,11 @@ const getHotelListService = async (params) => {
         return tagList.some(tag => hotel.tags.includes(tag));
       });
       console.log('Hotels after tags filter:', formattedHotels.length);
+    }
+
+    // 距离排序（如果需要）
+    if (sortParam === 'distance') {
+      formattedHotels.sort((a, b) => a.distance - b.distance);
     }
 
     console.log('Formatted hotels:', formattedHotels.length);
@@ -720,7 +863,24 @@ const getHotelListService = async (params) => {
       list: formattedHotels,
       total: filteredTotal,
       page: parseInt(page),
-      pageSize: parseInt(pageSize)
+      pageSize: parseInt(pageSize),
+      // 添加筛选条件到返回结果，以便前端显示
+      filters: {
+        city: cityFilter,
+        check_in: check_in || check_in_date,
+        check_out: check_out || check_out_date,
+        star_rating: starFilter,
+        min_price: minPriceValue,
+        max_price: maxPriceValue,
+        facilities: facilitiesFilter,
+        tags: tagsFilter,
+        keyword: keywordFilter,
+        sort: sortParam,
+        selectedTags: selectedTags,
+        selectedFacilities: selectedFacilities,
+        selectedFilterValue: selectedFilterValue,
+        currentFilterType: currentFilterType
+      }
     };
 
     console.log('Returning result:', result);

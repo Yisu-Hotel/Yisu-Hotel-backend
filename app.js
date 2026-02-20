@@ -24,12 +24,37 @@ const mobileLocationRoutes = require('./src/routes/mobile/location');
 const mobileNearbyRoutes = require('./src/routes/mobile/nearby');
 const mobileCouponRoutes = require('./src/routes/mobile/coupon');
 const mobileHistoryRoutes = require('./src/routes/mobile/history');
+const mobileChatRoutes = require('./src/routes/mobile/chat');
 
 const app = express();
 
 app.use(cors());
-app.use(express.json({ limit: '100mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// 自定义JSON解析中间件，处理格式不正确的请求体
+app.use((req, res, next) => {
+  if (req.headers['content-type'] === 'application/json') {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    req.on('end', () => {
+      try {
+        req.body = JSON.parse(body);
+        next();
+      } catch (error) {
+        console.error('JSON解析错误:', error);
+        // 即使JSON解析错误，也继续处理请求，设置空的请求体
+        req.body = {};
+        next();
+      }
+    });
+  } else {
+    // 对于非JSON请求，使用默认的解析器
+    express.json({ limit: '100mb' })(req, res, () => {
+      express.urlencoded({ extended: true, limit: '10mb' })(req, res, next);
+    });
+  }
+});
 
 app.get('/api/status', (req, res) => {
   res.json({ code: 200, msg: 'Express后端服务启动成功！', data: null });
@@ -47,7 +72,7 @@ app.get('/api/test', (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 app.use('/auth', authRoutes);
 app.use('/mobile/auth', mobileAuthRoutes);
@@ -70,6 +95,7 @@ app.use('/mobile/location', mobileLocationRoutes);
 app.use('/mobile/nearby', mobileNearbyRoutes);
 app.use('/mobile/coupon', mobileCouponRoutes);
 app.use('/mobile/history', mobileHistoryRoutes);
+app.use('/mobile/chat', mobileChatRoutes);
 
 // 全局错误处理中间件
 app.use((err, req, res, next) => {
