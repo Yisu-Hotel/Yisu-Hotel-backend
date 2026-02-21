@@ -46,7 +46,7 @@ const validateHotelListQuery = (req, res, next) => {
     sizeNumber = 100;
   }
 
-  if (status && !['draft', 'pending', 'approved', 'rejected'].includes(status)) {
+  if (status && !['draft', 'pending', 'published', 'rejected'].includes(status)) {
     return res.status(400).json({
       code: 4009,
       msg: '参数格式不正确',

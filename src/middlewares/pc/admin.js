@@ -46,7 +46,7 @@ const validateAdminHotelAuditListQuery = (req, res, next) => {
   let statusValue = null;
   if (status !== undefined) {
     statusValue = isNonEmptyString(status) ? String(status).trim() : '';
-    if (!statusValue || !['pending', 'auditing', 'approved', 'rejected'].includes(statusValue)) {
+    if (!statusValue || !['pending', 'auditing', 'published', 'rejected'].includes(statusValue)) {
       return res.status(400).json({
         code: 4009,
         msg: '参数格式不正确',
@@ -136,7 +136,7 @@ const validateAdminBatchAudit = (req, res, next) => {
   }
 
   const statusValue = isNonEmptyString(status) ? String(status).trim() : '';
-  if (!['approved', 'rejected'].includes(statusValue)) {
+  if (!['published', 'rejected'].includes(statusValue)) {
     return res.status(400).json({
       code: 4009,
       msg: '参数格式不正确',
