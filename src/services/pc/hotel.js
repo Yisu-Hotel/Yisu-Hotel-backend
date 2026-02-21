@@ -20,9 +20,9 @@ const {
   RoomPolicy
 } = require('../../models');
 
-const ROOM_IMAGE_DIR = 'd:\\Yisu\\Yisu-Hotel-PC\\public\\room_image';
+const ROOM_IMAGE_DIR = path.resolve(__dirname, '../../../../Yisu-Hotel-PC/public/room_image');
 const ROOM_IMAGE_URL_BASE = 'http://localhost:3000/room_image';
-const HOTEL_IMAGE_DIR = 'd:\\Yisu\\Yisu-Hotel-PC\\public\\main_image';
+const HOTEL_IMAGE_DIR = path.resolve(__dirname, '../../../../Yisu-Hotel-PC/public/main_image');
 const HOTEL_IMAGE_URL_BASE = 'http://localhost:3000/main_image';
 
 const ensureImageDir = (dir) => {
