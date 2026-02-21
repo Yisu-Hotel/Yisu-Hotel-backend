@@ -1,5 +1,5 @@
 const { Op, where, literal } = require('sequelize');
-const { Hotel, HotelFacility, HotelService, HotelPolicy, RoomType, RoomPrice, HotelReview, Facility, Service } = require('../../models');
+const { Hotel, HotelFacility, HotelService, HotelPolicy, RoomType, RoomPrice, HotelReview, Facility, Service, RoomTag, RoomFacility, RoomService, RoomPolicy, Favorite, Booking } = require('../../models');
 
 const searchHotelsService = async (params) => {
   const { city, check_in, check_out, guests, min_price, max_price, star_rating, facilities, sort_by, page = 1, size = 20 } = params;
@@ -180,12 +180,44 @@ const getHotelDetailService = async (hotel_id) => {
   };
   
   // 并行执行查询，提高性能
-  const [hotel, roomTypes] = await Promise.all([
+  const [hotel, roomTypes, reviewCount, favoriteCount, bookingCount] = await Promise.all([
     Hotel.findOne(queryOptions),
     RoomType.findAll({
       where: { hotel_id },
-      attributes: ['id', 'room_type_name', 'bed_type', 'area', 'description']
-    })
+      attributes: ['id', 'room_type_name', 'bed_type', 'area', 'description', 'room_image_url'],
+      include: [
+        {
+          model: RoomTag,
+          as: 'roomTags',
+          attributes: ['tag_name']
+        },
+        {
+          model: RoomFacility,
+          as: 'roomFacilities',
+          include: [{
+            model: Facility,
+            as: 'facility',
+            attributes: ['id', 'name']
+          }]
+        },
+        {
+          model: RoomService,
+          as: 'roomServices',
+          include: [{
+            model: Service,
+            as: 'service',
+            attributes: ['id', 'name']
+          }]
+        },
+        {
+          model: RoomPolicy,
+          as: 'policy'
+        }
+      ]
+    }),
+    HotelReview.count({ where: { hotel_id } }),
+    Favorite.count({ where: { hotel_id } }),
+    Booking.count({ where: { hotel_id } })
   ]);
 
   if (!hotel) {
@@ -245,16 +277,21 @@ const getHotelDetailService = async (hotel_id) => {
         bed_type: roomType.bed_type,
         area: roomType.area,
         description: roomType.description,
-        room_image_url: `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=hotel%20room%20interior%20${roomType.id}%20default%20placeholder&image_size=landscape_4_3`, // 默认占位图片
-        img: `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=hotel%20room%20interior%20${roomType.id}%20default%20placeholder&image_size=landscape_4_3`, // 兼容前端使用的img字段
-        tags: ['推荐', '高楼层', '景观房'], // 模拟数据
-        facilities: [], // 模拟数据
-        services: [], // 模拟数据
+        room_image_url: roomType.room_image_url || '',
+        tags: (roomType.roomTags || []).map(t => t.tag_name),
+        facilities: (roomType.roomFacilities || []).map(rf => ({
+          id: rf.facility?.id,
+          name: rf.facility?.name
+        })).filter(f => f.id && f.name),
+        services: (roomType.roomServices || []).map(rs => ({
+          id: rs.service?.id,
+          name: rs.service?.name
+        })).filter(s => s.id && s.name),
         policies: {
-          cancellation: '不可取消',
-          payment: '在线支付',
-          children: '不允许携带儿童',
-          pets: '不允许携带宠物'
+          cancellation: roomType.policy?.cancellation_policy || '不可取消',
+          payment: roomType.policy?.payment_policy || '在线支付',
+          children: roomType.policy?.children_policy || '不允许携带儿童',
+          pets: roomType.policy?.pets_policy || '不允许携带宠物'
         },
         prices
       };
@@ -280,7 +317,7 @@ const getHotelDetailService = async (hotel_id) => {
     hotel_name_en: hotel.hotel_name_en,
     star_rating: hotel.star_rating,
     rating: hotel.rating || 0,
-    review_count: Math.floor(Math.random() * 1000), // 模拟数据
+    review_count: reviewCount || 0,
     description: hotel.description,
     phone: hotel.phone || '',
     opening_date: hotel.opening_date || '',
@@ -288,8 +325,8 @@ const getHotelDetailService = async (hotel_id) => {
     main_image_url: mainImageUrl,
     tags: hotel.tags || [],
     location_info: hotel.location_info || {},
-    favorite_count: Math.floor(Math.random() * 1000), // 模拟数据
-    booking_count: Math.floor(Math.random() * 5000), // 模拟数据
+    favorite_count: favoriteCount || 0,
+    booking_count: bookingCount || 0,
     facilities,
     services,
     policies,
@@ -413,7 +450,36 @@ const getRoomTypesService = async (hotel_id, check_in, check_out) => {
   // 从数据库获取房型信息
   const roomTypes = await RoomType.findAll({
     where: { hotel_id },
-    attributes: ['id', 'room_type_name', 'description', 'bed_type', 'area', 'max_guests', 'base_price', 'main_image_url']
+    attributes: ['id', 'room_type_name', 'description', 'bed_type', 'area', 'max_guests', 'base_price', 'main_image_url'],
+    include: [
+      {
+        model: RoomTag,
+        as: 'roomTags',
+        attributes: ['tag_name']
+      },
+      {
+        model: RoomFacility,
+        as: 'roomFacilities',
+        include: [{
+          model: Facility,
+          as: 'facility',
+          attributes: ['id', 'name']
+        }]
+      },
+      {
+        model: RoomService,
+        as: 'roomServices',
+        include: [{
+          model: Service,
+          as: 'service',
+          attributes: ['id', 'name']
+        }]
+      },
+      {
+        model: RoomPolicy,
+        as: 'policy'
+      }
+    ]
   });
 
   // 格式化房型数据
@@ -426,19 +492,20 @@ const getRoomTypesService = async (hotel_id, check_in, check_out) => {
     max_guests: roomType.max_guests,
     base_price: roomType.base_price,
     main_image_url: roomType.main_image_url,
-    facilities: [
-      { id: 1, name: '免费WiFi' },
-      { id: 2, name: '空调' },
-      { id: 3, name: '电视' },
-      { id: 4, name: '独立卫浴' }
-    ],
-    services: [
-      { id: 1, name: '24小时热水' },
-      { id: 2, name: '洗漱用品' }
-    ],
+    tags: (roomType.roomTags || []).map(t => t.tag_name),
+    facilities: (roomType.roomFacilities || []).map(rf => ({
+      id: rf.facility?.id,
+      name: rf.facility?.name
+    })).filter(f => f.id && f.name),
+    services: (roomType.roomServices || []).map(rs => ({
+      id: rs.service?.id,
+      name: rs.service?.name
+    })).filter(s => s.id && s.name),
     policies: [
       { id: 1, type: 'check_in', value: '14:00后' },
-      { id: 2, type: 'check_out', value: '12:00前' }
+      { id: 2, type: 'check_out', value: '12:00前' },
+      { id: 3, type: 'cancellation', value: roomType.policy?.cancellation_policy || '入住前24小时可免费取消' },
+      { id: 4, type: 'payment', value: roomType.policy?.payment_policy || '在线支付' }
     ]
   }));
 
@@ -449,7 +516,36 @@ const getRoomTypeDetailService = async (hotel_id, room_type_id, check_in, check_
   // 从数据库获取房型详情
   const roomType = await RoomType.findOne({
     where: { id: room_type_id, hotel_id },
-    attributes: ['id', 'room_type_name', 'description', 'bed_type', 'area', 'max_guests', 'base_price', 'main_image_url']
+    attributes: ['id', 'room_type_name', 'description', 'bed_type', 'area', 'max_guests', 'base_price', 'main_image_url'],
+    include: [
+      {
+        model: RoomTag,
+        as: 'roomTags',
+        attributes: ['tag_name']
+      },
+      {
+        model: RoomFacility,
+        as: 'roomFacilities',
+        include: [{
+          model: Facility,
+          as: 'facility',
+          attributes: ['id', 'name']
+        }]
+      },
+      {
+        model: RoomService,
+        as: 'roomServices',
+        include: [{
+          model: Service,
+          as: 'service',
+          attributes: ['id', 'name']
+        }]
+      },
+      {
+        model: RoomPolicy,
+        as: 'policy'
+      }
+    ]
   });
 
   if (!roomType) {
@@ -469,25 +565,22 @@ const getRoomTypeDetailService = async (hotel_id, room_type_id, check_in, check_
     max_guests: roomType.max_guests,
     base_price: roomType.base_price,
     main_image_url: roomType.main_image_url,
-    facilities: [
-      { id: 1, name: '免费WiFi' },
-      { id: 2, name: '空调' },
-      { id: 3, name: '电视' },
-      { id: 4, name: '独立卫浴' },
-      { id: 5, name: '书桌' },
-      { id: 6, name: '衣柜' }
-    ],
-    services: [
-      { id: 1, name: '24小时热水' },
-      { id: 2, name: '洗漱用品' },
-      { id: 3, name: '毛巾浴巾' },
-      { id: 4, name: '拖鞋' }
-    ],
+    tags: (roomType.roomTags || []).map(t => t.tag_name),
+    facilities: (roomType.roomFacilities || []).map(rf => ({
+      id: rf.facility?.id,
+      name: rf.facility?.name
+    })).filter(f => f.id && f.name),
+    services: (roomType.roomServices || []).map(rs => ({
+      id: rs.service?.id,
+      name: rs.service?.name
+    })).filter(s => s.id && s.name),
     policies: [
       { id: 1, type: 'check_in', value: '14:00后' },
       { id: 2, type: 'check_out', value: '12:00前' },
-      { id: 3, type: 'cancellation', value: '入住前24小时可免费取消' },
-      { id: 4, type: 'smoking', value: '禁烟' }
+      { id: 3, type: 'cancellation', value: roomType.policy?.cancellation_policy || '入住前24小时可免费取消' },
+      { id: 4, type: 'payment', value: roomType.policy?.payment_policy || '在线支付' },
+      { id: 5, type: 'children', value: roomType.policy?.children_policy || '不允许携带儿童' },
+      { id: 6, type: 'pets', value: roomType.policy?.pets_policy || '不允许携带宠物' }
     ]
   };
 };

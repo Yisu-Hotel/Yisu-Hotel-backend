@@ -3,7 +3,7 @@ const axios = require('axios');
 async function testHotelDetailAPI() {
   try {
     // 使用一个有效的酒店ID进行测试
-    const hotelId = '80f9edf1-9a7a-4f29-8d43-8735ad83fa16';
+    const hotelId = 'b918694d-61f7-4f94-8b19-930729b8a5be';
     const response = await axios.get(`http://localhost:3001/mobile/hotel/${hotelId}`);
     
     console.log('API Response:', JSON.stringify(response.data, null, 2));
