@@ -212,6 +212,7 @@ const getBookingDetailService = async (user_id, booking_id) => {
     include: [
       {
         model: Hotel,
+        as: 'hotel',
         attributes: ['hotel_name_cn', 'phone', 'location_info']
       }
     ]
@@ -235,8 +236,8 @@ const getBookingDetailService = async (user_id, booking_id) => {
     order_number: booking.order_number || `ORD${booking.id.substring(0, 8).toUpperCase()}`,
     hotel_id: booking.hotel_id,
     hotel_name: booking.hotel_name,
-    hotel_phone: booking.Hotel?.phone || '',
-    hotel_address: booking.Hotel?.location_info?.formatted_address || '',
+    hotel_phone: booking.hotel?.phone || '',
+    hotel_address: booking.hotel?.location_info?.formatted_address || '',
     room_type: booking.room_type_name,
     check_in_date: booking.check_in_date,
     check_out_date: booking.check_out_date,

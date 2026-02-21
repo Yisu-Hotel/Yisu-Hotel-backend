@@ -1,46 +1,98 @@
 const http = require('http');
 
-// 存储有效的预订ID
 let validBookingId = '';
+let authToken = '';
+const hostname = 'localhost';
+const port = process.env.PORT || 3001;
 
-// 测试获取预订列表
-const testGetBookingList = () => {
-  console.log('=== 测试获取预订列表 ===');
-  const req = http.request({
-    hostname: 'localhost',
-    port: 5050,
-    path: '/mobile/booking/list',
-    method: 'GET',
-    headers: { 
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTQxN2NkM2EtNGVjOS00Zjk0LTgzYzctYjIxNGU5ZGQ3NmRhIiwicGhvbmUiOiIxODU5NTg5MDk4NyIsInJvbGUiOiJtb2JpbGUiLCJpYXQiOjE3NzA5NjQ5NzEsImV4cCI6MTc3MDk3MjE3MX0.LsWP3iuIH9cvREbdKftDRX2R-D3JYiIJA1SGxKgtxvg'
-    }
-  }, (res) => {
+const requestJson = (options, body) => new Promise((resolve, reject) => {
+  const req = http.request(options, (res) => {
     let data = '';
     res.on('data', (chunk) => data += chunk);
     res.on('end', () => {
-      const response = JSON.parse(data);
-      console.log('Get Booking List Response:', JSON.stringify(response, null, 2));
-      
-      // 从响应中获取一个有效的预订ID
-      if (response.code === 0 && response.data.bookings && response.data.bookings.length > 0) {
-        validBookingId = response.data.bookings[0].id;
-        console.log('获取到有效的预订ID:', validBookingId);
-        
-        // 使用有效的预订ID测试其他功能
-        testGetBookingDetail(validBookingId);
-        testCancelBooking(validBookingId);
-        testPayBooking(validBookingId);
+      try {
+        resolve(JSON.parse(data));
+      } catch (error) {
+        resolve({
+          code: -1,
+          msg: 'Invalid JSON response',
+          data: {
+            statusCode: res.statusCode,
+            contentType: res.headers['content-type'],
+            body: data
+          }
+        });
       }
     });
   });
-
-  req.on('error', (error) => console.error('请求失败:', error.message));
+  req.on('error', reject);
+  if (body) {
+    req.write(JSON.stringify(body));
+  }
   req.end();
+});
+
+const formatDate = (date) => date.toISOString().split('T')[0];
+
+const loginAndRun = async () => {
+  try {
+    const response = await requestJson({
+      hostname,
+      port,
+      path: '/mobile/auth/login',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    }, {
+      phone: '15928077855',
+      password: 'xby123456'
+    });
+    console.log('Login Response:', JSON.stringify(response, null, 2));
+    if (response.code === 0 && response.data && response.data.token) {
+      authToken = response.data.token;
+      // 使用 await 确保顺序执行
+      await testGetBookingList();
+      await testCreateBooking();
+      
+      // 对新创建的订单进行支付和取消测试
+      if (validBookingId) {
+        console.log('对新订单进行支付和取消测试:', validBookingId);
+        await testPayBooking(validBookingId);
+        await testCancelBooking(validBookingId);
+      }
+    }
+  } catch (error) {
+    console.error('请求失败:', error.message);
+  }
 };
 
-// 测试获取预订详情
-const testGetBookingDetail = (bookingId) => {
+const testGetBookingList = async () => {
+  console.log('=== 测试获取预订列表 ===');
+  try {
+    const response = await requestJson({
+      hostname,
+      port,
+      path: '/mobile/booking/list',
+      method: 'GET',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      }
+    });
+    
+    console.log('Get Booking List Response:', JSON.stringify(response, null, 2));
+    if (response.code === 0 && response.data.bookings && response.data.bookings.length > 0) {
+      validBookingId = response.data.bookings[0].id;
+      console.log('获取到有效的预订ID:', validBookingId);
+      
+      // 按顺序执行后续测试
+      await testGetBookingDetail(validBookingId);
+    }
+  } catch (error) {
+    console.error('请求失败:', error.message);
+  }
+};
+
+const testGetBookingDetail = async (bookingId) => {
   if (!bookingId) {
     console.log('\n=== 测试获取预订详情 ===');
     console.log('没有有效的预订ID，跳过测试');
@@ -48,72 +100,61 @@ const testGetBookingDetail = (bookingId) => {
   }
   
   console.log('\n=== 测试获取预订详情 ===');
-  const req = http.request({
-    hostname: 'localhost',
-    port: 5050,
-    path: `/mobile/booking/detail/${bookingId}`,
-    method: 'GET',
-    headers: { 
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTQxN2NkM2EtNGVjOS00Zjk0LTgzYzctYjIxNGU5ZGQ3NmRhIiwicGhvbmUiOiIxODU5NTg5MDk4NyIsInJvbGUiOiJtb2JpbGUiLCJpYXQiOjE3NzA5NjQ5NzEsImV4cCI6MTc3MDk3MjE3MX0.LsWP3iuIH9cvREbdKftDRX2R-D3JYiIJA1SGxKgtxvg'
-    }
-  }, (res) => {
-    let data = '';
-    res.on('data', (chunk) => data += chunk);
-    res.on('end', () => {
-      const response = JSON.parse(data);
-      console.log('Get Booking Detail Response:', JSON.stringify(response, null, 2));
-    });
-  });
-
-  req.on('error', (error) => console.error('请求失败:', error.message));
-  req.end();
-};
-
-// 测试创建预订
-const testCreateBooking = () => {
-  console.log('\n=== 测试创建预订 ===');
-  const postData = JSON.stringify({
-    hotel_id: '80f9edf1-9a7a-4f29-8d43-8735ad83fa16',
-    room_type_id: '363f3583-7ad0-48d5-a09b-ece9cdd52796',
-    check_in_date: '2026-02-15',
-    check_out_date: '2026-02-16',
-    contact_name: '张三',
-    contact_phone: '18595890987',
-    special_requests: ''
-  });
-
-  const req = http.request({
-    hostname: 'localhost',
-    port: 5050,
-    path: '/mobile/booking',
-    method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTQxN2NkM2EtNGVjOS00Zjk0LTgzYzctYjIxNGU5ZGQ3NmRhIiwicGhvbmUiOiIxODU5NTg5MDk4NyIsInJvbGUiOiJtb2JpbGUiLCJpYXQiOjE3NzA5NjQ5NzEsImV4cCI6MTc3MDk3MjE3MX0.LsWP3iuIH9cvREbdKftDRX2R-D3JYiIJA1SGxKgtxvg'
-    }
-  }, (res) => {
-    let data = '';
-    res.on('data', (chunk) => data += chunk);
-    res.on('end', () => {
-      const response = JSON.parse(data);
-      console.log('Create Booking Response:', JSON.stringify(response, null, 2));
-      
-      // 如果创建预订成功，使用新创建的预订ID测试其他功能
-      if (response.code === 0 && response.data && response.data.booking_id) {
-        validBookingId = response.data.booking_id;
-        console.log('创建预订成功，获取到新的预订ID:', validBookingId);
+  try {
+    const response = await requestJson({
+      hostname,
+      port,
+      path: `/mobile/booking/detail/${bookingId}`,
+      method: 'GET',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
       }
     });
-  });
-
-  req.on('error', (error) => console.error('请求失败:', error.message));
-  req.write(postData);
-  req.end();
+    console.log('Get Booking Detail Response:', JSON.stringify(response, null, 2));
+  } catch (error) {
+    console.error('请求失败:', error.message);
+  }
 };
 
-// 测试取消预订
-const testCancelBooking = (bookingId) => {
+const testCreateBooking = async () => {
+  console.log('\n=== 测试创建预订 ===');
+  const checkInDate = new Date();
+  checkInDate.setDate(checkInDate.getDate() + 2);
+  const checkOutDate = new Date(checkInDate);
+  checkOutDate.setDate(checkOutDate.getDate() + 1);
+  
+  try {
+    const response = await requestJson({
+      hostname,
+      port,
+      path: '/mobile/booking',
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      }
+    }, {
+      hotel_id: '80f9edf1-9a7a-4f29-8d43-8735ad83fa16',
+      room_type_id: '363f3583-7ad0-48d5-a09b-ece9cdd52796',
+      check_in_date: formatDate(checkInDate),
+      check_out_date: formatDate(checkOutDate),
+      contact_name: '张三',
+      contact_phone: '18595890987',
+      special_requests: ''
+    });
+    
+    console.log('Create Booking Response:', JSON.stringify(response, null, 2));
+    if (response.code === 0 && response.data && response.data.booking_id) {
+      validBookingId = response.data.booking_id;
+      console.log('创建预订成功，获取到新的预订ID:', validBookingId);
+    }
+  } catch (error) {
+    console.error('请求失败:', error.message);
+  }
+};
+
+const testCancelBooking = async (bookingId) => {
   if (!bookingId) {
     console.log('\n=== 测试取消预订 ===');
     console.log('没有有效的预订ID，跳过测试');
@@ -121,30 +162,26 @@ const testCancelBooking = (bookingId) => {
   }
   
   console.log('\n=== 测试取消预订 ===');
-  const req = http.request({
-    hostname: 'localhost',
-    port: 5050,
-    path: `/mobile/booking/cancel/${bookingId}`,
-    method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTQxN2NkM2EtNGVjOS00Zjk0LTgzYzctYjIxNGU5ZGQ3NmRhIiwicGhvbmUiOiIxODU5NTg5MDk4NyIsInJvbGUiOiJtb2JpbGUiLCJpYXQiOjE3NzA5NjQ5NzEsImV4cCI6MTc3MDk3MjE3MX0.LsWP3iuIH9cvREbdKftDRX2R-D3JYiIJA1SGxKgtxvg'
-    }
-  }, (res) => {
-    let data = '';
-    res.on('data', (chunk) => data += chunk);
-    res.on('end', () => {
-      const response = JSON.parse(data);
-      console.log('Cancel Booking Response:', JSON.stringify(response, null, 2));
+  try {
+    const response = await requestJson({
+      hostname,
+      port,
+      path: '/mobile/booking/cancel',
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      }
+    }, {
+      order_id: bookingId
     });
-  });
-
-  req.on('error', (error) => console.error('请求失败:', error.message));
-  req.end();
+    console.log('Cancel Booking Response:', JSON.stringify(response, null, 2));
+  } catch (error) {
+    console.error('请求失败:', error.message);
+  }
 };
 
-// 测试支付预订
-const testPayBooking = (bookingId) => {
+const testPayBooking = async (bookingId) => {
   if (!bookingId) {
     console.log('\n=== 测试支付预订 ===');
     console.log('没有有效的预订ID，跳过测试');
@@ -152,35 +189,26 @@ const testPayBooking = (bookingId) => {
   }
   
   console.log('\n=== 测试支付预订 ===');
-  const postData = JSON.stringify({
-    booking_id: bookingId,
-    payment_method: 'wechat',
-    transaction_id: `TXN_${Date.now()}`
-  });
-
-  const req = http.request({
-    hostname: 'localhost',
-    port: 5050,
-    path: '/mobile/booking/pay',
-    method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNTQxN2NkM2EtNGVjOS00Zjk0LTgzYzctYjIxNGU5ZGQ3NmRhIiwicGhvbmUiOiIxODU5NTg5MDk4NyIsInJvbGUiOiJtb2JpbGUiLCJpYXQiOjE3NzA5NjQ5NzEsImV4cCI6MTc3MDk3MjE3MX0.LsWP3iuIH9cvREbdKftDRX2R-D3JYiIJA1SGxKgtxvg'
-    }
-  }, (res) => {
-    let data = '';
-    res.on('data', (chunk) => data += chunk);
-    res.on('end', () => {
-      const response = JSON.parse(data);
-      console.log('Pay Booking Response:', JSON.stringify(response, null, 2));
+  try {
+    const response = await requestJson({
+      hostname,
+      port,
+      path: '/mobile/booking/pay',
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      }
+    }, {
+      booking_id: bookingId,
+      order_id: bookingId,
+      payment_method: 'wechat',
+      transaction_id: `TXN_${Date.now()}`
     });
-  });
-
-  req.on('error', (error) => console.error('请求失败:', error.message));
-  req.write(postData);
-  req.end();
+    console.log('Pay Booking Response:', JSON.stringify(response, null, 2));
+  } catch (error) {
+    console.error('请求失败:', error.message);
+  }
 };
 
-// 执行测试
-testGetBookingList();
-testCreateBooking();
+loginAndRun();
