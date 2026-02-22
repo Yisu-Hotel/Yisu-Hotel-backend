@@ -113,6 +113,34 @@ const testGetHotelList = async () => {
         console.log(JSON.stringify(response.data, null, 2));
     }
   } catch (error) { console.error('Error:', error.message); }
+
+  // Test 8: Facilities Filter
+  try {
+    console.log('--- Test 8: Facilities Filter (facilities="免费WiFi") ---');
+    const response = await axios.get(`${BASE_URL}/list`, {
+      params: {
+        facilities: '免费WiFi'
+      }
+    });
+    if (response.data.code === 0) {
+        console.log(`✅ Facilities filter passed. Found ${response.data.data.list.length} hotels.`);
+        console.log(JSON.stringify(response.data, null, 2));
+    }
+  } catch (error) { console.error('Error:', error.message); }
+
+  // Test 9: Services Filter
+  try {
+    console.log('--- Test 9: Services Filter (services="含早餐") ---');
+    const response = await axios.get(`${BASE_URL}/list`, {
+      params: {
+        services: '含早餐'
+      }
+    });
+    if (response.data.code === 0) {
+        console.log(`✅ Services filter passed. Found ${response.data.data.list.length} hotels.`);
+        console.log(JSON.stringify(response.data, null, 2));
+    }
+  } catch (error) { console.error('Error:', error.message); }
 };
 
 
