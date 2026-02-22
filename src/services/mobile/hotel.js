@@ -610,6 +610,7 @@ const getHotelListService = async (params) => {
       maxPrice,
       min_price, // 前端可能传递的参数名
       max_price, // 前端可能传递的参数名
+      max_min_price, // 新增：能接收的最高的酒店最低价筛选
       priceRange, // 可能的价格范围参数
       rating,
       minRating, // 前端传递的参数名
@@ -658,6 +659,7 @@ const getHotelListService = async (params) => {
       maxPrice,
       min_price,
       max_price,
+      max_min_price,
       priceRange,
       rating,
       minRating,
@@ -820,22 +822,52 @@ const getHotelListService = async (params) => {
       });
 
       let minPrice = 259.00; // 默认价格
+      
+      // 计算日期范围内的最低价格
+      // 如果没有提供日期，默认为今天入住，明天离店
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const checkInDate = check_in || check_in_date || today.toISOString().split('T')[0];
+      const checkOutDate = check_out || check_out_date || tomorrow.toISOString().split('T')[0];
+      
       if (roomTypes.length > 0) {
-        // 获取所有房型的价格
-        const roomPrices = await Promise.all(roomTypes.map(async (roomType) => {
+        // 获取每个房型在指定日期范围内的价格
+        const roomTypePrices = await Promise.all(roomTypes.map(async (roomType) => {
           const prices = await RoomPrice.findAll({
-            where: { room_type_id: roomType.id },
+            where: { 
+              room_type_id: roomType.id,
+              price_date: {
+                [Op.gte]: checkInDate,
+                [Op.lt]: checkOutDate
+              }
+            },
             attributes: ['price']
           });
-          return prices.map(p => p.price);
+          
+          if (prices.length === 0) return null;
+          
+          // 计算该房型的平均价格
+          const sum = prices.reduce((acc, curr) => acc + parseFloat(curr.price), 0);
+          return sum / prices.length;
         }));
-
-        // 扁平化价格数组
-        const allPrices = roomPrices.flat();
-        if (allPrices.length > 0) {
-          minPrice = Math.min(...allPrices);
+        
+        // 过滤掉没有价格的房型
+        const validPrices = roomTypePrices.filter(p => p !== null);
+        
+        if (validPrices.length > 0) {
+          // 取所有房型平均价格中的最小值
+          minPrice = Math.min(...validPrices);
         }
       }
+
+      // 获取统计数据
+      const [favoriteCount, bookingCount, reviewCount] = await Promise.all([
+        Favorite.count({ where: { hotel_id: hotel.id } }),
+        Booking.count({ where: { hotel_id: hotel.id } }),
+        HotelReview.count({ where: { hotel_id: hotel.id } })
+      ]);
 
       return {
         hotel_id: hotel.id,
@@ -847,19 +879,22 @@ const getHotelListService = async (params) => {
         main_image_url: mainImageUrl,
         tags: hotel.tags || [],
         location_info: hotel.location_info || {},
-        favorite_count: Math.floor(Math.random() * 1000), // 模拟数据
+        favorite_count: favoriteCount,
         average_rating: hotel.rating || 0,
-        booking_count: Math.floor(Math.random() * 5000), // 模拟数据
-        review_count: Math.floor(Math.random() * 1000), // 模拟数据
-        min_price: minPrice,
-        // 添加距离字段（模拟数据）
-        distance: Math.random() * 5
+        booking_count: bookingCount,
+        review_count: reviewCount,
+        min_price: parseFloat(minPrice.toFixed(2))
       };
     }));
 
     // 价格筛选 - 支持多种参数名和格式
     let minPriceValue = minPrice || min_price;
     let maxPriceValue = maxPrice || max_price;
+    // max_min_price 参数：能接收的最高的酒店最低价筛选
+    // 逻辑：酒店的 min_price 必须小于等于 max_min_price
+    if (max_min_price) {
+        maxPriceValue = max_min_price;
+    }
     // 处理价格范围数组
     if (priceRange && Array.isArray(priceRange) && priceRange.length === 2) {
       minPriceValue = priceRange[0];
@@ -909,37 +944,95 @@ const getHotelListService = async (params) => {
         facilityList = facilitiesFilter;
       } else if (typeof facilitiesFilter === 'string' && facilitiesFilter.includes(',')) {
         // 处理逗号分隔的字符串格式
-        facilityList = facilitiesFilter.split(',').filter(f => f.trim() !== '');
+        facilityList = facilitiesFilter.split(',').map(f => f.trim()).filter(f => f !== '');
+      } else if (typeof facilitiesFilter === 'string' && facilitiesFilter.startsWith('[') && facilitiesFilter.endsWith(']')) {
+          try {
+              facilityList = JSON.parse(facilitiesFilter);
+          } catch (e) {
+              facilityList = [facilitiesFilter];
+          }
       } else {
         facilityList = [facilitiesFilter];
       }
-      // 过滤酒店，保留包含指定设施的酒店
-      formattedHotels = formattedHotels.filter(hotel => {
-        // 这里简化处理，实际应该根据hotel_facilities表进行筛选
-        // 暂时基于酒店标签进行筛选
-        return facilityList.some(facility => {
-          // 检查酒店标签是否包含设施
-          if (hotel.tags && Array.isArray(hotel.tags)) {
-            return hotel.tags.includes(facility);
-          }
-          return false;
-        });
-      });
-      console.log('Hotels after facilities filter:', formattedHotels.length);
+      
+      if (facilityList.length > 0) {
+          // 过滤酒店，保留包含所有指定设施的酒店 (AND 逻辑)
+          // 注意：目前数据库设计可能没有直接关联 hotel_facilities 表到 Hotel 模型
+          // 这里暂时基于 tags 字段模拟，或者需要联表查询
+          // 假设 tags 中包含设施名称
+          formattedHotels = formattedHotels.filter(hotel => {
+            if (!hotel.tags || !Array.isArray(hotel.tags)) {
+              return false;
+            }
+            // 检查酒店标签是否包含所有请求的设施 (AND logic)
+            // 如果需要 OR 逻辑，可以使用 some
+            // 根据常规筛选逻辑，通常是 AND (即同时满足多个设施条件)
+            return facilityList.every(facility => hotel.tags.includes(facility));
+          });
+          console.log('Hotels after facilities filter:', formattedHotels.length);
+      }
+    }
+
+    // 服务筛选
+    if (services) {
+        console.log('Applying services filter:', services);
+        let serviceList = [];
+        if (Array.isArray(services)) {
+            serviceList = services;
+        } else if (typeof services === 'string' && services.includes(',')) {
+            serviceList = services.split(',').map(s => s.trim()).filter(s => s !== '');
+        } else if (typeof services === 'string' && services.startsWith('[') && services.endsWith(']')) {
+             try {
+                 serviceList = JSON.parse(services);
+             } catch (e) {
+                 serviceList = [services];
+             }
+        } else {
+            serviceList = [services];
+        }
+
+        if (serviceList.length > 0) {
+            formattedHotels = formattedHotels.filter(hotel => {
+                if (!hotel.tags || !Array.isArray(hotel.tags)) {
+                    return false;
+                }
+                // 假设 tags 中包含服务名称
+                return serviceList.every(service => hotel.tags.includes(service));
+            });
+            console.log('Hotels after services filter:', formattedHotels.length);
+        }
     }
 
     // 标签筛选 - 支持前端传递的selectedTags参数
     const tagsFilter = tags || selectedTags;
     if (tagsFilter) {
       console.log('Applying tags filter:', tagsFilter);
-      const tagList = Array.isArray(tagsFilter) ? tagsFilter : [tagsFilter];
-      formattedHotels = formattedHotels.filter(hotel => {
-        if (!hotel.tags || !Array.isArray(hotel.tags)) {
-          return false;
-        }
-        return tagList.some(tag => hotel.tags.includes(tag));
-      });
-      console.log('Hotels after tags filter:', formattedHotels.length);
+      let tagList = [];
+      if (Array.isArray(tagsFilter)) {
+          tagList = tagsFilter;
+      } else if (typeof tagsFilter === 'string' && tagsFilter.includes(',')) {
+          tagList = tagsFilter.split(',').map(t => t.trim()).filter(t => t !== '');
+      } else if (typeof tagsFilter === 'string' && tagsFilter.startsWith('[') && tagsFilter.endsWith(']')) {
+          try {
+              tagList = JSON.parse(tagsFilter);
+          } catch (e) {
+              tagList = [tagsFilter];
+          }
+      } else {
+          tagList = [tagsFilter];
+      }
+
+      if (tagList.length > 0) {
+          formattedHotels = formattedHotels.filter(hotel => {
+            if (!hotel.tags || !Array.isArray(hotel.tags)) {
+              return false;
+            }
+            // 标签筛选通常也是 AND 逻辑，或者 OR 逻辑，视业务需求而定
+            // 文档未明确，通常多个标签筛选意味着“同时满足”
+            return tagList.every(tag => hotel.tags.includes(tag));
+          });
+          console.log('Hotels after tags filter:', formattedHotels.length);
+      }
     }
 
     // 距离排序（如果需要）
