@@ -173,7 +173,7 @@ const receiveCouponService = async (user_id, coupon_id) => {
   await UserCoupon.create({
     user_id,
     coupon_id,
-    status: 'unused'
+    status: 'available'
   });
   
   // 减少优惠券库存
