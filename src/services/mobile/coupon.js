@@ -40,8 +40,9 @@ const getCouponListService = async (user_id, type = 'all') => {
     // 验证user_id是否为有效的UUID格式
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     
+    // 只有当user_id是有效的UUID格式时，才查询用户优惠券
+    // 这样可以避免数据库错误（因为数据库中的user_id字段是UUID类型）
     if (uuidRegex.test(user_id)) {
-      // 查询用户已领取的优惠券
       const userCoupons = await UserCoupon.findAll({
         where: {
           user_id
@@ -49,8 +50,7 @@ const getCouponListService = async (user_id, type = 'all') => {
         include: [
           {
             model: Coupon,
-            as: 'coupon',
-            attributes: ['id', 'title', 'description', 'discount_type', 'discount_value', 'min_order_amount', 'valid_from', 'valid_until', 'total_count', 'used_count', 'is_new_user_only', 'rules']
+            as: 'coupon'
           }
         ],
         attributes: ['id', 'coupon_id', 'status', 'created_at']
@@ -69,6 +69,10 @@ const getCouponListService = async (user_id, type = 'all') => {
         used_date: userCoupon.status === 'used' ? userCoupon.created_at : null,
         receive_time: userCoupon.created_at
       }));
+    } else {
+      // 当user_id不是有效的UUID格式时（比如'test_user'），跳过查询用户优惠券的步骤
+      console.log('User ID is not a valid UUID format, skipping user coupon query');
+      formattedUserCoupons = [];
     }
   } catch (error) {
     console.error('Error getting user coupons:', error);
@@ -76,32 +80,51 @@ const getCouponListService = async (user_id, type = 'all') => {
     formattedUserCoupons = [];
   }
   
+  // 准备返回数据
+  const returnData = {
+    coupons: [],
+    pushCoupons: {
+      limited: [],
+      bank: [],
+      selected: []
+    }
+  };
+  
   if (type === 'available') {
-    return {
-      coupons: [
-        ...formattedAvailableCoupons.map(coupon => ({ ...coupon, status: 'available' })),
-        ...formattedUserCoupons.filter(coupon => coupon.status === 'unused').map(coupon => ({ ...coupon, status: 'available' }))
-      ]
-    };
+    // 只返回用户已领取且未使用的优惠券
+    returnData.coupons = formattedUserCoupons.filter(coupon => coupon.status === 'unused').map(coupon => ({ ...coupon, status: 'available' }));
   } else if (type === 'used') {
-    return {
-      coupons: formattedUserCoupons.filter(coupon => coupon.status === 'used').map(coupon => ({ ...coupon, status: 'used' }))
-    };
+    // 只返回用户已使用的优惠券
+    returnData.coupons = formattedUserCoupons.filter(coupon => coupon.status === 'used').map(coupon => ({ ...coupon, status: 'used' }));
   } else if (type === 'expired') {
-    return {
-      coupons: formattedUserCoupons.filter(coupon => coupon.status === 'expired').map(coupon => ({ ...coupon, status: 'expired' }))
-    };
+    // 只返回用户已过期的优惠券
+    returnData.coupons = formattedUserCoupons.filter(coupon => coupon.status === 'expired').map(coupon => ({ ...coupon, status: 'expired' }));
   } else {
-    // 返回所有优惠券
-    return {
-      coupons: [
-        ...formattedAvailableCoupons.map(coupon => ({ ...coupon, status: 'available' })),
-        ...formattedUserCoupons.filter(coupon => coupon.status === 'unused').map(coupon => ({ ...coupon, status: 'available' })),
-        ...formattedUserCoupons.filter(coupon => coupon.status === 'used').map(coupon => ({ ...coupon, status: 'used' })),
-        ...formattedUserCoupons.filter(coupon => coupon.status === 'expired').map(coupon => ({ ...coupon, status: 'expired' }))
-      ]
-    };
+    // 只返回用户相关的所有优惠券
+    returnData.coupons = [
+      ...formattedUserCoupons.filter(coupon => coupon.status === 'unused').map(coupon => ({ ...coupon, status: 'available' })),
+      ...formattedUserCoupons.filter(coupon => coupon.status === 'used').map(coupon => ({ ...coupon, status: 'used' })),
+      ...formattedUserCoupons.filter(coupon => coupon.status === 'expired').map(coupon => ({ ...coupon, status: 'expired' }))
+    ];
   }
+  
+  // 添加推送优惠券数据
+  // 将可用优惠券分配到不同的推送类别
+  formattedAvailableCoupons.forEach(coupon => {
+    // 添加到领好券
+    returnData.pushCoupons.selected.push({
+      id: coupon.id,
+      name: coupon.title,
+      value: coupon.value,
+      discount: coupon.value,
+      description: coupon.description,
+      expire_date: coupon.expire_date,
+      limit: `满${coupon.min_spend}可用`,
+      remain: '100%'
+    });
+  });
+  
+  return returnData;
 };
 
 // 领取优惠券
