@@ -687,46 +687,42 @@ const getHotelListService = async (params) => {
       status: 'published' // 只返回已发布的酒店
     };
 
-    // 构建 OR 条件数组
-    const orConditions = [];
+    // 构建 AND 条件数组
+    const andConditions = [];
 
     // 城市筛选 - 支持多种参数名
     const cityFilter = location || city || cityName || destination || destinationCity;
     if (cityFilter) {
       console.log('Adding city filter:', cityFilter);
-      // 构建更灵活的城市匹配条件
       const cityLikeCondition = cityFilter.includes('市') ? cityFilter : `${cityFilter}市`;
-      orConditions.push(
-        // 精确匹配城市名称
+      const cityOrConditions = [
         where(literal(`"Hotel"."location_info"->>'city'`), cityFilter),
-        // 匹配包含"市"后缀的城市名称
         where(literal(`"Hotel"."location_info"->>'city'`), cityLikeCondition),
-        // 模糊匹配城市名称（去除"市"后缀）
         where(literal(`"Hotel"."location_info"->>'city'`), { [Op.iLike]: `%${cityFilter}%` }),
-        // 模糊匹配格式化地址
         where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: `%${cityFilter}%` }),
-        // 匹配省份（有些城市名称和省份名称相同）
         where(literal(`"Hotel"."location_info"->>'province'`), { [Op.iLike]: `%${cityFilter}%` })
-      );
+      ];
+      andConditions.push({ [Op.or]: cityOrConditions });
     }
 
     // 关键词搜索 - 支持多种参数名
     const keywordFilter = keyword || searchText || searchKeyword;
     if (keywordFilter) {
       console.log('Adding keyword filter:', keywordFilter);
-      orConditions.push(
+      const keywordOrConditions = [
         { hotel_name_cn: { [Op.iLike]: `%${keywordFilter}%` } },
         { hotel_name_en: { [Op.iLike]: `%${keywordFilter}%` } },
         { description: { [Op.iLike]: `%${keywordFilter}%` } },
         where(literal(`"Hotel"."location_info"->>'formatted_address'`), { [Op.iLike]: `%${keywordFilter}%` }),
-        { nearby_info: { [Op.iLike]: `%${keywordFilter}%` } }
-      );
+        { nearby_info: { [Op.iLike]: `%${keywordFilter}%` } },
+        where(literal(`"Hotel"."tags"::text`), { [Op.iLike]: `%${keywordFilter}%` })
+      ];
+      andConditions.push({ [Op.or]: keywordOrConditions });
     }
 
-    // 添加 OR 条件到查询条件
-    if (orConditions.length > 0) {
-      whereCondition[Op.or] = orConditions;
-      console.log('Added OR conditions:', orConditions.length);
+    if (andConditions.length > 0) {
+      whereCondition[Op.and] = andConditions;
+      console.log('Added AND conditions:', andConditions.length);
     }
 
     // 星级筛选 - 支持多种参数名
@@ -801,8 +797,60 @@ const getHotelListService = async (params) => {
 
     console.log('Found hotels:', hotels.length, 'total:', total);
 
+    const hotelIds = hotels.map(hotel => hotel.id);
+    const [hotelFacilityRows, hotelServiceRows] = await Promise.all([
+      hotelIds.length
+        ? HotelFacility.findAll({
+            where: { hotel_id: { [Op.in]: hotelIds } },
+            include: [{
+              model: Facility,
+              as: 'facility',
+              attributes: ['id', 'name']
+            }],
+            attributes: ['hotel_id', 'facility_id']
+          })
+        : Promise.resolve([]),
+      hotelIds.length
+        ? HotelService.findAll({
+            where: { hotel_id: { [Op.in]: hotelIds } },
+            include: [{
+              model: Service,
+              as: 'service',
+              attributes: ['id', 'name']
+            }],
+            attributes: ['hotel_id', 'service_id']
+          })
+        : Promise.resolve([])
+    ]);
+
+    const facilitiesByHotelId = new Map();
+    hotelFacilityRows.forEach(row => {
+      const hotelId = row.hotel_id;
+      if (!facilitiesByHotelId.has(hotelId)) {
+        facilitiesByHotelId.set(hotelId, []);
+      }
+      facilitiesByHotelId.get(hotelId).push({
+        id: row.facility_id,
+        name: row.facility?.name || ''
+      });
+    });
+
+    const servicesByHotelId = new Map();
+    hotelServiceRows.forEach(row => {
+      const hotelId = row.hotel_id;
+      if (!servicesByHotelId.has(hotelId)) {
+        servicesByHotelId.set(hotelId, []);
+      }
+      servicesByHotelId.get(hotelId).push({
+        id: row.service_id,
+        name: row.service?.name || ''
+      });
+    });
+
     // 格式化酒店数据
     let formattedHotels = await Promise.all(hotels.map(async (hotel) => {
+      const facilities = facilitiesByHotelId.get(hotel.id) || [];
+      const services = servicesByHotelId.get(hotel.id) || [];
       // 处理主图片URL
       let mainImageUrl = hotel.main_image_url || [];
       if (Array.isArray(mainImageUrl)) {
@@ -883,9 +931,33 @@ const getHotelListService = async (params) => {
         average_rating: hotel.rating || 0,
         booking_count: bookingCount,
         review_count: reviewCount,
-        min_price: parseFloat(minPrice.toFixed(2))
+        min_price: parseFloat(minPrice.toFixed(2)),
+        facilities,
+        services
       };
     }));
+
+    const normalizeList = (value) => {
+      if (!value) {
+        return [];
+      }
+      if (Array.isArray(value)) {
+        return value.map(v => String(v).trim()).filter(v => v !== '');
+      }
+      if (typeof value === 'string' && value.includes(',')) {
+        return value.split(',').map(v => v.trim()).filter(v => v !== '');
+      }
+      if (typeof value === 'string' && value.startsWith('[') && value.endsWith(']')) {
+        try {
+          const parsed = JSON.parse(value);
+          if (Array.isArray(parsed)) {
+            return parsed.map(v => String(v).trim()).filter(v => v !== '');
+          }
+        } catch (e) {
+        }
+      }
+      return [String(value).trim()].filter(v => v !== '');
+    };
 
     // 价格筛选 - 支持多种参数名和格式
     let minPriceValue = minPrice || min_price;
@@ -939,35 +1011,14 @@ const getHotelListService = async (params) => {
     const facilitiesFilter = facilities || amenities || selectedFacilities;
     if (facilitiesFilter) {
       console.log('Applying facilities filter:', facilitiesFilter);
-      let facilityList = [];
-      if (Array.isArray(facilitiesFilter)) {
-        facilityList = facilitiesFilter;
-      } else if (typeof facilitiesFilter === 'string' && facilitiesFilter.includes(',')) {
-        // 处理逗号分隔的字符串格式
-        facilityList = facilitiesFilter.split(',').map(f => f.trim()).filter(f => f !== '');
-      } else if (typeof facilitiesFilter === 'string' && facilitiesFilter.startsWith('[') && facilitiesFilter.endsWith(']')) {
-          try {
-              facilityList = JSON.parse(facilitiesFilter);
-          } catch (e) {
-              facilityList = [facilitiesFilter];
-          }
-      } else {
-        facilityList = [facilitiesFilter];
-      }
+      const facilityList = normalizeList(facilitiesFilter);
       
       if (facilityList.length > 0) {
-          // 过滤酒店，保留包含所有指定设施的酒店 (AND 逻辑)
-          // 注意：目前数据库设计可能没有直接关联 hotel_facilities 表到 Hotel 模型
-          // 这里暂时基于 tags 字段模拟，或者需要联表查询
-          // 假设 tags 中包含设施名称
           formattedHotels = formattedHotels.filter(hotel => {
-            if (!hotel.tags || !Array.isArray(hotel.tags)) {
-              return false;
-            }
-            // 检查酒店标签是否包含所有请求的设施 (AND logic)
-            // 如果需要 OR 逻辑，可以使用 some
-            // 根据常规筛选逻辑，通常是 AND (即同时满足多个设施条件)
-            return facilityList.every(facility => hotel.tags.includes(facility));
+            const facilityNames = (hotel.facilities || []).map(f => String(f.name));
+            const facilityIds = (hotel.facilities || []).map(f => String(f.id));
+            const tagNames = Array.isArray(hotel.tags) ? hotel.tags.map(t => String(t)) : [];
+            return facilityList.every(facility => facilityNames.includes(facility) || facilityIds.includes(facility) || tagNames.includes(facility));
           });
           console.log('Hotels after facilities filter:', formattedHotels.length);
       }
@@ -976,28 +1027,14 @@ const getHotelListService = async (params) => {
     // 服务筛选
     if (services) {
         console.log('Applying services filter:', services);
-        let serviceList = [];
-        if (Array.isArray(services)) {
-            serviceList = services;
-        } else if (typeof services === 'string' && services.includes(',')) {
-            serviceList = services.split(',').map(s => s.trim()).filter(s => s !== '');
-        } else if (typeof services === 'string' && services.startsWith('[') && services.endsWith(']')) {
-             try {
-                 serviceList = JSON.parse(services);
-             } catch (e) {
-                 serviceList = [services];
-             }
-        } else {
-            serviceList = [services];
-        }
+        const serviceList = normalizeList(services);
 
         if (serviceList.length > 0) {
             formattedHotels = formattedHotels.filter(hotel => {
-                if (!hotel.tags || !Array.isArray(hotel.tags)) {
-                    return false;
-                }
-                // 假设 tags 中包含服务名称
-                return serviceList.every(service => hotel.tags.includes(service));
+                const serviceNames = (hotel.services || []).map(s => String(s.name));
+                const serviceIds = (hotel.services || []).map(s => String(s.id));
+                const tagNames = Array.isArray(hotel.tags) ? hotel.tags.map(t => String(t)) : [];
+                return serviceList.every(service => serviceNames.includes(service) || serviceIds.includes(service) || tagNames.includes(service));
             });
             console.log('Hotels after services filter:', formattedHotels.length);
         }
@@ -1059,6 +1096,7 @@ const getHotelListService = async (params) => {
         min_price: minPriceValue,
         max_price: maxPriceValue,
         facilities: facilitiesFilter,
+        services: services,
         tags: tagsFilter,
         keyword: keywordFilter,
         sort: sortParam,

@@ -65,6 +65,7 @@ const testGetHotelList = async () => {
     console.log('--- Test 4: Keyword Search ("易宿") ---');
     const response = await axios.get(`${BASE_URL}/list`, {
       params: {
+        city: '北京市',
         keyword: '易宿'
       }
     });
@@ -130,10 +131,10 @@ const testGetHotelList = async () => {
 
   // Test 9: Services Filter
   try {
-    console.log('--- Test 9: Services Filter (services="含早餐") ---');
+    console.log('--- Test 9: Services Filter (services="洗衣服务") ---');
     const response = await axios.get(`${BASE_URL}/list`, {
       params: {
-        services: '含早餐'
+        services: '洗衣服务'
       }
     });
     if (response.data.code === 0) {
