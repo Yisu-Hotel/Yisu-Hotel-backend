@@ -33,12 +33,14 @@ const getCouponListService = async (user_id, type = 'all') => {
     status: 'available'
   }));
   
-  // 验证user_id是否为有效的UUID格式
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  // 处理用户优惠券
   let formattedUserCoupons = [];
   
-  if (uuidRegex.test(user_id)) {
-    try {
+  try {
+    // 验证user_id是否为有效的UUID格式
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    
+    if (uuidRegex.test(user_id)) {
       // 查询用户已领取的优惠券
       const userCoupons = await UserCoupon.findAll({
         where: {
@@ -67,11 +69,11 @@ const getCouponListService = async (user_id, type = 'all') => {
         used_date: userCoupon.status === 'used' ? userCoupon.created_at : null,
         receive_time: userCoupon.created_at
       }));
-    } catch (error) {
-      console.error('Error getting user coupons:', error);
-      // 发生错误时，只返回可用的优惠券
-      formattedUserCoupons = [];
     }
+  } catch (error) {
+    console.error('Error getting user coupons:', error);
+    // 发生错误时，只返回可用的优惠券
+    formattedUserCoupons = [];
   }
   
   if (type === 'available') {
