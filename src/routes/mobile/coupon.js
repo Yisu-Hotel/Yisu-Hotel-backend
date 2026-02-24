@@ -12,4 +12,7 @@ router.post('/receive', authMiddleware, couponController.receiveCoupon);
 // 使用优惠券
 router.post('/use', authMiddleware, couponController.useCoupon);
 
+// 测试优惠券流程 (开发环境使用)
+router.get('/test-flow', couponController.testCouponFlow);
+
 module.exports = router;

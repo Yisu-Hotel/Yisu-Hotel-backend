@@ -1,4 +1,4 @@
-const { Favorite, Hotel, HotelImage, RoomType } = require('../../models');
+const { Favorite, Hotel, HotelImage, RoomType, RoomPrice } = require('../../models');
 
 // 添加收藏
 const addFavoriteService = async (user_id, hotel_id) => {
@@ -129,7 +129,7 @@ const getFavoriteListService = async (user_id, { page = 1, pageSize = 10 } = {})
     });
     
     // 格式化数据
-    const formattedFavorites = favorites.map(favorite => {
+    const formattedFavorites = await Promise.all(favorites.map(async (favorite) => {
       if (!favorite.hotel) {
         return {
           favorite_id: favorite.id,
@@ -138,8 +138,37 @@ const getFavoriteListService = async (user_id, { page = 1, pageSize = 10 } = {})
           hotel_address: '',
           hotel_star: 0,
           main_image_url: '',
-          created_at: favorite.created_at
+          created_at: favorite.created_at,
+          price: 0,
+          min_price: 0
         };
+      }
+
+      // 计算最低价格
+      let minPrice = 259.00; // 默认价格
+      try {
+        const roomTypes = await RoomType.findAll({
+          where: { hotel_id: favorite.hotel_id }
+        });
+
+        if (roomTypes.length > 0) {
+          // 获取所有房型的价格
+          const roomPrices = await Promise.all(roomTypes.map(async (roomType) => {
+            const prices = await RoomPrice.findAll({
+              where: { room_type_id: roomType.id },
+              attributes: ['price']
+            });
+            return prices.map(p => parseFloat(p.price));
+          }));
+
+          // 扁平化价格数组
+          const allPrices = roomPrices.flat();
+          if (allPrices.length > 0) {
+            minPrice = Math.min(...allPrices);
+          }
+        }
+      } catch (err) {
+        console.error('获取价格失败:', err);
       }
 
       return {
@@ -149,9 +178,11 @@ const getFavoriteListService = async (user_id, { page = 1, pageSize = 10 } = {})
         hotel_address: favorite.hotel.location_info?.formatted_address || '',
         hotel_star: favorite.hotel.star_rating || 0,
         main_image_url: favorite.hotel.main_image_url?.[0] || '',
-        created_at: favorite.created_at
+        created_at: favorite.created_at,
+        price: minPrice,
+        min_price: minPrice
       };
-    });
+    }));
     
     return {
       total: count,
