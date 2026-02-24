@@ -106,7 +106,8 @@ const createBookingService = async (user_id, bookingData) => {
     contact_phone,
     special_requests,
     total_price: totalPrice,
-    status: 'pending'
+    original_total_price: totalPrice, // 记录原价
+    status: 'pending' // 使用pending状态
   });
   
   return {
@@ -121,7 +122,7 @@ const createBookingService = async (user_id, bookingData) => {
     contact_name: booking.contact_name,
     contact_phone: booking.contact_phone,
     special_requests: booking.special_requests,
-    booked_at: booking.created_at
+    booked_at: booking.booked_at
   };
 };
 
@@ -162,20 +163,30 @@ const getBookingListService = async (user_id, params) => {
     });
     
     // 格式化数据
-    const formattedBookings = bookings.map((booking) => {
-      return {
-        id: booking.id,
-        hotel_id: booking.hotel_id,
-        hotel_name: booking.hotel_name,
-        room_type: booking.room_type_name,
-        check_in_date: booking.check_in_date,
-        check_out_date: booking.check_out_date,
-        total_price: parseFloat(booking.total_price) || 0,
-        status: booking.status,
-        status_text: getStatusText(booking.status),
-        booked_at: booking.booked_at
-      };
-    });
+  const formattedBookings = bookings.map((booking) => {
+    // 计算实付金额，已取消订单显示实付金额
+    let payAmount = parseFloat(booking.total_price) || 0;
+    
+    // 确保状态值正确
+    let status = booking.status;
+    if (status === 'pending') {
+      status = 'pending_payment';
+    }
+    
+    return {
+      id: booking.id,
+      hotel_id: booking.hotel_id,
+      hotel_name: booking.hotel_name,
+      room_type: booking.room_type_name,
+      check_in_date: booking.check_in_date,
+      check_out_date: booking.check_out_date,
+      total_price: payAmount, // 保持向后兼容
+      payAmount: payAmount, // 新增实付金额字段
+      status: status,
+      status_text: getStatusText(status),
+      booked_at: booking.booked_at
+    };
+  });
     
     return {
       bookings: formattedBookings,
@@ -226,9 +237,15 @@ const getBookingDetailService = async (user_id, booking_id) => {
   }
   
   // 计算价格明细
-  const originalPrice = parseFloat(booking.total_price) || 0;
-  const discountAmount = 0; // 暂时设为0，后续可以根据优惠规则计算
-  const finalPrice = originalPrice - discountAmount;
+  const originalPrice = parseFloat(booking.original_total_price) || parseFloat(booking.total_price) || 0;
+  const discountAmount = parseFloat(booking.discount_amount) || 0;
+  const finalPrice = parseFloat(booking.total_price) || 0;
+  
+  // 确保状态值正确
+  let status = booking.status;
+  if (status === 'pending') {
+    status = 'pending_payment';
+  }
   
   // 格式化数据
   return {
@@ -249,8 +266,10 @@ const getBookingDetailService = async (user_id, booking_id) => {
       discount_amount: discountAmount,
       total_price: finalPrice
     },
-    status: booking.status,
-    status_text: getStatusText(booking.status),
+    total_price: finalPrice, // 保持向后兼容
+    payAmount: finalPrice, // 新增实付金额字段
+    status: status,
+    status_text: getStatusText(status),
     booked_at: booking.booked_at,
     paid_at: booking.paid_at,
     payment_method: null
@@ -265,45 +284,81 @@ const cancelBookingService = async (user_id, booking_id) => {
   
   console.log('Parsed bookingId:', { bookingIdStr });
   
-  // 查找预订
-  const booking = await Booking.findOne({
-    where: {
-      id: bookingIdStr,
-      user_id
+  // 开始事务
+  const transaction = await Booking.sequelize.transaction();
+  
+  try {
+    // 查找预订
+    const booking = await Booking.findOne({
+      where: {
+        id: bookingIdStr,
+        user_id
+      },
+      transaction
+    });
+    
+    if (!booking) {
+      const error = new Error('预订不存在');
+      error.code = 3007;
+      error.httpStatus = 404;
+      throw error;
     }
-  });
-  
-  if (!booking) {
-    const error = new Error('预订不存在');
-    error.code = 3007;
-    error.httpStatus = 404;
-    throw error;
-  }
-  
-  // 检查是否可以取消
+    
+    // 检查是否可以取消
   if (booking.status !== 'pending' && booking.status !== 'paid') {
     const error = new Error('该预订状态不可取消');
     error.code = 3008;
     error.httpStatus = 400;
     throw error;
   }
-  
-  // 更新预订状态
-  await booking.update({
-    status: 'cancelled'
-  });
-  
-  return {
-    booking_id: booking_id,
-    status: 'cancelled',
-    status_text: getStatusText('cancelled')
-  };
+    
+    // 查找并更新相关的优惠券
+    if (booking.coupon_id) {
+      const { UserCoupon } = require('../../models');
+      const userCoupon = await UserCoupon.findOne({
+        where: {
+          booking_id: bookingIdStr,
+          user_id
+        },
+        transaction
+      });
+      
+      if (userCoupon && userCoupon.status === 'used') {
+        // 将优惠券状态更新为 available，使其可以再次使用
+        await userCoupon.update({
+          status: 'available',
+          used_at: null,
+          booking_id: null
+        }, { transaction });
+        
+        console.log('Coupon restored:', { couponId: userCoupon.id, userId: user_id });
+      }
+    }
+    
+    // 更新预订状态
+    await booking.update({
+      status: 'cancelled'
+    }, { transaction });
+    
+    // 提交事务
+    await transaction.commit();
+    
+    return {
+      booking_id: booking_id,
+      status: 'cancelled',
+      status_text: getStatusText('cancelled')
+    };
+  } catch (error) {
+    // 回滚事务
+    await transaction.rollback();
+    throw error;
+  }
 };
 
 const payBookingService = async (user_id, paymentData) => {
   console.log('payBookingService called with:', { user_id, paymentData });
   
-  const { booking_id, payment_method, transaction_id } = paymentData;
+  const { booking_id, payment_method, transaction_id, coupon_id } = paymentData;
   
   // 验证参数
   if (!booking_id || !payment_method || !transaction_id) {
@@ -345,9 +400,21 @@ const payBookingService = async (user_id, paymentData) => {
   const transaction = await Booking.sequelize.transaction();
   
   try {
+    // 如果有优惠券ID，先使用优惠券
+    if (coupon_id) {
+      console.log('Using coupon:', coupon_id);
+      // 导入useCouponService
+      const { useCouponService } = require('./coupon');
+      // 使用优惠券
+      await useCouponService(user_id, coupon_id, booking_id);
+    }
+    
     // 更新预订状态
     await booking.update({
-      status: 'paid'
+      status: 'paid',
+      payment_method,
+      transaction_id,
+      paid_at: new Date()
     }, { transaction });
     
     // 提交事务
@@ -369,6 +436,7 @@ const payBookingService = async (user_id, paymentData) => {
 function getStatusText(status) {
   const statusMap = {
     pending: '待支付',
+    pending_payment: '待支付',
     paid: '已支付',
     completed: '已完成',
     cancelled: '已取消'

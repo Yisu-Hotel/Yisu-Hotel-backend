@@ -9,4 +9,7 @@ router.get('/list', authMiddleware, couponController.getCouponList);
 // 领取优惠券
 router.post('/receive', authMiddleware, couponController.receiveCoupon);
 
+// 使用优惠券
+router.post('/use', authMiddleware, couponController.useCoupon);
+
 module.exports = router;

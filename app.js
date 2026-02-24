@@ -40,8 +40,14 @@ app.use((req, res, next) => {
     });
     req.on('end', () => {
       try {
-        req.body = JSON.parse(body);
-        next();
+        // 检查body是否为空
+        if (!body || body.trim() === '') {
+          req.body = {};
+          next();
+        } else {
+          req.body = JSON.parse(body);
+          next();
+        }
       } catch (error) {
         console.error('JSON解析错误:', error);
         // 即使JSON解析错误，也继续处理请求，设置空的请求体
@@ -117,6 +123,10 @@ app.listen(PORT, () => {
   sequelize.authenticate()
     .then(() => {
       console.log('✅ 数据库连接成功！');
+      
+      // 启动优惠券定时任务
+      const { startCouponTasks } = require('./src/tasks/coupon-tasks');
+      startCouponTasks();
     })
     .catch((error) => {
       console.error('❌ 数据库连接失败:', error);
