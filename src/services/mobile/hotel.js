@@ -137,7 +137,10 @@ const searchHotelsService = async (params) => {
   };
 };
 
-const getHotelDetailService = async (hotel_id) => {
+const getHotelDetailService = async (hotel_id, params = {}) => {
+  // 解析日期参数
+  const { check_in_date, check_out_date, check_in, check_out, checkInDate, checkOutDate } = params;
+  
   // 验证酒店ID
   if (!hotel_id || hotel_id === 'undefined' || hotel_id === 'null') {
     const error = new Error('酒店id不能为空');
@@ -298,6 +301,47 @@ const getHotelDetailService = async (hotel_id) => {
     })
   );
 
+  // 计算日期区间内的最低价格
+  // 如果没有提供日期，默认为今天入住，明天离店
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const checkIn = check_in || check_in_date || checkInDate || today.toISOString().split('T')[0];
+  const checkOut = check_out || check_out_date || checkOutDate || tomorrow.toISOString().split('T')[0];
+
+  let minPrice = 259.00; // 默认价格
+
+  if (roomTypes.length > 0) {
+    // 获取每个房型在指定日期区间内的价格
+    const roomTypePrices = await Promise.all(roomTypes.map(async (roomType) => {
+      const prices = await RoomPrice.findAll({
+        where: {
+          room_type_id: roomType.id,
+          price_date: {
+            [Op.gte]: checkIn,
+            [Op.lt]: checkOut
+          }
+        },
+        attributes: ['price']
+      });
+
+      if (prices.length === 0) return null;
+
+      // 计算该房型的平均价格
+      const sum = prices.reduce((acc, curr) => acc + parseFloat(curr.price), 0);
+      return sum / prices.length;
+    }));
+
+    // 过滤掉没有价格的房型
+    const validPrices = roomTypePrices.filter(p => p !== null);
+
+    if (validPrices.length > 0) {
+      // 取所有房型平均价格中的最小值
+      minPrice = Math.min(...validPrices);
+    }
+  }
+
   // 处理主图片URL
   let mainImageUrl = hotel.main_image_url || [];
   if (Array.isArray(mainImageUrl)) {
@@ -330,7 +374,8 @@ const getHotelDetailService = async (hotel_id) => {
     facilities,
     services,
     policies,
-    room_types: roomTypesWithPrices
+    room_types: roomTypesWithPrices,
+    min_price: parseFloat(minPrice.toFixed(2))
   };
 };
 

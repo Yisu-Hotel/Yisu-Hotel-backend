@@ -41,7 +41,7 @@ exports.getHotelList = async (req, res) => {
 exports.getHotelDetail = async (req, res) => {
   try {
     const { id } = req.params;
-    const data = await getHotelDetailService(id);
+    const data = await getHotelDetailService(id, req.query);
     return res.json({ code: 0, msg: '查询成功', data });
   } catch (error) {
     return handleError(res, error, 'Get hotel detail error:');
