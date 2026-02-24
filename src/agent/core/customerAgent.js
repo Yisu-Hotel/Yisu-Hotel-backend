@@ -127,32 +127,27 @@ class CustomerAgent {
         console.log('Tool execution completed successfully!');
         console.log('Number of executed tool calls:', executedToolCalls.length);
 
-        // 直接返回文本响应，不调用LLM服务
-        console.log('Generating direct response based on tool results...');
-        
-        // 提取用户最后一条消息
-        const lastUserMessage = messages.reverse().find(msg => msg.role === 'user');
-        messages.reverse(); // 恢复数组顺序
-        const userContent = lastUserMessage?.content || '';
-        
-        // 根据用户问题类型生成不同的响应
-        let content = '';
-        if (userContent.includes('设施')) {
-          content = `阳光酒店提供以下设施：免费WiFi、停车场、健身房、餐厅、24小时前台、行李寄存等。部分高端房型还会提供游泳池、SPA、商务中心等额外设施。`;
-        } else if (userContent.includes('价格')) {
-          content = `阳光酒店的价格因房型和季节而异。标准间价格通常在300-500元/晚，豪华间价格在500-800元/晚，套房价格在800-1200元/晚。旺季价格可能会有所上涨，建议您在预订时查看实时价格。`;
-        } else if (userContent.includes('信息') || userContent.includes('详情')) {
-          content = `阳光酒店是一家位于市中心的四星级酒店，拥有200间客房，提供免费WiFi、停车场、健身房、餐厅等设施。酒店距离地铁站仅5分钟步行路程，交通便利。酒店的入住时间为14:00后，退房时间为12:00前。`;
-        } else if (userContent.includes('怎么样')) {
-          content = `阳光酒店是一家口碑很好的四星级酒店，位于市中心，交通便利。酒店设施齐全，服务周到，房间干净舒适。客人普遍反映酒店的早餐种类丰富，味道不错。如果您计划在市中心入住，阳光酒店是一个不错的选择。`;
-        } else {
-          content = `阳光酒店是一家位于市中心的四星级酒店，拥有200间客房，提供免费WiFi、停车场、健身房、餐厅等设施。酒店距离地铁站仅5分钟步行路程，交通便利。酒店的入住时间为14:00后，退房时间为12:00前。价格因房型和季节而异，标准间价格通常在300-500元/晚。`;
+        if (toolMessages.length === 0) {
+          const content = firstMessage?.content || '抱歉，我暂时无法回答这个问题。';
+          return {
+            content,
+            success: true,
+            toolCalls: executedToolCalls
+          };
         }
 
-        console.log('Final content:', content);
+        const secondResponse = await llmService.chat(
+          [...messages, firstMessage, ...toolMessages],
+          {
+            temperature: 0.3,
+            tools,
+            tool_choice: 'none'
+          }
+        );
+        const finalMessage = secondResponse?.choices?.[0]?.message;
 
         return {
-          content: content,
+          content: finalMessage?.content || '抱歉，我暂时无法回答这个问题。',
           success: true,
           toolCalls: executedToolCalls
         };
