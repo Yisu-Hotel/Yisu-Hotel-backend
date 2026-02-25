@@ -1,5 +1,12 @@
 const { isNonEmptyString, isValidDateYYYYMMDD, isValidUuid } = require('../../utils/validator');
 
+/**
+ * 验证管理员权限中间件
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @param {Function} next - 下一个中间件函数
+ * @returns {Promise<void>} - 无返回值
+ */
 const requireAdmin = (req, res, next) => {
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({
@@ -11,6 +18,13 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
+/**
+ * 验证管理员酒店审核列表查询参数
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @param {Function} next - 下一个中间件函数
+ * @returns {Promise<void>} - 无返回值
+ */
 const validateAdminHotelAuditListQuery = (req, res, next) => {
   const { page, page_size, status, start_date, end_date, keyword } = req.query;
 
@@ -115,6 +129,13 @@ const validateAdminHotelAuditListQuery = (req, res, next) => {
   next();
 };
 
+/**
+ * 验证管理员批量审核参数
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @param {Function} next - 下一个中间件函数
+ * @returns {Promise<void>} - 无返回值
+ */
 const validateAdminBatchAudit = (req, res, next) => {
   const { hotel_ids, status, reject_reason } = req.body || {};
 

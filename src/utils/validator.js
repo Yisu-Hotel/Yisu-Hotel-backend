@@ -62,6 +62,11 @@ const toDecimal2 = (value) => {
   return Math.round(Number(value) * 100) / 100;
 };
 
+/**
+ * 验证 UUID 格式
+ * @param {string} value - 待验证值
+ * @returns {boolean} - 是否为有效的 UUID
+ */
 const isValidUuid = (value) => {
   if (typeof value !== 'string') {
     return false;

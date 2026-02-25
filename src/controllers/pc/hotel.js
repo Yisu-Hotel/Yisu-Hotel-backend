@@ -42,6 +42,12 @@ const createHotel = async (req, res) => {
   }
 };
 
+/**
+ * 更新酒店
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @returns {Promise<void>} - 无返回值
+ */
 const updateHotel = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -125,6 +131,12 @@ const getHotelDetail = async (req, res) => {
   }
 };
 
+/**
+ * 获取酒店审核状态
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @returns {Promise<void>} - 无返回值
+ */
 const getHotelAuditStatus = async (req, res) => {
   try {
     const { userId } = req.user;
@@ -142,6 +154,12 @@ const getHotelAuditStatus = async (req, res) => {
   }
 };
 
+/**
+ * 删除酒店
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @returns {Promise<void>} - 无返回值
+ */
 const deleteHotel = async (req, res) => {
   try {
     const { userId } = req.user;

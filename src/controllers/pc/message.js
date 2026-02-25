@@ -16,6 +16,12 @@ const handleError = (res, error, logLabel) => {
   });
 };
 
+/**
+ * 获取用户消息列表
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @returns {Promise<void>} - 无返回值
+ */
 const getUserMessages = async (req, res) => {
   try {
     const { userId } = req.user;

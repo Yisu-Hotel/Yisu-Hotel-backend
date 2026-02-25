@@ -27,6 +27,15 @@ const buildHotelListWhere = ({ userId, status, keyword }) => {
   return whereClause;
 };
 
+/**
+ * 构建管理员酒店筛选查询条件
+ * @param {Object} params - 筛选参数
+ * @param {string} [params.status] - 酒店状态
+ * @param {string} [params.keyword] - 搜索关键字
+ * @param {string} [params.startDate] - 开始日期
+ * @param {string} [params.endDate] - 结束日期
+ * @returns {Object} - Sequelize where 查询对象
+ */
 const buildAdminHotelFilterWhere = ({ status, keyword, startDate, endDate }) => {
   const whereClause = {};
 
@@ -124,6 +133,11 @@ const formatHotelList = (hotels) => hotels.map((hotel) => ({
   updated_at: hotel.updated_at
 }));
 
+/**
+ * 获取审核状态文本
+ * @param {string} status - 审核状态
+ * @returns {string} - 状态文本描述
+ */
 const getAuditStatusText = (status) => {
   if (status === 'draft') return '草稿';
   if (status === 'pending') return '待审核';
@@ -135,6 +149,11 @@ const getAuditStatusText = (status) => {
   return '';
 };
 
+/**
+ * 获取审核员姓名
+ * @param {Object} auditor - 审核员对象
+ * @returns {string|null} - 审核员姓名或ID
+ */
 const getAuditorName = (auditor) => {
   if (!auditor) return null;
   if (auditor.profile && auditor.profile.nickname) return auditor.profile.nickname;
@@ -143,6 +162,11 @@ const getAuditorName = (auditor) => {
   return auditor.id || null;
 };
 
+/**
+ * 格式化审核日志
+ * @param {Array<Object>} logs - 审核日志数组
+ * @returns {Array<Object>} - 格式化后的日志数组
+ */
 const formatAuditLogs = (logs) => (logs || []).map((log) => {
   const status = log.result || log.status || '';
   const auditedBy = getAuditorName(log.auditor) || log.auditor_id || null;

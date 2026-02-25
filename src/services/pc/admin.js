@@ -12,6 +12,17 @@ const adminHotelAttributes = [
   'created_by'
 ];
 
+/**
+ * 获取管理员酒店审核列表服务
+ * @param {Object} params - 查询参数
+ * @param {string} [params.status] - 审核状态
+ * @param {string} [params.startDate] - 开始日期
+ * @param {string} [params.endDate] - 结束日期
+ * @param {string} [params.keyword] - 搜索关键字
+ * @param {number} params.page - 页码
+ * @param {number} params.pageSize - 每页数量
+ * @returns {Promise<Object>} - 列表数据
+ */
 const getAdminHotelAuditListService = async ({ status, startDate, endDate, keyword, page, pageSize }) => {
   const whereClause = buildAdminHotelFilterWhere({ status, startDate, endDate, keyword });
 
@@ -75,6 +86,15 @@ const getAdminHotelAuditListService = async ({ status, startDate, endDate, keywo
   };
 };
 
+/**
+ * 批量审核酒店服务
+ * @param {Object} params - 审核参数
+ * @param {number[]} params.hotelIds - 酒店ID列表
+ * @param {string} params.status - 审核状态
+ * @param {number} params.auditorId - 审核人ID
+ * @param {string} [params.rejectReason] - 拒绝原因
+ * @returns {Promise<Object>} - 审核结果
+ */
 const batchAuditHotelsService = async ({ hotelIds, status, auditorId, rejectReason }) => {
   const transaction = await sequelize.transaction();
   try {

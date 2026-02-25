@@ -164,6 +164,14 @@ const validateUpdateProfile = (req, res, next) => {
 module.exports = {
   authenticateToken,
   validateUpdateProfile,
+
+  /**
+   * 验证消息列表查询参数
+   * @param {Object} req - 请求对象
+   * @param {Object} res - 响应对象
+   * @param {Function} next - 下一个中间件函数
+   * @returns {Promise<void>} - 无返回值
+   */
   validateMessageListQuery: (req, res, next) => {
     const { page } = req.query;
     let pageNumber = 1;

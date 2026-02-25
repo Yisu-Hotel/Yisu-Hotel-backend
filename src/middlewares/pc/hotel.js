@@ -420,6 +420,13 @@ const validateHotelDetailParam = (req, res, next) => {
   next();
 };
 
+/**
+ * 验证酒店审核状态查询参数
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @param {Function} next - 下一个中间件函数
+ * @returns {Promise<void>} - 无返回值
+ */
 const validateAuditStatusParam = (req, res, next) => {
   const { id } = req.params;
   const hotelId = isNonEmptyString(id) ? String(id).trim() : '';
@@ -436,6 +443,13 @@ const validateAuditStatusParam = (req, res, next) => {
   next();
 };
 
+/**
+ * 验证酒店删除参数
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @param {Function} next - 下一个中间件函数
+ * @returns {Promise<void>} - 无返回值
+ */
 const validateHotelDeleteParam = (req, res, next) => {
   const { id } = req.params;
   const hotelId = isNonEmptyString(id) ? String(id).trim() : '';

@@ -1,5 +1,13 @@
 const { sequelize, Message } = require('../../models');
 
+/**
+ * 获取用户消息列表服务
+ * @param {Object} params - 查询参数
+ * @param {number} params.userId - 用户ID
+ * @param {number} params.page - 页码
+ * @param {number} params.pageSize - 每页数量
+ * @returns {Promise<Object>} - 消息列表
+ */
 const getUserMessagesService = async ({ userId, page, pageSize }) => {
   const whereClause = { user_id: userId };
 

@@ -16,6 +16,12 @@ const handleError = (res, error, logLabel) => {
   });
 };
 
+/**
+ * 获取管理员酒店审核列表
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @returns {Promise<void>} - 无返回值
+ */
 const getAdminHotelAuditList = async (req, res) => {
   try {
     const { page, pageSize, status, startDate, endDate, keyword } = req.adminHotelFilter || {
@@ -46,6 +52,12 @@ const getAdminHotelAuditList = async (req, res) => {
   }
 };
 
+/**
+ * 管理员获取酒店详情
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @returns {Promise<void>} - 无返回值
+ */
 const getAdminHotelDetail = async (req, res) => {
   try {
     const hotelId = req.hotelId || req.params.id;
@@ -60,6 +72,12 @@ const getAdminHotelDetail = async (req, res) => {
   }
 };
 
+/**
+ * 批量审核酒店
+ * @param {Object} req - 请求对象
+ * @param {Object} res - 响应对象
+ * @returns {Promise<void>} - 无返回值
+ */
 const batchAuditHotels = async (req, res) => {
   try {
     const { hotelIds, status, rejectReason } = req.adminBatchAudit || {};

@@ -241,6 +241,13 @@ const createHotelService = async (userId, payload) => {
   }
 };
 
+/**
+ * 更新酒店服务
+ * @param {number} userId - 用户ID
+ * @param {number} hotelId - 酒店ID
+ * @param {Object} payload - 更新数据
+ * @returns {Promise<Object>} - 更新结果
+ */
 const updateHotelService = async (userId, hotelId, payload) => {
   const transaction = await sequelize.transaction();
   try {
@@ -409,6 +416,11 @@ const updateHotelService = async (userId, hotelId, payload) => {
   }
 };
 
+/**
+ * 根据条件获取酒店详情（内部方法）
+ * @param {Object} whereClause - 查询条件
+ * @returns {Promise<Object>} - 酒店详情
+ */
 const getHotelDetailByWhere = async (whereClause) => {
   const hotel = await Hotel.findOne({
     where: whereClause,
@@ -582,10 +594,21 @@ const getHotelDetailService = async (userId, hotelId) => {
   });
 };
 
+/**
+ * 管理员获取酒店详情服务
+ * @param {number} hotelId - 酒店ID
+ * @returns {Promise<Object>} - 酒店详情
+ */
 const getHotelDetailByAdminService = async (hotelId) => {
   return getHotelDetailByWhere({ id: hotelId });
 };
 
+/**
+ * 删除酒店服务
+ * @param {number} userId - 用户ID
+ * @param {number} hotelId - 酒店ID
+ * @returns {Promise<void>}
+ */
 const deleteHotelService = async (userId, hotelId) => {
   const hotel = await Hotel.findByPk(hotelId);
   if (!hotel) {
@@ -611,6 +634,12 @@ const deleteHotelService = async (userId, hotelId) => {
   return null;
 };
 
+/**
+ * 获取酒店审核状态服务
+ * @param {number} userId - 用户ID
+ * @param {number} hotelId - 酒店ID
+ * @returns {Promise<Array>} - 审核日志列表
+ */
 const getHotelAuditStatusService = async (userId, hotelId) => {
   const hotel = await Hotel.findByPk(hotelId);
   if (!hotel) {
